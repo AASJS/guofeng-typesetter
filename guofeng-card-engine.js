@@ -1,6 +1,7 @@
 /*!
- * Guofeng Card Engine v3.2  —  数据 + 模板 架构
+ * Guofeng Card Engine v3.3  —  数据 + 模板 + 灵感库 架构
  * 8 套主题收敛为：themes.json（数据） + 6 个通用布局模板（结构，含 poster 招募海报）。
+ * 灵感库：inspiration.json（数据） + 同步进本文件 INSPIRATIONS 块，Studio 内可浏览/复制。
  * 新增风格 = 在 themes.json 加一条（layout + colors + decor + sample），无需改 HTML。
  *
  * 用法一（UI 挂载）：
@@ -673,6 +674,275 @@
 };
   /*__THEMES_DATA_END__*/
 
+  /* ============ 灵感库（由 scripts/sync_inspiration.js 从 references/inspiration.json 同步） ============ */
+  /*__INSPIRATION_DATA_START__*/
+  const INSPIRATIONS = {
+  "version": "1.0.0",
+  "updated": "2026-10-29",
+  "description": "国风排版灵感库 · 来自 Awwwards / 时尚杂志 / 高端品牌 / 2026 字体趋势等公开来源的「美观、高级、时尚感」排版范式。结构化的可更新数据源：编辑本文件即可追加灵感，再跑 scripts/sync_inspiration.js 同步进引擎，或在 Studio 内直接浏览。",
+  "sources": [
+    {
+      "id": "awwwards-2026",
+      "title": "Awwwards — Web Design Trends 2026",
+      "url": "https://www.awwwards.com/",
+      "fetchedAt": "2026-10-29",
+      "tags": ["trend", "editorial", "typography", "minimal"],
+      "summary": "2026 趋势：排版即主角（Typography as the Hero）、探索式布局、电影感英雄区、自然提炼色（Nature Distilled）、噪点+色度混搭。"
+    },
+    {
+      "id": "award-ref",
+      "title": "Award-Winning Websites 2025–2030 Reference",
+      "url": "https://github.com/coroboros/research/blob/main/articles/award-winning-websites-2025-2030/award-winning-websites-2025-2030.md",
+      "fetchedAt": "2026-10-29",
+      "tags": ["archetype", "minimal", "editorial", "luxury"],
+      "summary": "获奖站八大原型（Minimalist / Editorial / Corporate Luxury 等）的字体、配色、网格、间距与可复用 CSS 片段；含 60-30-10、流体字号/间距系统。"
+    },
+    {
+      "id": "luxury-andor",
+      "title": "STUDIO ANDOR — Luxury Branding Trends 2025",
+      "url": "https://studioandor.com/blog/luxury-website-design-trends",
+      "fetchedAt": "2026-10-29",
+      "tags": ["brand", "luxury", "typography", "texture"],
+      "summary": "静奢趋势：bold yet understated 定制衬线、大地色/摩卡慕斯/香槟金、极简+极繁点缀、数字触感纹理（噪点/压印/箔）。"
+    },
+    {
+      "id": "fashion-mags",
+      "title": "MaisFonts — Typography in Fashion Magazines (Vogue/BAZAAR/Elle)",
+      "url": "https://sa.maisfontes.com/blog/fashion-magazine-typography-vogue-harpers-bazaar-elle",
+      "fetchedAt": "2026-10-29",
+      "tags": ["magazine", "typography", "serif"],
+      "summary": "时尚杂志排版密码：Vogue=Didot 高对比优雅、BAZAAR=Bodoni 戏剧感、Elle=Futura 都市感；衬线标题+无衬线信息分层。"
+    },
+    {
+      "id": "bigbigwork-2026",
+      "title": "大作 — 2026 年字体趋势（八种表现型排版）",
+      "url": "https://blog.bigbigwork.com/archives/202511222",
+      "fetchedAt": "2026-10-29",
+      "tags": ["typography", "trend", "expressive"],
+      "summary": "2026 八大字体趋势：时髦曲线衬线、新颖斜体、安静无衬线、意式风情、前沿风尚、文字图形化、可爱舒适、混乱手写。"
+    },
+    {
+      "id": "purplehill-2025",
+      "title": "Purple Hills Studio — Trendy Fonts for 2025",
+      "url": "https://www.purplehillstudio.com/blog/trendy-fonts-for-2025",
+      "fetchedAt": "2026-10-29",
+      "tags": ["typography", "font-pairing"],
+      "summary": "当红字体清单：Neue Montreal / Canela / Söhne / Cooper Black / GT America / Inter 等，覆盖极简、编辑、复古回潮。"
+    }
+  ],
+  "entries": [
+    {
+      "id": "typo-as-hero",
+      "title": "排版即主角（Typography as the Hero）",
+      "category": "trend",
+      "source": "awwwards-2026",
+      "designLanguage": "超大、朴素的无衬线字体铺满画面，置于纯色 / 柔和渐变 / 黑白之上；让字体本身讲故事，不需要配图也能成立。",
+      "palette": { "bg": "#111111", "ink": "#FFFFFF", "accent": "#E94F37" },
+      "fonts": ["Neue Montreal", "Inter", "Suisse Int'l"],
+      "cssSnippet": ".hero-type{font-size:clamp(64px,14vw,200px);font-weight:800;line-height:.95;letter-spacing:-.02em;color:var(--ink)}",
+      "applicableTo": ["single", "poster", "editorial"],
+      "tags": ["oversized", "minimal", "black-white"],
+      "note": "适合反共识金句卡 / 招募海报主标题：字大到溢出边缘，克制即高级。"
+    },
+    {
+      "id": "quiet-luxury-serif",
+      "title": "静奢定制衬线（Bold yet Understated）",
+      "category": "brand",
+      "source": "luxury-andor",
+      "designLanguage": "定制高对比衬线体，字脚锐利、字形修长；与极精致的元信息无衬线搭配，于克制中显贵气。",
+      "palette": { "bg": "#F8F5F0", "ink": "#1A1A1A", "accent": "#C5A572" },
+      "fonts": ["Didot", "Bodoni", "GT Sectra", "Apercu", "Founders Grotesk"],
+      "cssSnippet": ".lux-title{font-family:'Playfair Display',serif;font-weight:700;letter-spacing:.01em;color:var(--ink)}.lux-meta{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#9a9388}",
+      "applicableTo": ["single", "darkgold", "editorial"],
+      "tags": ["luxury", "serif", "restraint"],
+      "note": "对应宋韵禅意 / 暗色鎏金：标题用衬线、信息用无衬线、主色只做锚点。"
+    },
+    {
+      "id": "editorial-serif-sans",
+      "title": "衬线标题 + 无衬线正文（Editorial Pairing）",
+      "category": "magazine",
+      "source": "fashion-mags",
+      "designLanguage": "衬线大标题（Playfair/GT Sectra 60–120px）配无衬线正文（Inter/Neue Haas 16–18px），多列不对称网格，引文破版。",
+      "palette": { "bg": "#FAF8F4", "ink": "#1a1a1a", "accent": "#B8442C" },
+      "fonts": ["Playfair Display", "GT Sectra", "Inter", "Neue Haas Grotesk"],
+      "cssSnippet": ".editorial-layout{display:grid;grid-template-columns:repeat(12,1fr);gap:1.5rem}.feature{grid-column:1/8}.sidebar{grid-column:9/13}.pull-quote{grid-column:3/11;font-style:italic;font-size:var(--fs-xl)}",
+      "applicableTo": ["editorial"],
+      "tags": ["serif-sans", "grid", "magazine"],
+      "note": "杂志编辑系统的核心：标题衬线、正文无衬线、引文斜体破版。"
+    },
+    {
+      "id": "vogue-didot",
+      "title": "Vogue 高对比 Didot",
+      "category": "magazine",
+      "source": "fashion-mags",
+      "designLanguage": "Didot 极细发丝线 + 强竖画，照片之上如薄纱般透出；开放空间给字体呼吸，制造欧洲奢侈品气质。",
+      "palette": { "bg": "#0F0F0F", "ink": "#F4F1EA", "accent": "#C9A962" },
+      "fonts": ["Didot", "Prata", "Bodoni Moda"],
+      "cssSnippet": ".didot-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(48px,9vw,128px);line-height:1.05;color:var(--ink)}",
+      "applicableTo": ["editorial", "darkgold"],
+      "tags": ["didot", "high-contrast", "luxury"],
+      "note": "免费平替用 Prata / Bodoni Moda（Google Fonts），避免商用 Didot 授权问题。"
+    },
+    {
+      "id": "minimal-extreme-whitespace",
+      "title": "极简极端留白（Extreme Whitespace）",
+      "category": "archetype",
+      "source": "award-ref",
+      "designLanguage": "2–3 色，每个元素都需证明存在价值；巨幅留白，宏观区块间距 120–200px+，字体承载设计。",
+      "palette": { "bg": "#FAFAF5", "ink": "#2D2D2D", "accent": "#2D2D2D" },
+      "fonts": ["Inter", "Neue Haas Grotesk", "Söhne"],
+      "cssSnippet": ".wrapper{display:grid;grid-template-columns:1fr min(65ch,100%) 1fr;gap:clamp(3rem,8vw,12rem);padding:clamp(2rem,5vw,8rem)}.wrapper>*{grid-column:2}.full-bleed{grid-column:1/-1}",
+      "applicableTo": ["single", "poster"],
+      "tags": ["minimal", "whitespace", "type-driven"],
+      "note": "留白即奢侈：内容块间距给足，而非用分割线堆砌。"
+    },
+    {
+      "id": "fluid-scale-system",
+      "title": "流体字号 / 间距系统（Fluid Scale）",
+      "category": "typography",
+      "source": "award-ref",
+      "designLanguage": "用 clamp() 定义一套随视口流动的 --fs / --space 变量，去掉断点、保证跨尺寸节奏一致。",
+      "palette": {},
+      "fonts": [],
+      "cssSnippet": ":root{--space-s:clamp(1rem,.75rem + 1.25vw,1.5rem);--space-l:clamp(2rem,1rem + 5vw,6rem);--fs-xl:clamp(1.95rem,1.77rem + .91vw,2.44rem);--fs-hero:clamp(3.05rem,2.76rem + 1.43vw,3.81rem)}section{padding-block:var(--space-l)}",
+      "applicableTo": ["single", "editorial", "grid", "asymmetric", "business", "poster"],
+      "tags": ["fluid", "scale", "8px-grid"],
+      "note": "通用基线：所有卡片的字号/间距都从这一套 clamp 变量派生，保持韵律。"
+    },
+    {
+      "id": "swiss-grid-numbers",
+      "title": "瑞士网格 + 超大序号（Swiss Grid）",
+      "category": "archetype",
+      "source": "award-ref",
+      "designLanguage": "严格网格，步骤用 80–120px 超大等宽序号，直角无圆角，结论条用单一品牌红。",
+      "palette": { "bg": "#FFFFFF", "ink": "#0A0A0A", "accent": "#C8202A" },
+      "fonts": ["Neue Haas Grotesk", "Suisse Int'l", "JetBrains Mono"],
+      "cssSnippet": ".step{display:flex;gap:28px;border-top:1px solid var(--line);padding-top:32px}.step-no{flex:0 0 110px;font-family:'JetBrains Mono',monospace;font-size:88px;font-weight:700;color:var(--accent);line-height:1}.conclusion{background:var(--accent);color:#fff;padding:24px 32px;font-weight:700}",
+      "applicableTo": ["grid"],
+      "tags": ["grid", "mono", "numbers"],
+      "note": "已沉淀为 swiss 主题：编号步骤 + 红底结论条。"
+    },
+    {
+      "id": "earthy-muted-2026",
+      "title": "大地色 / 克制自然色（Nature Distilled）",
+      "category": "trend",
+      "source": "awwwards-2026",
+      "designLanguage": "取自泥土、黏土、沙、石的低饱和色板，叠加 Pantone 2025 摩卡慕斯；柔和、精致、有触感。",
+      "palette": { "bg": "#E8E4DF", "ink": "#3A352C", "accent": "#A47764" },
+      "fonts": ["Cormorant Garamond", "Fraunces"],
+      "cssSnippet": ":root{--sand:#E8E4DF;--mocha:#A47764;--clay:#9C6B4A;--gold:#C5A572;--ink:#3A352C}",
+      "applicableTo": ["sage", "single"],
+      "tags": ["earthy", "muted", "tactile"],
+      "note": "草木绿之外的高级自然色方案，适配中医/东方美学/自然疗愈内容。"
+    },
+    {
+      "id": "expressive-curvy-serif",
+      "title": "时髦曲线衬线（Curvy Serif）",
+      "category": "typography",
+      "source": "bigbigwork-2026",
+      "designLanguage": "带 70 年代活力的圆润高对比衬线，俏皮又开放；正取代极简无衬线 Logo（如 Eventbrite / Affinity 焕新）。",
+      "palette": { "bg": "#F3EAE0", "ink": "#241F1D", "accent": "#E0457B" },
+      "fonts": ["Fraunces", "Recoleta", "Canela"],
+      "cssSnippet": ".curvy{font-family:'Fraunces',serif;font-weight:600;font-optical-sizing:auto;font-style:normal;letter-spacing:.01em}",
+      "applicableTo": ["editorial", "poster"],
+      "tags": ["serif", "groovy", "retro"],
+      "note": "大胆张扬的衬线，适合年轻化、有态度的品牌标题。"
+    },
+    {
+      "id": "new-italic-2026",
+      "title": "新颖斜体（Liquid Italic）",
+      "category": "typography",
+      "source": "bigbigwork-2026",
+      "designLanguage": "带液态/气泡特质的个性斜体（如 Tilt Beauty / SKIMS），年轻、反叛、有态度；给足留白才出彩。",
+      "palette": { "bg": "#111111", "ink": "#FFFFFF", "accent": "#7C5CFF" },
+      "fonts": ["Fraunces (italic)", "Recolfa", "Sohne (oblique)"],
+      "cssSnippet": ".italic-pop{font-style:italic;font-weight:800;font-size:clamp(40px,8vw,120px);transform:skewX(-6deg);letter-spacing:-.01em}",
+      "applicableTo": ["poster", "editorial"],
+      "tags": ["italic", "playful", "gen-z"],
+      "note": "目标年轻受众的宣言式标题；避免与繁杂背景挤在一起。"
+    },
+    {
+      "id": "quiet-sans-2026",
+      "title": "安静无衬线（Quiet Sans）",
+      "category": "typography",
+      "source": "bigbigwork-2026",
+      "designLanguage": "极简无衬线，小尺寸、低声细语；靠金属箔、压印纹理、精致标签显贵气（如 Edwart Chocolatier / SCENARIO）。",
+      "palette": { "bg": "#F6F3EE", "ink": "#2A2A28", "accent": "#B89B6E" },
+      "fonts": ["Söhne", "Apercu", "Inter (light)"],
+      "cssSnippet": ".quiet{font-family:'Inter',sans-serif;font-weight:300;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}",
+      "applicableTo": ["business", "single"],
+      "tags": ["sans", "minimal", "luxury"],
+      "note": "高端包装/品牌副信息的首选：克制即高级，靠质感细节取胜。"
+    },
+    {
+      "id": "type-as-graphic",
+      "title": "文字图形化（Typography as Graphic）",
+      "category": "trend",
+      "source": "bigbigwork-2026",
+      "designLanguage": "把字母放大、扭曲、融入华丽边框，让文字成为背景图案 / Logo 艺术品本身（装饰艺术 / Y2K / 迷幻 90s）。",
+      "palette": { "bg": "#0E0E0E", "ink": "#EDEDED", "accent": "#C9A962" },
+      "fonts": ["Playfair Display", "Cinzel", "Bodoni"],
+      "cssSnippet": ".type-bg{position:absolute;inset:0;display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:46vw;font-weight:900;color:rgba(255,255,255,.05);line-height:1;pointer-events:none}",
+      "applicableTo": ["poster", "asymmetric"],
+      "tags": ["graphic", "watermark", "decorative"],
+      "note": "对应海报水印字：超大字作背景层，制造纵深与品牌感。"
+    },
+    {
+      "id": "cinematic-hero",
+      "title": "电影感英雄区（Cinematic Hero）",
+      "category": "trend",
+      "source": "awwwards-2026",
+      "designLanguage": "全幅高清照片/视频背景 + 其上超大朴素字体，氛围由图定、信息由字给，最简布局也最难忘。",
+      "palette": { "bg": "#000000", "ink": "#FFFFFF", "accent": "#FFFFFF" },
+      "fonts": ["Neue Montreal", "Inter"],
+      "cssSnippet": ".hero{position:relative;height:100vh;display:grid;place-items:center;background:url('hero.jpg')center/cover}.hero h1{position:relative;font-size:clamp(40px,10vw,140px);font-weight:800;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.4)}",
+      "applicableTo": ["poster", "single"],
+      "tags": ["cinematic", "hero", "photo"],
+      "note": "海报/封面版式：背景图 + 大字标题，图字平衡即高级。"
+    },
+    {
+      "id": "color-60-30-10",
+      "title": "60-30-10 配色法则",
+      "category": "brand",
+      "source": "award-ref",
+      "designLanguage": "60% 中性基底（背景/留白/表面）+ 30% 次级（文字/边框/结构）+ 10% 强调色（CTA/高亮/交互）。强调色因稀有而有效。",
+      "palette": { "bg": "#F2EFEA", "ink": "#2B2B2B", "accent": "#C8202A" },
+      "fonts": [],
+      "cssSnippet": ":root{--c-60:#F2EFEA;--c-30:#2B2B2B;--c-10:#C8202A}/* 背景/文字/强调 按此比例分配 */",
+      "applicableTo": ["single", "editorial", "grid", "asymmetric", "business", "poster"],
+      "tags": ["color-theory", "ratio", "accent"],
+      "note": "所有风格的配色基线：主色锚点 ≤5 处，不要喧宾夺主。"
+    },
+    {
+      "id": "variable-font-motion",
+      "title": "可变字体动态（Variable Font Motion）",
+      "category": "typography",
+      "source": "awwwards-2026",
+      "designLanguage": "单个可变字体文件，字重/字宽连续轴；滚动或悬停时 Light→Bold 平滑形变，无布局抖动，一个文件顶 4–8 个静态字重。",
+      "palette": {},
+      "fonts": ["Inter (variable)", "Roboto Flex", "Fraunces (variable)"],
+      "cssSnippet": "@font-face{font-family:'VF';src:url('vf.woff2')format('woff2')tech('variations')}.vf{font-family:'VF';font-variation-settings:'wght'400,'wdth'100;transition:font-variation-settings .4s}.vf:hover{font-variation-settings:'wght'900,'wdth'125}",
+      "applicableTo": ["single", "editorial", "poster"],
+      "tags": ["variable", "motion", "performance"],
+      "note": "概念级灵感：静态卡可借鉴「单字族 + 字重对比」制造层级，而非混用多字体。"
+    },
+    {
+      "id": "neo-brutalist",
+      "title": "新粗野主义（Neo-Brutalist）",
+      "category": "archetype",
+      "source": "award-ref",
+      "designLanguage": "刻意拒绝精致：粗黑描边（2–4px）、硬投影（纯黑实心）、纯色平涂、零渐变；字体即设计（Monument Extended / Archivo Black 80–200px）。",
+      "palette": { "bg": "#FFFFFF", "ink": "#000000", "accent": "#FF90E8" },
+      "fonts": ["Monument Extended", "Archivo Black", "Space Mono"],
+      "cssSnippet": ".brutal{border:3px solid #000;box-shadow:8px 8px 0 #000;background:#fff;font-family:'Archivo Black',sans-serif}.brutal-accent{background:#FF90E8;border:3px solid #000}",
+      "applicableTo": ["grid", "poster"],
+      "tags": ["brutalist", "bold", "flat"],
+      "note": "反差玩法：想从国风静美里『跳出来』做活动炸裂款时可用，但仍建议主色锚点克制。"
+    }
+  ]
+};
+  /*__INSPIRATION_DATA_END__*/
+
   /* ============ 通用布局模板（结构 + 装饰由 theme.colors/decor 注入） ============ */
   const LAYOUTS = {
     single: {
@@ -988,7 +1258,7 @@ ${f1}${f2}
 
   /* ============ 可挂载 UI ============ */
   const CSS = `
-.gc-studio{display:flex;flex-direction:column;height:100%;min-height:520px;background:#1c1c1e;color:#e8e8ea;font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;--gc-accent:#C9A962;--gc-line:#3a3a40;--gc-panel:#262629;--gc-panel2:#2e2e32;--gc-muted:#9a9aa0;--gc-ok:#3ec97a;--gc-err:#ff6b6b}
+.gc-studio{position:relative;display:flex;flex-direction:column;height:100%;min-height:520px;background:#1c1c1e;color:#e8e8ea;font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;--gc-accent:#C9A962;--gc-line:#3a3a40;--gc-panel:#262629;--gc-panel2:#2e2e32;--gc-muted:#9a9aa0;--gc-ok:#3ec97a;--gc-err:#ff6b6b}
 .gc-studio *{margin:0;padding:0;box-sizing:border-box}
 .gc-stylebar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--gc-line)}
 .gc-stylebar button{background:var(--gc-panel2);border:1px solid var(--gc-line);color:#e8e8ea;padding:7px 13px;border-radius:8px;font-size:13px;cursor:pointer;transition:.15s}
@@ -1015,6 +1285,30 @@ ${f1}${f2}
 .gc-preview-wrap{flex:1;overflow:auto;display:flex;justify-content:center;padding:24px;align-items:flex-start}
 .gc-preview{background:#fff;border:none;transform-origin:top center;box-shadow:0 10px 40px rgba(0,0,0,.5)}
 .gc-hint{font-size:11px;color:var(--gc-muted);padding:8px 16px;border-top:1px solid var(--gc-line)}
+.gc-insp{background:var(--gc-panel2);border:1px solid var(--gc-line);color:#e8e8ea;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+.gc-insp:hover{border-color:var(--gc-accent)}
+.gc-insp-overlay{position:absolute;inset:0;z-index:20;background:rgba(20,20,22,.97);display:none;flex-direction:column}
+.gc-insp-overlay.open{display:flex}
+.gc-insp-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--gc-line);flex-wrap:wrap}
+.gc-insp-head h3{font-size:15px;font-weight:700;color:var(--gc-accent);letter-spacing:1px}
+.gc-insp-close{margin-left:auto;background:var(--gc-panel2);border:1px solid var(--gc-line);color:#e8e8ea;padding:6px 12px;border-radius:6px;cursor:pointer}
+.gc-insp-close:hover{border-color:var(--gc-accent)}
+.gc-insp-chips{display:flex;gap:6px;flex-wrap:wrap}
+.gc-insp-chips button{background:var(--gc-panel2);border:1px solid var(--gc-line);color:var(--gc-muted);padding:5px 12px;border-radius:14px;font-size:12px;cursor:pointer}
+.gc-insp-chips button.active{background:var(--gc-accent);color:#1c1c1e;border-color:var(--gc-accent);font-weight:700}
+.gc-insp-grid{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-content:start}
+.gc-insp-card{background:var(--gc-panel);border:1px solid var(--gc-line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.gc-insp-card .cat{font-size:11px;color:var(--gc-accent);letter-spacing:1px;text-transform:uppercase}
+.gc-insp-card .t{font-size:14px;font-weight:700;color:#fff;line-height:1.4}
+.gc-insp-card .dl{font-size:12px;color:#cfcfd4;line-height:1.6}
+.gc-insp-card .sw{display:flex;gap:5px}
+.gc-insp-card .sw i{width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.2)}
+.gc-insp-card .ft{font-size:11px;color:var(--gc-muted)}
+.gc-insp-card .tg{display:flex;gap:4px;flex-wrap:wrap}
+.gc-insp-card .tg span{font-size:10px;background:var(--gc-panel2);border:1px solid var(--gc-line);color:var(--gc-muted);padding:2px 7px;border-radius:10px}
+.gc-insp-card .copy{margin-top:auto;background:var(--gc-accent);color:#1c1c1e;border:none;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.gc-insp-card .copy:active{transform:scale(.97)}
+.gc-insp-empty{padding:40px;text-align:center;color:var(--gc-muted);font-size:13px}
 `;
 
   function mount(container, options) {
@@ -1045,11 +1339,20 @@ ${f1}${f2}
           <div class="gc-bar">
             <button class="gc-download">下载 HTML</button>
             <button class="gc-copy">复制 HTML</button>
+            <button class="gc-insp">灵感库</button>
             <span class="gc-status"></span>
           </div>
           <div class="gc-preview-wrap"><iframe class="gc-preview" title="预览"></iframe></div>
           <div class="gc-hint">Guofeng Card Engine v3 · 数据(themes.json) + 模板(5 layouts) · 已接入工作站</div>
         </div>
+      </div>
+      <div class="gc-insp-overlay">
+        <div class="gc-insp-head">
+          <h3>灵感库</h3>
+          <div class="gc-insp-chips"></div>
+          <button class="gc-insp-close">✕ 关闭</button>
+        </div>
+        <div class="gc-insp-grid"></div>
       </div>`;
 
     const $ = sel => container.querySelector(sel);
@@ -1140,6 +1443,61 @@ ${f1}${f2}
     $('.gc-sign').oninput = update;
     $('.gc-wechat').onchange = update;
 
+    /* —— 灵感库面板 —— */
+    function renderInsp(filter) {
+      const grid = $('.gc-insp-grid');
+      const list = (INSPIRATIONS.entries || []).filter(e => !filter || filter === 'all' || e.category === filter);
+      grid.innerHTML = '';
+      if (!list.length) { grid.innerHTML = '<div class="gc-insp-empty">暂无灵感条目（编辑 references/inspiration.json 追加后跑 sync_inspiration.js）</div>'; return; }
+      list.forEach(e => {
+        const sw = e.palette || {};
+        const swatches = ['bg', 'ink', 'accent'].filter(k => sw[k]).map(k => `<i style="background:${sw[k]}" title="${k}"></i>`).join('');
+        const tags = (e.tags || []).map(t => `<span>${t}</span>`).join('');
+        const card = document.createElement('div');
+        card.className = 'gc-insp-card';
+        card.innerHTML = `
+          <div class="cat">${e.category || ''}</div>
+          <div class="t">${e.title || ''}</div>
+          <div class="dl">${e.designLanguage || ''}</div>
+          ${swatches ? `<div class="sw">${swatches}</div>` : ''}
+          <div class="ft">字体：${(e.fonts || []).join(' / ') || '—'}</div>
+          ${tags ? `<div class="tg">${tags}</div>` : ''}
+          <button class="copy">复制 CSS 片段</button>`;
+        card.querySelector('.copy').onclick = () => {
+          const snip = e.cssSnippet || '';
+          const b = card.querySelector('.copy');
+          if (snip && navigator.clipboard) {
+            navigator.clipboard.writeText(snip).then(() => { b.textContent = '已复制 ✓'; setTimeout(() => b.textContent = '复制 CSS 片段', 1400); });
+          } else if (snip) {
+            alert(snip);
+          } else { b.textContent = '无片段'; setTimeout(() => b.textContent = '复制 CSS 片段', 1400); }
+        };
+        grid.appendChild(card);
+      });
+    }
+    function renderInspChips() {
+      const chips = $('.gc-insp-chips');
+      const cats = ['all', ...Array.from(new Set((INSPIRATIONS.entries || []).map(e => e.category).filter(Boolean)))];
+      chips.innerHTML = '';
+      cats.forEach((c, i) => {
+        const b = document.createElement('button');
+        b.textContent = c === 'all' ? '全部' : c;
+        if (i === 0) b.classList.add('active');
+        b.onclick = () => {
+          chips.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          renderInsp(c);
+        };
+        chips.appendChild(b);
+      });
+    }
+    $('.gc-insp').onclick = () => {
+      $('.gc-insp-overlay').classList.add('open');
+      renderInspChips();
+      renderInsp('all');
+    };
+    $('.gc-insp-close').onclick = () => $('.gc-insp-overlay').classList.remove('open');
+
     renderStylebar(); renderForm(); update();
 
     const api = {
@@ -1156,8 +1514,9 @@ ${f1}${f2}
   }
 
   global.GuofengCard = {
-    DATA, LAYOUTS, buildCard, inlineStyles, validate, mount,
+    DATA, LAYOUTS, INSPIRATIONS, buildCard, inlineStyles, validate, mount,
     themes: DATA.themes, layouts: DATA.layouts,
+    inspirations: INSPIRATIONS,
     styleKeys: Object.keys(DATA.themes),
     getSample: (k) => (DATA.themes[k] && DATA.themes[k].sample) || {},
     getFields: (k) => (DATA.themes[k] && DATA.layouts[DATA.themes[k].layout].fields) || [],

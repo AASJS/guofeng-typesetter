@@ -3,7 +3,7 @@
 > 输入一段文案，自动匹配最高级的版式系统，输出可直接浏览器打开的单文件 HTML 图文卡片。
 > 整合 GitHub 热门开源排版项目（heti / Han.css / tailwindcss-typography / Gutenberg 等）的中文排版最佳实践。
 
-**版本**：v3.2.0 · **许可**：MIT · **作者**：静心知识库 · @圣为Ai设计
+**版本**：v3.3.0 · **许可**：MIT · **作者**：静心知识库 · @圣为Ai设计
 
 ---
 
@@ -18,6 +18,7 @@
 - **跨平台不掉格式**：内置「公众号内嵌模式」——全内联 + span 包裹 + CSS 变量解析 + `grid→flex` 降级，可直接粘进公众号编辑器
 - **确定性质量门**：生成后跑校验脚本，ERROR 清零才交付（普通模式 + 公众号模式双关卡）
 - **离线可用**：纯原生 JS，无任何外部框架依赖；字体走 CDN，断网也能渲染（回退系统字体）
+- **灵感库（可更新）**：联网沉淀 Awwwards / 时尚杂志 / 高端品牌 / 2026 字体趋势等「美观高级时尚感」排版范式（16 条 / 6 来源），Studio 内点「灵感库」即可按分类浏览、复制可复用 CSS 片段；改 `references/inspiration.json`（或跑 `update_inspiration.js`）即可增量更新，无需改引擎
 
 ---
 
@@ -42,6 +43,8 @@
 ### 方式三：命令行生成
 ```bash
 node scripts/sync_themes.js          # 把 themes.json 同步进引擎（离线数据源）
+node scripts/sync_inspiration.js     # 把 inspiration.json 同步进引擎（灵感库数据源）
+node scripts/update_inspiration.js list   # 查看当前灵感库统计
 python3 scripts/validate_card.py <卡片.html>            # 普通模式校验
 python3 scripts/validate_card.py --wechat <卡片.html>   # 公众号模式校验
 ```
@@ -108,12 +111,15 @@ guofeng-typesetter/
 ├── workstation-integration.html      # 多 Tab 工作站接入 demo
 ├── references/
 │   ├── themes.json                   # ★ 唯一可编辑数据源（配色/字体/装饰/字段/示例）
+│   ├── inspiration.json              # ★ 灵感库数据源（来源 + 灵感条目，可更新）
 │   ├── design-systems.md             # 6 套系统完整规范
 │   ├── layout-patterns.md            # 布局模板说明（数据驱动）
 │   ├── typography-best-practices.md  # GitHub 开源项目整合 + 可复用 CSS 片段
-│   └── inspiration-notes.md          # 灵感库
+│   └── inspiration-notes.md          # 灵感库使用指南 + 设计语言提炼
 ├── scripts/
 │   ├── sync_themes.js                # themes.json → 引擎 DATA 同步
+│   ├── sync_inspiration.js           # inspiration.json → 引擎 INSPIRATIONS 同步
+│   ├── update_inspiration.js         # 命令行追加灵感/来源（可增量更新）
 │   └── validate_card.py              # 产物合规校验（普通 + 公众号）
 ├── assets/                           # 2 张示例卡
 └── examples/                         # 道·宋韵禅意 + 术·朱砂版 9:16 海报（PNG+HTML）+ 共修群二维码
@@ -141,6 +147,7 @@ guofeng-typesetter/
 - **v3.0.0** 数据 + 模板重构（`themes.json` + 5 通用布局，加风格 = 填表）
 - **v3.1.0** 加入更新日志与道术双群实战海报示例
 - **v3.2.0** poster 招募海报布局（9:16 竖版，实战泛化）+ poster_dao / poster_shu 两套主题
+- **v3.3.0** 灵感库（联网沉淀 16 条/6 来源，结构化可更新）+ Studio「灵感库」面板 + sync/update_inspiration 脚本
 
 ## 🤝 后续可扩展
 - 接历史数据看板做「风格→阅读量」加权推荐（P1 数据反哺）

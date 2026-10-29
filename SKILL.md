@@ -1,18 +1,19 @@
 ---
 name: guofeng-typesetter
 description: "国风高档图文排版设计器 —— 输入一段文案，自动匹配最高级的版式系统，输出可直接浏览器打开的单文件 HTML 图文卡片。融合赫蹏(heti)、Han.css、typography.js、Gutenberg、tailwindcss-typography 等 GitHub 热门开源排版项目的最佳实践，以及 doocs/md、mdnice、gzh-design-skill 的公众号内联适配经验。适用于金句卡、干货卡、课程营销卡、禅意卡、中医/东方美学卡、杂志叙事卡。关键词：排版、图文卡片、国风、单文件HTML、公众号配图、金句卡、视觉设计、卡片生成"
-version: "3.2.0"
+version: "3.3.0"
 author: "静心知识库 · @圣为Ai设计（整合 GitHub 开源排版项目）"
 created: "2026-10-29"
 updated: "2026-10-29"
 ---
 
-# Guofeng Typesetter · 国风高档图文排版设计器 v3.2
+# Guofeng Typesetter · 国风高档图文排版设计器 v3.3
 
 > 输入一段文案，自动匹配最高级的版式系统，输出可直接浏览器打开的单文件 HTML 图文卡片。
 > v2.0 在 v1.0 六套设计系统之上，**整合 GitHub 热门开源排版项目的最佳实践**，把"能看"升级为"专业级中文排版"。
 > v3.0 进一步把骨架收敛为 **`数据(themes.json)` + `模板(通用布局)`** 架构：新增风格只改 JSON，不动 HTML。
 > v3.2 新增 **poster 招募海报布局**：9:16 竖版社群/课程招募海报，大字标题+印章+日课+CTA二维码，直接填文案即出图。
+> v3.3 新增 **灵感库（Inspiration Library）**：联网沉淀的「美观 / 高级 / 时尚感」排版范式，结构化、可更新，Studio 内可直接浏览并复制 CSS 片段。
 
 ## 一、它解决什么问题
 
@@ -139,19 +140,22 @@ Step 5  输出交付
 
 ```
 guofeng-typesetter/
-├── SKILL.md                          # 本文件：工作流 + 决策树 + 排版质量基线
+├── SKILL.md                          # 本文件：工作流 + 决策树 + 排版质量基线 + 灵感库
 ├── references/
 │   ├── themes.json                   # 【唯一可编辑数据源】配色/字体/装饰/字段/示例，按风格罗列
+│   ├── inspiration.json              # ★ 灵感库数据源：来源(sources) + 灵感条目(entries)，结构化、可更新
 │   ├── design-systems.md             # 6套系统完整配色/字体/装饰规范
 │   ├── layout-patterns.md            # 通用布局模板说明（由 themes.json 的 colors/decor 注入）
 │   ├── typography-best-practices.md  # GitHub开源项目整合：heti/Han/typography.js/Gutenberg/tailwindcss-typography + 可复用CSS片段
-│   └── inspiration-notes.md          # 灵感库（Awwwards/Editorial/草木帖/时尚杂志）
-├── guofeng-card-engine.js            # 引擎：嵌入 THEMES 数据 + 通用布局模板(含 poster) + inlineStyles/validate/mount
-├── guofeng-card-studio.html          # 独立单文件版（加载引擎并挂载）
+│   └── inspiration-notes.md          # 灵感库使用指南 + 设计语言提炼（数据见 inspiration.json）
+├── guofeng-card-engine.js            # 引擎：嵌入 THEMES + INSPIRATIONS 数据 + 通用布局模板(含 poster) + inlineStyles/validate/mount
+├── guofeng-card-studio.html          # 独立单文件版（加载引擎并挂载，含「灵感库」面板）
 ├── workstation-integration.html      # 多 Tab 工作站接入示例
 ├── scripts/
 │   ├── validate_card.py              # 产物合规校验（普通模式 + 公众号模式）
-│   └── sync_themes.js                # 把 themes.json 同步进 guofeng-card-engine.js 的 DATA 块
+│   ├── sync_themes.js                # 把 themes.json 同步进引擎 DATA 块
+│   ├── sync_inspiration.js           # 把 inspiration.json 同步进引擎 INSPIRATIONS 块
+│   └── update_inspiration.js         # 命令行追加灵感/来源（可增量更新，不必手改 JSON）
 └── assets/
     ├── 烂泥哲学-宋韵禅意.html          # 示例
     └── 君臣佐使-草木绿.html            # 示例
@@ -168,6 +172,59 @@ guofeng-typesetter/
 - [ ] `node scripts/sync_themes.js` 可把 JSON 同步进引擎 DATA 块且无语法错误。
 - [ ] 新增一条 theme（如 wabi）后，无需改模板即可 `buildCard('wabi', sample)` 出图。
 - [ ] 其余验收同 v2.0（匹配/落款/校验/公众号内联）。
+
+## 九、灵感库（Inspiration Library · v3.3 新增）
+
+> 高级感不是凭空想象，而是从 Awwwards、时尚杂志、高端品牌、2026 字体趋势等公开来源中提炼可复用的设计语言。v3.3 把这些灵感结构化、可更新，并接进 Studio。
+
+### 1. 数据在哪里
+- **唯一数据源**：`references/inspiration.json`，结构 = `{ sources[], entries[] }`。
+  - `sources[]`：灵感出处（站点/书/报告），含 `id / title / url / fetchedAt / tags / summary`。
+  - `entries[]`：单条灵感，含 `id / title / category / source / designLanguage / palette / fonts / cssSnippet / applicableTo / tags / note`。
+- 引擎内嵌：跑 `node scripts/sync_inspiration.js` → 同步进 `guofeng-card-engine.js` 的 `INSPIRATIONS` 块，离线（file://）也能用；通过 `GuofengCard.inspirations` 访问。
+
+### 2. 在 Studio 里怎么用
+顶部栏点 **「灵感库」** → 弹出浮层：
+- 顶部**分类筛选**（trend / brand / magazine / typography / archetype）一键过滤；
+- 每张卡片展示：设计语言、配色色板（bg/ink/accent 三色块）、推荐字体、标签；
+- 点 **「复制 CSS 片段」** 即可把可复用片段贴进卡片或主题，直接复用获奖站/杂志的版式密码。
+
+### 3. 怎么更新（核心诉求：灵感能更新）
+三种方式任选其一，改完都跑一次 `node scripts/sync_inspiration.js` 同步进引擎：
+
+| 方式 | 命令 | 适用场景 |
+|------|------|----------|
+| **命令行追加** | `node scripts/update_inspiration.js add-entry --json '{...}'`（或 `--file ./x.json`） | 抓到新灵感，免手改 JSON |
+| **追加来源** | `node scripts/update_inspiration.js add-source --title "..." --url "..." --tags "..."` | 新增一个出处站点 |
+| **直接编辑 JSON** | 打开 `references/inspiration.json` 手写条目 | 批量整理、精细控制 |
+
+脚本会自动生成 id（标题 slug）、写入 `fetchedAt/updated` 为当天、重排计数，并提示同步。验证：`node scripts/update_inspiration.js list`。
+
+### 4. 条目字段规范（entries 一条怎么写）
+```json
+{
+  "id": "typo-as-hero",                 // 唯一，建议英文 slug
+  "title": "排版即主角",
+  "category": "trend",                   // trend|brand|magazine|typography|archetype
+  "source": "awwwards-2026",            // 对应 sources 里的 id
+  "designLanguage": "超大朴素无衬线铺满画面……",
+  "palette": { "bg":"#111", "ink":"#fff", "accent":"#E94F37" },
+  "fonts": ["Neue Montreal","Inter"],
+  "cssSnippet": ".hero-type{font-size:clamp(64px,14vw,200px)}",
+  "applicableTo": ["single","poster","editorial"],  // 适配哪几种布局
+  "tags": ["oversized","minimal"],
+  "note": "适合反共识金句卡……"
+}
+```
+
+### 5. 当前灵感目录（16 条 / 6 来源，来自 2026-10-29 联网抓取）
+- **趋势 trend**：排版即主角、大地色/克制自然色、文字图形化、电影感英雄区
+- **品牌 brand**：静奢定制衬线、60-30-10 配色法则
+- **杂志 magazine**：衬线标题+无衬线正文、Vogue 高对比 Didot
+- **字体 typography**：流体字号/间距系统、时髦曲线衬线、新颖斜体、安静无衬线、可变字体动态
+- **原型 archetype**：极简极端留白、瑞士网格+超大序号、新粗野主义
+
+> 注：`references/inspiration-notes.md` 是配套的人类可读指南（设计语言提炼 + 使用说明），与 `inspiration.json`（机器可读数据源）配合使用；新增灵感优先写进 JSON。
 
 ## 八、验收标准
 

@@ -7,6 +7,23 @@
 
 ---
 
+## [3.3.0] - 2026-10-29
+
+### Added
+- **灵感库（Inspiration Library）**：联网抓取 Awwwards 2026 趋势、时尚杂志排版（Vogue/BAZAAR/Elle）、高端品牌静奢趋势、2026 字体趋势等公开来源，沉淀为结构化、可更新的灵感库。
+- **`references/inspiration.json`**：灵感库唯一数据源，含 6 个来源 + 16 条灵感条目（设计语言 / 配色色板 / 推荐字体 / 可复用 CSS 片段 / 适用布局 / 标签），并带来源 URL 与抓取时间。
+- **`scripts/sync_inspiration.js`**：把 `inspiration.json` 同步进引擎 `INSPIRATIONS` 块（与 `sync_themes.js` 同架构），离线 Studio 也能浏览灵感。
+- **`scripts/update_inspiration.js`**：命令行追加灵感/来源（`add-entry` / `add-source` / `list`），自动生成 id、更新时间戳与计数——实现「灵感能更新、可增量」。
+- **Studio「灵感库」面板**：顶部栏新增「灵感库」按钮，弹出浮层，支持分类筛选、卡片式浏览（色板/字体/标签）、一键复制 CSS 片段，灵感即取即用。
+- 引擎暴露 `GuofengCard.inspirations`（同 `GuofengCard.INSPIRATIONS`）。
+
+### Changed
+- SKILL.md：新增「九、灵感库」专章（数据源 / Studio 用法 / 更新流程 / 字段规范 / 目录），文件结构补充 `inspiration.json` 与两个脚本。
+- `references/inspiration-notes.md`：重构为人类可读的灵感库使用指南 + 设计语言提炼，明确以 `inspiration.json` 为机器可读数据源。
+- README.md / 引擎注释：版本同步至 v3.3.0，补充灵感库特性与文件结构。
+
+---
+
 ## [3.2.0] - 2026-10-29
 
 ### Added
