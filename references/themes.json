@@ -1,0 +1,253 @@
+{
+  "version": "3.0.0",
+  "signDefault": "静心知识库 · @圣为Ai设计",
+  "fontFamilies": {
+    "serif": "\"Noto Serif SC\",\"Songti SC\",\"SimSun\",serif",
+    "sans": "\"Noto Sans SC\",sans-serif",
+    "display": "\"Playfair Display\",serif",
+    "mono": "\"JetBrains Mono\",monospace"
+  },
+  "fontLink": {
+    "serif": "Noto+Serif+SC:wght@400;600;700;900",
+    "sans": "Noto+Sans+SC:wght@300;400;500;700;800",
+    "display": "Playfair+Display:wght@700;900",
+    "mono": "JetBrains+Mono:wght@400;700"
+  },
+  "layouts": {
+    "single": {
+      "desc": "单列叙事：标签→主标题→竖线引文→小节→收尾金句→印章。宋韵禅意/暗色鎏金共用",
+      "fields": [
+        {"k": "tag", "l": "标签", "t": "text"},
+        {"k": "subTag", "l": "副标签", "t": "text"},
+        {"k": "title", "l": "主标题", "t": "text"},
+        {"k": "quote", "l": "竖线引文", "t": "text"},
+        {"k": "s1t", "l": "小节标题一", "t": "text"},
+        {"k": "s1b", "l": "小节正文一", "t": "area"},
+        {"k": "s2t", "l": "小节标题二", "t": "text"},
+        {"k": "s2b", "l": "小节正文二", "t": "area"},
+        {"k": "golden", "l": "收尾金句", "t": "text"},
+        {"k": "seal", "l": "印章字", "t": "text"}
+      ]
+    },
+    "editorial": {
+      "desc": "杂志叙事：栏目标签→主标题→导语→首字下沉→金句引文→第二段",
+      "fields": [
+        {"k": "kicker", "l": "栏目标签", "t": "text"},
+        {"k": "title", "l": "主标题", "t": "text"},
+        {"k": "dek", "l": "导语/摘要", "t": "area"},
+        {"k": "lead", "l": "首段（首字下沉）", "t": "area"},
+        {"k": "pull", "l": "金句引文", "t": "text"},
+        {"k": "lead2", "l": "第二段", "t": "area"}
+      ]
+    },
+    "grid": {
+      "desc": "瑞士网格：顶栏→主标题→编号步骤→结论条",
+      "fields": [
+        {"k": "topL", "l": "分类标签", "t": "text"},
+        {"k": "topR", "l": "日期/编号", "t": "text"},
+        {"k": "title", "l": "主标题", "t": "text"},
+        {"k": "s1t", "l": "阶段一标题", "t": "text"},
+        {"k": "s1b", "l": "阶段一说明", "t": "area"},
+        {"k": "s2t", "l": "阶段二标题", "t": "text"},
+        {"k": "s2b", "l": "阶段二说明", "t": "area"},
+        {"k": "s3t", "l": "阶段三标题", "t": "text"},
+        {"k": "s3b", "l": "阶段三说明", "t": "area"},
+        {"k": "conclusion", "l": "结论条", "t": "text"}
+      ]
+    },
+    "asymmetric": {
+      "desc": "不对称色块：左侧色块+竖排水印+四角元数据→内容区",
+      "fields": [
+        {"k": "metaTL", "l": "编号", "t": "text"},
+        {"k": "metaTR", "l": "期次", "t": "text"},
+        {"k": "series", "l": "系列名", "t": "text"},
+        {"k": "title", "l": "主标题", "t": "text"},
+        {"k": "subtitle", "l": "副标题", "t": "area"},
+        {"k": "s1t", "l": "小节标签一", "t": "text"},
+        {"k": "s1b", "l": "小节正文一", "t": "area"},
+        {"k": "s2t", "l": "小节标签二", "t": "text"},
+        {"k": "s2b", "l": "小节正文二", "t": "area"},
+        {"k": "circle", "l": "圆心字", "t": "text"},
+        {"k": "golden", "l": "收尾金句", "t": "text"},
+        {"k": "water", "l": "水印字", "t": "text"}
+      ]
+    },
+    "business": {
+      "desc": "商务营销：红封边→页码水印→卖点列表→渐变页脚",
+      "fields": [
+        {"k": "kicker", "l": "课程/产品标签", "t": "text"},
+        {"k": "title", "l": "主标题", "t": "text"},
+        {"k": "subtitle", "l": "副标题/价值", "t": "area"},
+        {"k": "f1t", "l": "卖点一标题", "t": "text"},
+        {"k": "f1b", "l": "卖点一说明（含*高亮*）", "t": "area"},
+        {"k": "f2t", "l": "卖点二标题", "t": "text"},
+        {"k": "f2b", "l": "卖点二说明", "t": "area"}
+      ]
+    }
+  },
+  "themes": {
+    "songzen": {
+      "label": "宋韵禅意",
+      "layout": "single",
+      "bodyBg": "#e8e4dc",
+      "fonts": {"base": "serif", "display": "serif"},
+      "fontTokens": ["serif"],
+      "decor": {"seal": true, "paperTexture": true, "gradientText": false},
+      "colors": {
+        "--ink": "#222",
+        "--accent": "#8C4A38",
+        "--accent-bright": "#B8442C",
+        "--gold": "#C8B89E",
+        "--jade": "#3A5A48",
+        "--paper": "#F7F4EB",
+        "--line": "#DDD8CF",
+        "--muted": "#999"
+      },
+      "sample": {
+        "tag": "一人公司笔记",
+        "subTag": "反完美主义 · 持续输出",
+        "title": "烂泥哲学",
+        "quote": "允许自己先烂着，但别允许自己不动。",
+        "s1t": "什么是烂泥",
+        "s1b": "不是摆烂，是接受当下不够好的状态。像烂泥一样，先摊在地上，再慢慢长出根来。",
+        "s2t": "怎么用",
+        "s2b": "别等准备好了再开始。先发十条烂内容，再发一百条还行的，最后那条爆款自然会来。",
+        "golden": "完成比完美重要，活着比活着好。",
+        "seal": "禅"
+      }
+    },
+    "editorial": {
+      "label": "杂志编辑",
+      "layout": "editorial",
+      "bodyBg": "#e4e0d8",
+      "fonts": {"base": "sans", "display": "serif"},
+      "fontTokens": ["serif", "sans", "display"],
+      "decor": {"hairline": true, "pullquote": true, "dropcap": true},
+      "colors": {
+        "--ink": "#1a1a1a",
+        "--accent": "#B8442C",
+        "--paper": "#FAF8F4",
+        "--line": "#D5D0C8",
+        "--muted": "#8a8580"
+      },
+      "sample": {
+        "kicker": "COLUMN · 阅读",
+        "title": "读书的意义",
+        "dek": "读书不是为了记住什么，是为了在某个瞬间，你突然懂了某个人说的某句话。",
+        "lead": "我们总以为阅读是一场记忆的搬运，把别人的思想装进自己的脑子。可大多数书，读过就忘了。",
+        "pull": "记不住没关系，那一瞬间的懂，已经改变了你。",
+        "lead2": "真正留下的，是你看世界时悄悄多出的那一层滤镜。"
+      }
+    },
+    "swiss": {
+      "label": "瑞士网格",
+      "layout": "grid",
+      "bodyBg": "#dadada",
+      "fonts": {"base": "sans", "accent": "mono"},
+      "fontTokens": ["sans", "mono"],
+      "decor": {"topbar": true, "stepNumbers": true, "conclusionBar": true},
+      "colors": {
+        "--ink": "#0A0A0A",
+        "--accent": "#C8202A",
+        "--paper": "#FFFFFF",
+        "--line": "#E0E0E0",
+        "--muted": "#999"
+      },
+      "sample": {
+        "topL": "内容方法论 / METHOD",
+        "topR": "2026.10",
+        "title": "做内容的三个阶段",
+        "s1t": "发自己想发的",
+        "s1b": "自嗨期。先让自己舒服，把表达欲释放出来，不必急着讨好任何人。",
+        "s2t": "发用户想看的",
+        "s2b": "流量期。开始读评论、看数据，用别人的需求校准自己的表达。",
+        "s3t": "发用户说不出但需要的",
+        "s3b": "壁垒期。你替他们说出了那句一直卡在喉咙里的话，这就成了你的护城河。",
+        "conclusion": "从自嗨到壁垒，差的是一百条还不完美的练习。"
+      }
+    },
+    "crimson": {
+      "label": "朱砂商务",
+      "layout": "business",
+      "bodyBg": "#d8d8d8",
+      "fonts": {"base": "sans"},
+      "fontTokens": ["sans"],
+      "decor": {"redBorder": true, "pageno": true, "footerGradient": true, "highlight": true},
+      "colors": {
+        "--ink": "#1a1a1a",
+        "--accent": "#C8202A",
+        "--accent-bright": "#D43A3A",
+        "--accent-deep": "#8A1F24",
+        "--paper": "#FFFFFF",
+        "--muted": "#9a9a9a"
+      },
+      "sample": {
+        "kicker": "课程首发",
+        "title": "一人公司实战营",
+        "subtitle": "不投流、纯靠内容驱动，一个人也能跑通的商业闭环。",
+        "f1t": "21 天陪跑",
+        "f1b": "从 0 到 1 搭起你的*内容资产*，每天 30 分钟，不焦虑。",
+        "f2t": "可复用 SOP",
+        "f2b": "排版、选题、标题、数据看板，全部*模板化*，复制即用。"
+      }
+    },
+    "darkgold": {
+      "label": "暗色鎏金",
+      "layout": "single",
+      "bodyBg": "#000",
+      "fonts": {"base": "serif", "display": "serif"},
+      "fontTokens": ["serif"],
+      "decor": {"seal": true, "frame": true, "gradientText": true},
+      "colors": {
+        "--ink": "#0D0D0D",
+        "--text": "#E8E0D0",
+        "--accent": "#C9A962",
+        "--accent-bright": "#E0C88A",
+        "--gold": "#C9A962",
+        "--gold-bright": "#E0C88A",
+        "--gold-line": "rgba(201,169,98,.25)",
+        "--paper": "#0D0D0D",
+        "--line": "rgba(201,169,98,.25)",
+        "--muted": "#C9A962"
+      },
+      "sample": {
+        "kicker": "珍藏版金句",
+        "title": "善友如镜",
+        "quote": "善友如镜，照见自己。",
+        "golden": "你靠近谁，就会成为谁。",
+        "seal": "鏡"
+      }
+    },
+    "sage": {
+      "label": "草木绿东方极简",
+      "layout": "asymmetric",
+      "bodyBg": "#d8d4c8",
+      "fonts": {"base": "serif", "meta": "sans"},
+      "fontTokens": ["serif", "sans"],
+      "decor": {"sageBlock": true, "watermark": true, "cornerMeta": true, "seriesQuote": true, "circle": true},
+      "colors": {
+        "--sage": "#7D855A",
+        "--sage-deep": "#5A6340",
+        "--paper": "#EAEAE2",
+        "--charcoal": "#2A2A28",
+        "--charcoal-soft": "#4a4a46",
+        "--muted": "#9a958a",
+        "--line": "#D5D0C8"
+      },
+      "sample": {
+        "metaTL": "NO. 03",
+        "metaTR": "AUTUMN 2026",
+        "series": "中医本草",
+        "title": "君臣佐使",
+        "subtitle": "一张方子的秩序，就是一个人做事的秩序。",
+        "s1t": "君 · 主药",
+        "s1b": "针对主证的核心药材，力量最大。做任何事，先找到那个必须解决的主问题。",
+        "s2t": "臣 · 辅药",
+        "s2b": "辅助君药，加强疗效。核心之外，配两三个得力帮手，不贪多。",
+        "circle": "和",
+        "golden": "药有君臣佐使，人有主次缓急。",
+        "water": "藥"
+      }
+    }
+  }
+}

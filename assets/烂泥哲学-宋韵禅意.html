@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烂泥哲学 · 宋韵禅意</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap">
+<style>
+:root{
+  --ink:#222; --seal:#8C4A38; --seal-bright:#B8442C; --jade:#3A5A48;
+  --gold:#C8B89E; --paper:#F7F4EB; --line:#DDD8CF; --muted:#999;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;background:#e8e4dc;padding:40px 16px;
+  font-family:"Noto Serif SC","Songti SC","SimSun",serif}
+.card{width:900px;max-width:100%;aspect-ratio:9/16;background:var(--paper);
+  position:relative;overflow:hidden;padding:100px 80px 80px;color:var(--ink);
+  box-shadow:0 8px 40px rgba(0,0,0,.12)}
+.card::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(180,170,150,.03) 2px,rgba(180,170,150,.03) 3px),
+    repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(180,170,150,.02) 2px,rgba(180,170,150,.02) 3px)}
+.content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column}
+.tag{display:inline-block;border:1px solid var(--seal);color:var(--seal);
+  padding:6px 20px;font-size:28px;letter-spacing:4px;align-self:flex-start}
+.sub-tag{margin-top:14px;font-size:26px;color:#697478;letter-spacing:3px}
+.main-title{margin-top:56px;font-size:88px;font-weight:700;color:var(--ink);
+  letter-spacing:8px;line-height:1.2}
+.quote{margin-top:52px;padding-left:24px;border-left:3px solid var(--gold);
+  font-size:40px;line-height:1.8;letter-spacing:2px}
+.section{margin-top:48px}
+.section-title{font-size:34px;color:var(--seal);font-weight:700;margin-bottom:14px;letter-spacing:2px}
+.section-text{font-size:32px;color:#333;line-height:1.9;letter-spacing:1px}
+.divider{width:100%;height:1px;background:var(--line);margin:36px 0}
+.golden{margin-top:auto;padding-top:60px;text-align:center;font-size:48px;
+  color:var(--jade);line-height:1.8;font-weight:600;letter-spacing:3px}
+.footer{margin-top:40px;text-align:center;font-size:24px;color:var(--muted);letter-spacing:2px}
+.seal{position:absolute;top:100px;right:80px;width:56px;height:56px;
+  border:2px solid var(--seal-bright);border-radius:6px;display:flex;align-items:center;
+  justify-content:center;color:var(--seal-bright);font-size:22px;font-weight:700;
+  writing-mode:vertical-rl;z-index:3;opacity:.7}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="seal">禅</div>
+  <div class="content">
+    <div class="tag">一人公司笔记</div>
+    <div class="sub-tag">反完美主义 · 持续输出</div>
+    <h1 class="main-title">烂泥哲学</h1>
+    <div class="quote">
+      允许自己先烂着，<br>但别允许自己不动。
+    </div>
+    <div class="section">
+      <div class="section-title">什么是烂泥</div>
+      <div class="section-text">
+        不是摆烂，是接受当下不够好的状态。像烂泥一样，先摊在地上，再慢慢长出根来。
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+      <div class="section-title">怎么用</div>
+      <div class="section-text">
+        别等准备好了再开始。先发十条烂内容，再发一百条还行的，最后那条爆款自然会来。
+      </div>
+    </div>
+    <div class="golden">
+      完成比完美重要，活着比活着好。
+    </div>
+    <div class="footer">静心知识库 · @圣为Ai设计</div>
+  </div>
+</div>
+</body>
+</html>

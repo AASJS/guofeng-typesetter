@@ -1,0 +1,4 @@
+# 忽略临时/无关文件
+.DS_Store
+*.log
+__pycache__/

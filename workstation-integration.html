@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公众号排版助手 · 多 Tab 工作站（集成示例）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#161618;color:#e8e8ea;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid #2a2a2e}
+  .topbar .logo{font-size:17px;font-weight:700;letter-spacing:1px}
+  .topbar .logo small{font-size:11px;color:#9a9aa0;font-weight:400;margin-left:8px}
+  /* —— 你现有的 Tab 栏，照此结构保留即可 —— */
+  .tabs{display:flex;gap:4px;margin-left:auto}
+  .tabs button{background:transparent;border:none;color:#9a9aa0;padding:9px 18px;font-size:14px;border-radius:8px 8px 0 0;cursor:pointer;font-family:inherit;transition:.15s}
+  .tabs button:hover{color:#e8e8ea}
+  .tabs button.active{background:#262629;color:#fff;font-weight:600}
+  .panels{flex:1;min-height:0;overflow:hidden}
+  .panel{display:none;height:100%;overflow:auto}
+  .panel.active{display:flex}
+  .panel-inner{padding:26px 30px;width:100%}
+  .placeholder{color:#6a6a70;font-size:14px;line-height:2;max-width:640px}
+  .placeholder h2{color:#e8e8ea;font-size:20px;margin-bottom:12px}
+  .placeholder code{background:#262629;padding:2px 8px;border-radius:5px;color:#C9A962;font-size:13px}
+  /* 国风卡片面板 = 直接调用引擎挂载到这个容器 */
+  #tab-paiban.active{display:flex;flex-direction:column}
+  #guofeng-mount{flex:1;min-height:0}
+  .panel-head{font-size:13px;color:#9a9aa0;margin-bottom:14px}
+  .panel-head b{color:#C9A962}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo">公众号排版助手 <small>多 Tab 工作站 · 集成示例</small></div>
+    <div class="tabs" id="tabs">
+      <button data-tab="paiban" class="active">排版</button>
+      <button data-tab="peise">配色</button>
+      <button data-tab="biaoti">标题生成与AB测试</button>
+      <button data-tab="kanban">历史数据看板</button>
+      <button data-tab="guofeng">国风卡片</button>
+    </div>
+  </div>
+
+  <div class="panels">
+    <!-- 排版：你已有的排版核心 + 国风卡片挂载点 -->
+    <section class="panel active" id="tab-paiban">
+      <div class="panel-inner" style="display:flex;flex-direction:column;height:100%;padding:0">
+        <div class="panel-head" style="padding:16px 30px 0">你的「排版」核心区（正文编辑 / 样式微调等）→ 下方为国风卡片生成模块</div>
+        <!-- ============ 关键：把引擎挂载到这个容器 ============ -->
+        <div id="guofeng-mount"></div>
+      </div>
+    </section>
+
+    <!-- 其余 Tab：你现有功能占位，勿删，按你实际功能替换即可 -->
+    <section class="panel" id="tab-peise"><div class="panel-inner"><div class="placeholder"><h2>配色方案</h2><p>这是你现有的「配色」Tab 占位。保留 Tab 结构，把国风卡片引擎挂载到你想放的位置即可（本例放在「排版」Tab 内，也单独留了一个「国风卡片」Tab）。</p></div></div></section>
+    <section class="panel" id="tab-biaoti"><div class="panel-inner"><div class="placeholder"><h2>标题生成与 AB 测试</h2><p>你现有的「标题生成与 AB 测试」Tab 占位。</p></div></div></section>
+    <section class="panel" id="tab-kanban"><div class="panel-inner"><div class="placeholder"><h2>历史数据看板</h2><p>你现有的「历史数据看板」Tab 占位。</p></div></div></section>
+    <section class="panel" id="tab-guofeng"><div class="panel-inner" style="padding:0;height:100%;display:flex;flex-direction:column"><div id="guofeng-mount-2" style="flex:1;min-height:0"></div></div></section>
+  </div>
+
+  <!-- 引入引擎（相对路径，和你的工作站同目录即可；也可改成 CDN/绝对路径） -->
+  <script src="guofeng-card-engine.js"></script>
+  <script>
+  /* ===== 1) Tab 切换逻辑（你现有工程的 Tab 机制，这里用原生实现示意） ===== */
+  const tabs = document.querySelectorAll('#tabs button');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    const t = btn.dataset.tab;
+    tabs.forEach(b => b.classList.toggle('active', b === btn));
+    panels.forEach(p => p.classList.toggle('active', p.id === 'tab-' + t));
+    // 切到含国风卡片的 Tab 时，触发一次预览重算（iframe srcdoc 在隐藏时不会渲染，切回需重绘）
+    if (t === 'paiban' && window.__gc1) window.__gc1.getHtml && refresh(window.__gc1);
+    if (t === 'guofeng' && window.__gc2) refresh(window.__gc2);
+  }));
+
+  // 隐藏 Tab 内的 iframe 切回需重新写入 srcdoc
+  function refresh(api){ const h = api.getHtml(); /* 内部引擎已自管，这里仅为示例触发重绘 */ }
+
+  /* ===== 2) 挂载国风卡片引擎 ===== */
+  // 放在「排版」Tab 内
+  window.__gc1 = GuofengCard.mount('#guofeng-mount', { defaultStyle: 'songzen', sign: '静心知识库 · @圣为Ai设计' });
+  // 也可独立成「国风卡片」Tab（演示同时挂两处，互不影响，验证无全局污染）
+  window.__gc2 = GuofengCard.mount('#guofeng-mount-2', { defaultStyle: 'swiss' });
+
+  /* ===== 3) 进阶：从你其他 Tab（如标题生成）拿数据喂给卡片 ===== */
+  // 例：标题生成器产出标题后，调用 api.setStyle + 直接写字段
+  // document.getElementById('f_title').value = 生成的标题;
+  // 注意：字段 id 形如 f_<字段key>，可直接操作 DOM 注入。
+  </script>
+</body>
+</html>

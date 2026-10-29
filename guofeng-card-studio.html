@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>国风卡片生成 · Guofeng Card Studio v3</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#161618;color:#e8e8ea;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  header{padding:14px 20px;border-bottom:1px solid #2a2a2e;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:17px;font-weight:700;letter-spacing:1px}
+  header .sub{font-size:12px;color:#9a9aa0}
+  header .hint{margin-left:auto;font-size:12px;color:#6a6a70}
+  main{flex:1;min-height:0;display:flex}
+  #app{flex:1;min-width:0}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>国风卡片生成</h1>
+    <div class="sub">Guofeng Card Studio · v3 数据+模板架构（引擎见 guofeng-card-engine.js）</div>
+  </div>
+  <div class="hint">改样式只需编辑 references/themes.json → 跑 scripts/sync_themes.js</div>
+</header>
+<main>
+  <div id="app"></div>
+</main>
+
+<!-- 引擎（含全部主题数据与 5 个通用布局模板） -->
+<script src="guofeng-card-engine.js"></script>
+<script>
+  // 挂载引擎到 #app。风格/数据全部来自引擎内的 DATA（由 themes.json 同步）。
+  GuofengCard.mount('#app', { defaultStyle: 'songzen', sign: '静心知识库 · @圣为Ai设计' });
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>君臣佐使 · 草木</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --sage:#7D855A; --sage-deep:#5A6340;
+  --paper:#EAEAE2; --paper-card:#F2F0E8;
+  --charcoal:#2A2A28; --charcoal-soft:#4a4a46;
+  --muted:#9a958a; --line:#D5D0C8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;background:#d8d4c8;padding:40px 16px;
+  font-family:"Noto Serif SC","Songti SC",serif}
+.card{width:900px;max-width:100%;aspect-ratio:9/16;background:var(--paper);
+  position:relative;overflow:hidden;color:var(--charcoal);
+  box-shadow:0 8px 40px rgba(0,0,0,.1)}
+.sage-block{position:absolute;left:0;top:0;bottom:0;width:33%;
+  background:var(--sage-deep);z-index:1}
+.sage-block .watermark{position:absolute;bottom:40px;left:20px;
+  font-size:140px;font-weight:900;color:rgba(255,255,255,.06);
+  line-height:1;writing-mode:vertical-rl}
+.meta{position:absolute;font-family:"Noto Sans SC",sans-serif;font-size:11px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--muted);z-index:3}
+.meta-tl{top:28px;left:40px}
+.meta-tr{top:28px;right:40px}
+.meta-bl{bottom:28px;left:40px}
+.meta-br{bottom:28px;right:40px}
+.content{position:relative;z-index:2;margin-left:33%;padding:90px 60px 80px;
+  height:100%;display:flex;flex-direction:column}
+.series-tag{display:inline-block;font-family:"Noto Sans SC",sans-serif;
+  font-size:13px;letter-spacing:3px;color:var(--sage);align-self:flex-start;
+  margin-bottom:30px}
+.series-tag::before{content:"「";color:var(--sage)}
+.series-tag::after{content:"」";color:var(--sage)}
+h1{font-size:80px;font-weight:900;color:var(--charcoal);line-height:1.1;
+  letter-spacing:4px;margin-bottom:20px}
+.subtitle{font-size:18px;color:var(--charcoal-soft);line-height:1.7;
+  margin-bottom:40px;font-family:"Noto Sans SC",sans-serif;font-weight:300}
+.hairline{width:40px;height:1px;background:var(--sage);margin:0 0 36px}
+.section{margin-bottom:36px}
+.section-label{font-family:"Noto Sans SC",sans-serif;font-size:12px;
+  letter-spacing:3px;color:var(--sage);text-transform:uppercase;margin-bottom:10px}
+.section p{font-size:20px;line-height:2;color:var(--charcoal-soft);letter-spacing:1px}
+.circle{width:120px;height:120px;border-radius:50%;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;margin:20px 0;position:relative}
+.circle::after{content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid var(--line);opacity:.4}
+.circle span{font-size:28px;color:var(--sage);font-weight:700}
+.closing{margin-top:auto;padding-top:40px;font-size:26px;color:var(--charcoal);
+  letter-spacing:3px;line-height:1.8;font-weight:600}
+.footer{margin-top:24px;font-family:"Noto Sans SC",sans-serif;font-size:12px;
+  color:var(--muted);letter-spacing:2px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="sage-block"><div class="watermark">藥</div></div>
+  <div class="meta meta-tl">NO. 03</div>
+  <div class="meta meta-tr">AUTUMN 2026</div>
+  <div class="meta meta-bl">静心知识库</div>
+  <div class="meta meta-br">@圣为Ai设计</div>
+  <div class="content">
+    <div class="series-tag">中医本草</div>
+    <h1>君臣佐使</h1>
+    <p class="subtitle">一张方子的秩序，就是一个人做事的秩序。</p>
+    <div class="hairline"></div>
+    <div class="section">
+      <div class="section-label">君 · 主药</div>
+      <p>针对主证的核心药材，力量最大。做任何事，先找到那个"必须解决的主问题"。</p>
+    </div>
+    <div class="section">
+      <div class="section-label">臣 · 辅药</div>
+      <p>辅助君药，加强疗效。核心之外，配两三个得力帮手，不贪多。</p>
+    </div>
+    <div class="section">
+      <div class="section-label">佐使 · 调和</div>
+      <p>监制偏性、引经报使。一个团队里，总得有人调和关系、守住底线。</p>
+    </div>
+    <div class="circle"><span>和</span></div>
+    <div class="closing">药有君臣佐使，人有主次缓急。</div>
+    <div class="footer">静心知识库 · @圣为Ai设计</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>做内容的三个阶段 · 瑞士网格</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --ink:#0A0A0A; --accent:#C8202A; --paper:#FFFFFF; --panel:#F5F5F5; --line:#E0E0E0; --muted:#999;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{display:flex;justify-content:center;background:#dadada;padding:40px 16px;
+  font-family:"Noto Sans SC",sans-serif;text-rendering:optimizeLegibility;font-feature-settings:"kern" 1}
+.card{width:900px;max-width:100%;aspect-ratio:9/16;background:var(--paper);
+  position:relative;overflow:hidden;padding:80px 72px;color:var(--ink);
+  box-shadow:0 8px 40px rgba(0,0,0,.12)}
+.content{height:100%;display:flex;flex-direction:column}
+.topbar{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;
+  font-size:14px;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:16px}
+.main-title{font-size:72px;font-weight:900;line-height:1.05;letter-spacing:-1px;margin:40px 0}
+.step{display:grid;grid-template-columns:120px 1fr;gap:28px;align-items:start;margin-top:40px;
+  border-top:1px solid var(--line);padding-top:32px}
+.step-no{font-family:"JetBrains Mono",monospace;font-size:88px;font-weight:700;color:var(--accent);line-height:1}
+.step-body h3{font-size:32px;font-weight:700;margin-bottom:12px}
+.step-body p{font-size:22px;line-height:1.8;color:#333;max-width:32em}
+.conclusion{margin-top:auto;background:var(--accent);color:#fff;padding:24px 32px;
+  font-size:28px;font-weight:700;letter-spacing:1px}
+.footer{margin-top:24px;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="content">
+    <div class="topbar"><span>内容方法论 / METHOD</span><span>2026.10</span></div>
+    <h1 class="main-title">做内容的<br>三个阶段</h1>
+    <div class="step">
+      <div class="step-no">01</div>
+      <div class="step-body"><h3>发自己想发的</h3><p>自嗨期。先让自己舒服，把表达欲释放出来，不必急着讨好任何人。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-no">02</div>
+      <div class="step-body"><h3>发用户想看的</h3><p>流量期。开始读评论、看数据，用别人的需求校准自己的表达。</p></div>
+    </div>
+    <div class="step">
+      <div class="step-no">03</div>
+      <div class="step-body"><h3>发用户说不出但需要的</h3><p>壁垒期。你替他们说出了那句一直卡在喉咙里的话，这就成了你的护城河。</p></div>
+    </div>
+    <div class="conclusion">从自嗨到壁垒，差的是一百条还不完美的练习。</div>
+    <div class="footer">静心知识库 · @圣为Ai设计</div>
+  </div>
+</div>
+</body>
+</html>
