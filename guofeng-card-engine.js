@@ -1287,6 +1287,9 @@ ${f1}${f2}
 .gc-hint{font-size:11px;color:var(--gc-muted);padding:8px 16px;border-top:1px solid var(--gc-line)}
 .gc-insp{background:var(--gc-panel2);border:1px solid var(--gc-line);color:#e8e8ea;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer}
 .gc-insp:hover{border-color:var(--gc-accent)}
+.gc-example{background:var(--gc-panel2);border:1px solid var(--gc-line);color:#e8e8ea;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer}
+.gc-example:hover{border-color:var(--gc-accent)}
+.gc-ex-card{width:300px;height:533px;border:none;border-radius:6px;background:#fff;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .gc-insp-overlay{position:absolute;inset:0;z-index:20;background:rgba(20,20,22,.97);display:none;flex-direction:column}
 .gc-insp-overlay.open{display:flex}
 .gc-insp-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--gc-line);flex-wrap:wrap}
@@ -1350,6 +1353,7 @@ ${f1}${f2}
             <button class="gc-download">下载 HTML</button>
             <button class="gc-copy">复制 HTML</button>
             <button class="gc-insp">灵感库</button>
+            <button class="gc-example">示例卡片</button>
             <span class="gc-status"></span>
           </div>
           <div class="gc-preview-wrap"><iframe class="gc-preview" title="预览"></iframe></div>
@@ -1363,6 +1367,13 @@ ${f1}${f2}
           <button class="gc-insp-close">✕ 关闭</button>
         </div>
         <div class="gc-insp-grid"></div>
+      </div>
+      <div class="gc-insp-overlay gc-example-overlay">
+        <div class="gc-insp-head">
+          <h3>示例卡片</h3>
+          <button class="gc-example-close">✕ 关闭</button>
+        </div>
+        <div class="gc-insp-grid gc-example-grid"></div>
       </div>`;
 
     const $ = sel => container.querySelector(sel);
@@ -1389,11 +1400,7 @@ ${f1}${f2}
       const form = $('.gc-form');
       form.innerHTML = '';
       const s = DATA.themes[current];
-      if (!filled[current]) {
-        const d = sampleOf(current);
-        Object.entries(d).forEach(([k, v]) => { const el = form.querySelector('#f_' + k); if (el) el.value = v; });
-        filled[current] = true;
-      }
+      const needFill = !filled[current];
       fieldsOf(current).forEach(f => {
         const wrap = document.createElement('div'); wrap.className = 'gc-field';
         const lab = document.createElement('label'); lab.textContent = f.l; lab.setAttribute('for', 'f_' + f.k);
@@ -1402,6 +1409,11 @@ ${f1}${f2}
         inp.addEventListener('input', update);
         wrap.appendChild(lab); wrap.appendChild(inp); form.appendChild(wrap);
       });
+      if (needFill) {
+        const d = sampleOf(current);
+        Object.entries(d).forEach(([k, v]) => { const el = form.querySelector('#f_' + k); if (el) el.value = v; });
+        filled[current] = true;
+      }
     }
     function collectData() {
       const d = {};
@@ -1457,6 +1469,34 @@ ${f1}${f2}
     $('.gc-sign').oninput = update;
     $('.gc-wechat').onchange = update;
 
+    /* —— 示例卡片面板 —— */
+    function renderExamples() {
+      const grid = $('.gc-example-grid');
+      grid.innerHTML = '';
+      Object.entries(DATA.themes).forEach(([key, s]) => {
+        const d = s.sample || {};
+        const html = buildCard(key, d, { ratio: '9:16', sign: options.sign });
+        const card = document.createElement('div'); card.className = 'gc-insp-card';
+        const frame = document.createElement('iframe');
+        frame.className = 'gc-ex-card'; frame.srcdoc = html.replace('</body>', '<style>html,body{margin:0}body{width:900px;transform:scale(.3333);transform-origin:top left}</style></body>'); frame.title = s.label;
+        const cat = document.createElement('div'); cat.className = 'cat'; cat.textContent = s.label;
+        const t = document.createElement('div'); t.className = 't'; t.textContent = '点击套用该示例';
+        card.appendChild(cat); card.appendChild(frame); card.appendChild(t);
+        card.onclick = () => {
+          current = key;
+          delete filled[key];
+          renderStylebar(); renderForm();
+          $('.gc-ratio').value = options.ratio;
+          $('.gc-sign').value = options.sign;
+          Object.entries(d).forEach(([k, v]) => { const el = container.querySelector('#f_' + k); if (el) el.value = v; });
+          filled[key] = true;
+          $('.gc-example-overlay').classList.remove('open');
+          update();
+        };
+        grid.appendChild(card);
+      });
+    }
+
     /* —— 灵感库面板 —— */
     function renderInsp(filter) {
       const grid = $('.gc-insp-grid');
@@ -1511,6 +1551,12 @@ ${f1}${f2}
       renderInsp('all');
     };
     $('.gc-insp-close').onclick = () => $('.gc-insp-overlay').classList.remove('open');
+
+    $('.gc-example').onclick = () => {
+      $('.gc-example-overlay').classList.add('open');
+      renderExamples();
+    };
+    $('.gc-example-close').onclick = () => $('.gc-example-overlay').classList.remove('open');
 
     let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(update, 120); });
 
