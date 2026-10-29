@@ -7,6 +7,23 @@
 
 ---
 
+## [3.2.0] - 2026-10-29
+
+### Added
+- **poster 招募海报布局**（第 6 个通用布局模板）：9:16 竖版社群/课程招募海报，设计语言来自「道术双群」实战并已泛化——大字主标题（`<br>` 换行 + `<em>` 高亮）+ 印章、壹/贰/叁 日课、可选路径条（空格分隔自动加箭头）、CTA 色块 + 二维码（支持 url/base64，无码时显示占位框）、背景水印字、裱框细线 + 纸纹。配色全主题驱动（`--cta-bg/--cta-text/--gold-line` 等 CSS 变量）。
+- **两套 poster 主题**：`poster_dao`（宋韵禅意·招募海报，墨绿 CTA）与 `poster_shu`（朱砂·招募海报，朱砂渐变 CTA + 路径条），sample 即道术双群实战文案，直接改字段即可生成同类海报。
+- 引擎 `GuofengCard.buildCard('poster_dao'|'poster_shu', data, {ratio:'9:16'})` 直接可用；studio 表单自动出现 12 个海报字段。
+
+### Fixed
+- poster 路径条箭头改用 class 选择器（`.poster-path .ar`）而非内联 `style="color:var(--gold)"`——内联转换器不解析元素已有 style 中的 `var()`，原写法会导致 `var(--` 泄漏、公众号校验报错。
+- 印章定位从卡片级移入 `.poster-hero`，还原实战稿中「印章贴标题右下」的版式。
+
+### Changed
+- SKILL.md：设计系统表新增「招募海报 Poster」行、决策树新增招募海报分支、布局说明同步。
+- README.md：设计系统一览与快速开始补充 poster。
+
+---
+
 ## [3.1.0] - 2026-10-29
 
 ### Added

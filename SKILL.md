@@ -1,17 +1,18 @@
 ---
 name: guofeng-typesetter
 description: "国风高档图文排版设计器 —— 输入一段文案，自动匹配最高级的版式系统，输出可直接浏览器打开的单文件 HTML 图文卡片。融合赫蹏(heti)、Han.css、typography.js、Gutenberg、tailwindcss-typography 等 GitHub 热门开源排版项目的最佳实践，以及 doocs/md、mdnice、gzh-design-skill 的公众号内联适配经验。适用于金句卡、干货卡、课程营销卡、禅意卡、中医/东方美学卡、杂志叙事卡。关键词：排版、图文卡片、国风、单文件HTML、公众号配图、金句卡、视觉设计、卡片生成"
-version: "3.1.0"
+version: "3.2.0"
 author: "静心知识库 · @圣为Ai设计（整合 GitHub 开源排版项目）"
 created: "2026-10-29"
 updated: "2026-10-29"
 ---
 
-# Guofeng Typesetter · 国风高档图文排版设计器 v3.1
+# Guofeng Typesetter · 国风高档图文排版设计器 v3.2
 
 > 输入一段文案，自动匹配最高级的版式系统，输出可直接浏览器打开的单文件 HTML 图文卡片。
 > v2.0 在 v1.0 六套设计系统之上，**整合 GitHub 热门开源排版项目的最佳实践**，把"能看"升级为"专业级中文排版"。
-> v3.0 进一步把 6 套骨架收敛为 **`数据(themes.json)` + `模板(5 个通用布局)`** 架构：新增风格只改 JSON，不动 HTML。
+> v3.0 进一步把骨架收敛为 **`数据(themes.json)` + `模板(通用布局)`** 架构：新增风格只改 JSON，不动 HTML。
+> v3.2 新增 **poster 招募海报布局**：9:16 竖版社群/课程招募海报，大字标题+印章+日课+CTA二维码，直接填文案即出图。
 
 ## 一、它解决什么问题
 
@@ -37,6 +38,7 @@ v2.0 的突破（均来自真实开源项目，见 `references/typography-best-p
 | 课程/知识付费/产品/营销/带二维码 | **朱砂商务 Crimson Business** | 朱砂#C8202A 深红#8A1F24 亮红#D43A3A 白#FFF | 红封边、页码水印、深红footer渐变、红色高亮 |
 | 高端品牌/年度总结/珍藏版金句 | **暗色鎏金 Dark Gold** | 深墨#0D0D0D 鎏金#C9A962 亮金#E0C88A 暖白#E8E0D0 | 金线画框、烫金标题、菱形分隔、朱砂印 |
 | 自然/疗愈/中医/东方美学品牌/画册 | **草木绿东方极简 Sage Oriental** | 鼠尾草绿#7D855A 深绿#5A6340 暖米#EAEAE2 暖炭#2A2A28 | 不对称色块、四角元数据、直角引号、水墨圆框、竖排水印 |
+| 社群/课程招募、活动报名（9:16 竖版发朋友圈/视频号） | **招募海报 Poster**（poster_dao 宋韵 / poster_shu 朱砂） | 同宋韵禅意或朱砂系，CTA 色块另配 | 大字主标题+印章、壹贰叁日课、路径条、CTA色块+二维码、背景水印、裱框 |
 
 **决策树**：
 
@@ -51,6 +53,8 @@ v2.0 的突破（均来自真实开源项目，见 `references/typography-best-p
   ├─ 是 → 杂志编辑
 文案是自然/疗愈/中医/东方美学品牌/画册？
   ├─ 是 → 草木绿东方极简
+文案是社群/课程招募、活动报名，要发朋友圈/视频号（9:16 竖版）？
+  ├─ 是 → 招募海报（禅意/修行调性 → poster_dao；行动/实修调性 → poster_shu）
 无法判断 → 默认宋韵禅意
 ```
 
@@ -139,10 +143,10 @@ guofeng-typesetter/
 ├── references/
 │   ├── themes.json                   # 【唯一可编辑数据源】配色/字体/装饰/字段/示例，按风格罗列
 │   ├── design-systems.md             # 6套系统完整配色/字体/装饰规范
-│   ├── layout-patterns.md            # 5 个通用布局模板说明（由 themes.json 的 colors/decor 注入）
+│   ├── layout-patterns.md            # 通用布局模板说明（由 themes.json 的 colors/decor 注入）
 │   ├── typography-best-practices.md  # GitHub开源项目整合：heti/Han/typography.js/Gutenberg/tailwindcss-typography + 可复用CSS片段
 │   └── inspiration-notes.md          # 灵感库（Awwwards/Editorial/草木帖/时尚杂志）
-├── guofeng-card-engine.js            # 引擎：嵌入 THEMES 数据 + 5 个通用布局模板 + inlineStyles/validate/mount
+├── guofeng-card-engine.js            # 引擎：嵌入 THEMES 数据 + 通用布局模板(含 poster) + inlineStyles/validate/mount
 ├── guofeng-card-studio.html          # 独立单文件版（加载引擎并挂载）
 ├── workstation-integration.html      # 多 Tab 工作站接入示例
 ├── scripts/
@@ -154,7 +158,7 @@ guofeng-typesetter/
 ```
 
 ### v3.0 新增风格（侘寂/暗黑杂志等）= 填表
-1. 在 `references/themes.json` 的 `themes` 下加一条：`{ "label", "layout"(single/editorial/grid/asymmetric/business), "bodyBg", "fonts", "fontTokens", "decor", "colors"(CSS 变量), "sample" }`。
+1. 在 `references/themes.json` 的 `themes` 下加一条：`{ "label", "layout"(single/editorial/grid/asymmetric/business/poster), "bodyBg", "fonts", "fontTokens", "decor", "colors"(CSS 变量), "sample" }`。
 2. 跑 `node scripts/sync_themes.js`，数据即同步进离线引擎。
 3. 无需改动任何 HTML 模板；若现成 5 种布局都不够，再在引擎 `LAYOUTS` 加一个模板函数（仍由 themes 的 colors/decor 注入配色）。
 
