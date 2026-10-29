@@ -6,7 +6,10 @@
 <title>公众号排版助手 · 多 Tab 工作站（集成示例）</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#161618;color:#e8e8ea;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  /* 自适应缩放：body 作为居中舞台容器，.stage 承载缩放后的尺寸，.workstation 为固定设计尺寸(1440×820) */
+  body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#0e0e10;color:#e8e8ea;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .stage{transform-origin:top left;margin:0 auto}
+  .workstation{width:1440px;height:820px;background:#161618;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.5)}
   .topbar{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid #2a2a2e}
   .topbar .logo{font-size:17px;font-weight:700;letter-spacing:1px}
   .topbar .logo small{font-size:11px;color:#9a9aa0;font-weight:400;margin-left:8px}
@@ -30,6 +33,8 @@
 </style>
 </head>
 <body>
+  <div class="stage">
+  <div class="workstation">
   <div class="topbar">
     <div class="logo">公众号排版助手 <small>多 Tab 工作站 · 集成示例</small></div>
     <div class="tabs" id="tabs">
@@ -57,6 +62,8 @@
     <section class="panel" id="tab-kanban"><div class="panel-inner"><div class="placeholder"><h2>历史数据看板</h2><p>你现有的「历史数据看板」Tab 占位。</p></div></div></section>
     <section class="panel" id="tab-guofeng"><div class="panel-inner" style="padding:0;height:100%;display:flex;flex-direction:column"><div id="guofeng-mount-2" style="flex:1;min-height:0"></div></div></section>
   </div>
+  </div>
+  </div>
 
   <!-- 引入引擎（相对路径，和你的工作站同目录即可；也可改成 CDN/绝对路径） -->
   <script src="guofeng-card-engine.js"></script>
@@ -76,16 +83,37 @@
   // 隐藏 Tab 内的 iframe 切回需重新写入 srcdoc
   function refresh(api){ const h = api.getHtml(); /* 内部引擎已自管，这里仅为示例触发重绘 */ }
 
-  /* ===== 2) 挂载国风卡片引擎 ===== */
-  // 放在「排版」Tab 内
-  window.__gc1 = GuofengCard.mount('#guofeng-mount', { defaultStyle: 'songzen', sign: '静心知识库 · @圣为Ai设计' });
-  // 也可独立成「国风卡片」Tab（演示同时挂两处，互不影响，验证无全局污染）
-  window.__gc2 = GuofengCard.mount('#guofeng-mount-2', { defaultStyle: 'swiss' });
+  /* ===== 2) 挂载国风卡片引擎（引擎缺失也不影响下方整体缩放，故加 try/catch 兜底） ===== */
+  try {
+    // 放在「排版」Tab 内
+    window.__gc1 = GuofengCard.mount('#guofeng-mount', { defaultStyle: 'songzen', sign: '静心知识库 · @圣为Ai设计' });
+    // 也可独立成「国风卡片」Tab（演示同时挂两处，互不影响，验证无全局污染）
+    window.__gc2 = GuofengCard.mount('#guofeng-mount-2', { defaultStyle: 'swiss' });
+  } catch (e) {
+    console.warn('国风卡片引擎未加载，仅渲染工作站外壳：', e);
+  }
 
   /* ===== 3) 进阶：从你其他 Tab（如标题生成）拿数据喂给卡片 ===== */
   // 例：标题生成器产出标题后，调用 api.setStyle + 直接写字段
   // document.getElementById('f_title').value = 生成的标题;
   // 注意：字段 id 形如 f_<字段key>，可直接操作 DOM 注入。
+
+  /* ===== 4) 整体自适应缩放（同卡片方案）：窄屏下整站等比缩小，桌面布局原样保留 ===== */
+  (function(){
+    var DESIGN_W = 1440, DESIGN_H = 820;   // 固定设计画布尺寸
+    var stage = document.querySelector('.stage');
+    var ws = document.querySelector('.workstation');
+    function fit(){
+      var vw = document.documentElement.clientWidth;
+      var vh = document.documentElement.clientHeight;
+      var s = Math.min(vw / DESIGN_W, vh / DESIGN_H, 1);
+      ws.style.transform = 'scale(' + s + ')';
+      stage.style.width  = (DESIGN_W * s) + 'px';
+      stage.style.height = (DESIGN_H * s) + 'px';
+    }
+    addEventListener('resize', fit);
+    fit();
+  })();
   </script>
 </body>
 </html>
