@@ -1188,6 +1188,22 @@ ${f1}${f2}
     }
     return '';
   }
+  /* 从最内层 var() 向外循环解析，正确处理 var(--a,var(--b)) 嵌套 fallback。
+     旧实现用 /var\(([^)]*)\)/ 单次替换，遇嵌套时会把内层闭括号吞掉，
+     导致 linear-gradient(...) 语法损坏 → background 失效 → 渐变文字（color:transparent）整段隐形。 */
+  function resolveVars(str, vars) {
+    let prev;
+    do {
+      prev = str;
+      str = str.replace(/var\(([^()]*)\)/g, (_, inner) => {
+        const ci = inner.indexOf(',');
+        const name = (ci >= 0 ? inner.slice(0, ci) : inner).trim();
+        const fb = ci >= 0 ? inner.slice(ci + 1).trim() : '';
+        return vars[name] || fb;
+      });
+    } while (str !== prev);
+    return str;
+  }
   function inlineStyles(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const styleEls = Array.from(doc.querySelectorAll('style'));
@@ -1212,13 +1228,24 @@ ${f1}${f2}
         const i = dl.indexOf(':');
         if (i > 0) {
           const k = dl.slice(0, i).trim();
-          let v = dl.slice(i + 1).trim().replace(/var\(([^)]*)\)/g, (_, inner) => resolveVarExpr(inner, vars));
+          let v = resolveVars(dl.slice(i + 1).trim(), vars);
           if (k) props[k] = v;
         }
       });
       if (Object.keys(props).length) rules.push({ sel, props });
     });
-    rules.forEach(({ sel, props }) => {
+    /* 按 CSS 优先级（specificity）升序内联：高优先级规则后写入，正确覆盖低优先级。
+     否则 `.decor-gradient .main-title`(0,2,0) 先写、`.main-title`(0,1,0) 后写会反向覆盖，
+     导致渐变文字 color:transparent 被布局色覆盖 → 深色主题标题不可见。 */
+  function specOf(sel) {
+    const ids = (sel.match(/#[\w-]+/g) || []).length;
+    const rest = sel.replace(/#[\w-]+/g, ' ');
+    const cls = (rest.match(/\.[\w-]+/g) || []).length + (rest.match(/\[[^\]]*\]/g) || []).length;
+    const rest2 = rest.replace(/\.[\w-]+/g, ' ').replace(/\[[^\]]*\]/g, ' ');
+    const tags = (rest2.match(/(?:^|[\s>+~])[a-zA-Z][\w-]*/g) || []).length;
+    return ids * 1000 + cls * 100 + tags;
+  }
+  rules.slice().sort((a, b) => specOf(a.sel) - specOf(b.sel)).forEach(({ sel, props }) => {
       let els = [];
       try { els = Array.from(doc.querySelectorAll(sel)); } catch (e) { return; }
       els.forEach(el => {
