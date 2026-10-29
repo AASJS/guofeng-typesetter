@@ -1311,10 +1311,11 @@ ${f1}${f2}
 .gc-insp-empty{padding:40px;text-align:center;color:var(--gc-muted);font-size:13px}
 @media (max-width:760px){
 .gc-stylebar{padding:10px 12px}
+.gc-studio{height:auto;min-height:0}
 .gc-main{flex-direction:column}
 .gc-left{width:100%;min-width:0;flex:none;border-right:none;border-bottom:1px solid var(--gc-line)}
-.gc-form{flex:none;max-height:32vh;overflow-y:auto}
-.gc-right{flex:1;min-height:380px}
+.gc-form{flex:none;max-height:none;overflow:visible}
+.gc-right{flex:none;min-height:0}
 .gc-preview-wrap{padding:16px}
 .gc-controls .gc-chk{flex:1 1 100%}
 }

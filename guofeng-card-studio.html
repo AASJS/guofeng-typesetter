@@ -13,6 +13,11 @@
   header .hint{margin-left:auto;font-size:12px;color:#6a6a70}
   main{flex:1;min-height:0;display:flex}
   #app{flex:1;min-width:0}
+  @media (max-width:760px){
+    body{height:auto;overflow:auto;display:block}
+    main{display:block;min-height:0}
+    #app{height:auto;min-height:0}
+  }
 </style>
 </head>
 <body>
@@ -27,7 +32,7 @@
   <div id="app"></div>
 </main>
 
-<!-- 引擎已内联（含全部主题数据与布局模板），单文件即可运行 -->
+<!-- 引擎已内联，单文件即可运行 -->
 <script>
 /*!
  * Guofeng Card Engine v3.3  —  数据 + 模板 + 灵感库 架构
@@ -1342,10 +1347,11 @@ ${f1}${f2}
 .gc-insp-empty{padding:40px;text-align:center;color:var(--gc-muted);font-size:13px}
 @media (max-width:760px){
 .gc-stylebar{padding:10px 12px}
+.gc-studio{height:auto;min-height:0}
 .gc-main{flex-direction:column}
 .gc-left{width:100%;min-width:0;flex:none;border-right:none;border-bottom:1px solid var(--gc-line)}
-.gc-form{flex:none;max-height:32vh;overflow-y:auto}
-.gc-right{flex:1;min-height:380px}
+.gc-form{flex:none;max-height:none;overflow:visible}
+.gc-right{flex:none;min-height:0}
 .gc-preview-wrap{padding:16px}
 .gc-controls .gc-chk{flex:1 1 100%}
 }
