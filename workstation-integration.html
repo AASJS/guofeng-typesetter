@@ -2,20 +2,20 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>公众号排版助手 · 多 Tab 工作站（集成示例）</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  /* 自适应缩放：body 作为居中舞台容器，.stage 承载缩放后的尺寸，.workstation 为固定设计尺寸(1440×820) */
-  body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#0e0e10;color:#e8e8ea;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
-  .stage{transform-origin:top left;margin:0 auto}
-  .workstation{width:1440px;height:820px;background:#161618;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.5)}
-  .topbar{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid #2a2a2e}
+  html,body{height:100%}
+  body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#0e0e10;color:#e8e8ea;height:100vh;height:100dvh;overflow:hidden}
+  /* 流式布局：工作站直接占满视口，桌面/手机都可用（弃用固定 1440×820 + transform 等比缩放方案） */
+  .workstation{width:100%;height:100%;background:#161618;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{display:flex;align-items:center;gap:18px;padding:14px 22px;border-bottom:1px solid #2a2a2e;flex-wrap:wrap}
   .topbar .logo{font-size:17px;font-weight:700;letter-spacing:1px}
   .topbar .logo small{font-size:11px;color:#9a9aa0;font-weight:400;margin-left:8px}
-  /* —— 你现有的 Tab 栏，照此结构保留即可 —— */
-  .tabs{display:flex;gap:4px;margin-left:auto}
-  .tabs button{background:transparent;border:none;color:#9a9aa0;padding:9px 18px;font-size:14px;border-radius:8px 8px 0 0;cursor:pointer;font-family:inherit;transition:.15s}
+  .tabs{display:flex;gap:4px;margin-left:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex-shrink:0;background:transparent;border:none;color:#9a9aa0;padding:9px 18px;font-size:14px;border-radius:8px 8px 0 0;cursor:pointer;font-family:inherit;transition:.15s}
   .tabs button:hover{color:#e8e8ea}
   .tabs button.active{background:#262629;color:#fff;font-weight:600}
   .panels{flex:1;min-height:0;overflow:hidden}
@@ -30,10 +30,18 @@
   #guofeng-mount{flex:1;min-height:0}
   .panel-head{font-size:13px;color:#9a9aa0;margin-bottom:14px}
   .panel-head b{color:#C9A962}
+  /* 手机端（≤720px）：Tab 独立成行可横滑，收窄留白 */
+  @media (max-width:720px){
+    .topbar{padding:10px 14px;gap:10px}
+    .topbar .logo{font-size:15px}
+    .topbar .logo small{display:block;margin:2px 0 0}
+    .tabs{margin-left:0;width:100%;order:3}
+    .tabs button{padding:8px 14px;font-size:13px}
+    .panel-inner{padding:18px 16px}
+  }
 </style>
 </head>
 <body>
-  <div class="stage">
   <div class="workstation">
   <div class="topbar">
     <div class="logo">公众号排版助手 <small>多 Tab 工作站 · 集成示例</small></div>
@@ -63,27 +71,20 @@
     <section class="panel" id="tab-guofeng"><div class="panel-inner" style="padding:0;height:100%;display:flex;flex-direction:column"><div id="guofeng-mount-2" style="flex:1;min-height:0"></div></div></section>
   </div>
   </div>
-  </div>
 
   <!-- 引入引擎（相对路径，和你的工作站同目录即可；也可改成 CDN/绝对路径） -->
   <script src="guofeng-card-engine.js"></script>
   <script>
-  /* ===== 1) Tab 切换逻辑（你现有工程的 Tab 机制，这里用原生实现示意） ===== */
+  /* ===== 1) Tab 切换逻辑 ===== */
   const tabs = document.querySelectorAll('#tabs button');
   const panels = document.querySelectorAll('.panel');
   tabs.forEach(btn => btn.addEventListener('click', () => {
     const t = btn.dataset.tab;
     tabs.forEach(b => b.classList.toggle('active', b === btn));
     panels.forEach(p => p.classList.toggle('active', p.id === 'tab-' + t));
-    // 切到含国风卡片的 Tab 时，触发一次预览重算（iframe srcdoc 在隐藏时不会渲染，切回需重绘）
-    if (t === 'paiban' && window.__gc1) window.__gc1.getHtml && refresh(window.__gc1);
-    if (t === 'guofeng' && window.__gc2) refresh(window.__gc2);
   }));
 
-  // 隐藏 Tab 内的 iframe 切回需重新写入 srcdoc
-  function refresh(api){ const h = api.getHtml(); /* 内部引擎已自管，这里仅为示例触发重绘 */ }
-
-  /* ===== 2) 挂载国风卡片引擎（引擎缺失也不影响下方整体缩放，故加 try/catch 兜底） ===== */
+  /* ===== 2) 挂载国风卡片引擎（引擎缺失也不影响工作站外壳，故加 try/catch 兜底） ===== */
   try {
     // 放在「排版」Tab 内
     window.__gc1 = GuofengCard.mount('#guofeng-mount', { defaultStyle: 'songzen', sign: '静心知识库 · @圣为Ai设计' });
@@ -98,22 +99,9 @@
   // document.getElementById('f_title').value = 生成的标题;
   // 注意：字段 id 形如 f_<字段key>，可直接操作 DOM 注入。
 
-  /* ===== 4) 整体自适应缩放（同卡片方案）：窄屏下整站等比缩小，桌面布局原样保留 ===== */
-  (function(){
-    var DESIGN_W = 1440, DESIGN_H = 820;   // 固定设计画布尺寸
-    var stage = document.querySelector('.stage');
-    var ws = document.querySelector('.workstation');
-    function fit(){
-      var vw = document.documentElement.clientWidth;
-      var vh = document.documentElement.clientHeight;
-      var s = Math.min(vw / DESIGN_W, vh / DESIGN_H, 1);
-      ws.style.transform = 'scale(' + s + ')';
-      stage.style.width  = (DESIGN_W * s) + 'px';
-      stage.style.height = (DESIGN_H * s) + 'px';
-    }
-    addEventListener('resize', fit);
-    fit();
-  })();
+  /* 布局说明：原「固定 1440×820 画布 + transform 等比缩放」已移除——
+     手机上会被缩到约 0.27 倍导致不可用；现改为流式布局 + 面板自然滚动。
+     同时清理了原文件中的死代码 refresh()（只取 getHtml() 未做任何事）。 */
   </script>
 </body>
 </html>
