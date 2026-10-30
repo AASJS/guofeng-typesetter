@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>国风排版工作台 · 静心</title>
+<style>
+:root{
+  --acc:#A8322A; --acc2:#C9A227; --paper-b:#f7f3ea; --paper-b2:#efe8da; --paper-b3:#e5dbc8;
+  --ink:#2b2b2b; --ink-soft:#6a635a; --line:rgba(60,55,50,.16);
+  --ok:#3C5A45; --warn:#9A5B33;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ height:100%; }
+body{
+  font-family:"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--ink); background:radial-gradient(120% 100% at 50% 0%,var(--paper-b) 0%,var(--paper-b2) 56%,var(--paper-b3) 100%);
+  font-size:14px; line-height:1.6;
+}
+.serif{ font-family:"Noto Serif CJK SC","Songti SC","SimSun",serif; }
+.wrap{ max-width:1440px; margin:0 auto; padding:0 24px 40px; }
+
+/* ---------- 顶栏 ---------- */
+.top{ border-bottom:1px solid var(--line); padding:22px 0 16px; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+.top h1{ font-family:"Noto Serif CJK SC",serif; font-size:26px; font-weight:800; letter-spacing:.08em; }
+.top .sub{ color:var(--ink-soft); font-size:12.5px; letter-spacing:.14em; margin-top:4px; }
+.top .seal-mini{ border:2px solid var(--acc); color:var(--acc); border-radius:8px; padding:6px 10px; font-size:12px; letter-spacing:.2em; opacity:.9; }
+
+/* ---------- Tab ---------- */
+.tabs{ display:flex; flex-wrap:wrap; gap:2px; margin:18px 0 20px; border-bottom:1px solid var(--line); }
+.tabs button{
+  background:none; border:0; border-bottom:2px solid transparent; cursor:pointer; padding:10px 20px;
+  font-family:"Noto Serif CJK SC",serif; font-size:15px; font-weight:700; color:var(--ink-soft); letter-spacing:.1em;
+}
+.tabs button:hover{ color:var(--ink); }
+.tabs button.on{ color:var(--acc); border-bottom-color:var(--acc); }
+.panel{ display:none; } .panel.on{ display:block; }
+
+/* ---------- 通用容器 ---------- */
+.card{ background:rgba(255,255,255,.62); border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+.card h3{ font-family:"Noto Serif CJK SC",serif; font-size:15px; font-weight:800; letter-spacing:.08em; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.card h3::before{ content:""; width:3px; height:14px; background:var(--acc); display:inline-block; }
+.hint{ color:var(--ink-soft); font-size:12px; letter-spacing:.04em; }
+
+/* ---------- Tab1 分栏 ---------- */
+.cols{ display:grid; grid-template-columns:372px 1fr; gap:20px; align-items:start; }
+.cols>*, .abgrid>*{ min-width:0; } /* 防 iframe 布局盒把 grid 项顶宽 */
+.cols.split{ grid-template-columns:1fr 1fr; }
+.cols.abcols{ grid-template-columns:400px 1fr; }
+@media (max-width:1080px){ .cols{ grid-template-columns:1fr; } .cols.split,.cols.abcols{ grid-template-columns:1fr; } }
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:12px; color:var(--ink-soft); letter-spacing:.08em; margin-bottom:5px; }
+input[type=text],textarea,select{
+  width:100%; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font:inherit; font-size:13px;
+  background:rgba(255,255,255,.8); color:var(--ink);
+}
+input[type=text]:focus,textarea:focus,select:focus{ outline:1px solid var(--acc); border-color:var(--acc); }
+textarea{ resize:vertical; min-height:58px; }
+input[type=color]{ width:100%; height:34px; border:1px solid var(--line); border-radius:8px; background:none; padding:2px; cursor:pointer; }
+
+.grid9{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.tpl{ border:1px solid var(--line); background:rgba(255,255,255,.6); border-radius:8px; padding:8px 4px; cursor:pointer; text-align:center; line-height:1.35; }
+.tpl:hover{ border-color:var(--acc); }
+.tpl.on{ border:2px solid var(--acc); background:rgba(168,50,42,.07); }
+.tpl b{ display:block; font-family:"Noto Serif CJK SC",serif; font-size:12.5px; font-weight:800; }
+.tpl i{ font-style:normal; font-size:10px; color:var(--ink-soft); letter-spacing:.1em; }
+
+.seg{ display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+.seg button{ flex:1; border:0; background:rgba(255,255,255,.7); padding:8px; cursor:pointer; font:inherit; font-size:13px; color:var(--ink-soft); }
+.seg button.on{ background:var(--acc); color:#fff; font-weight:700; }
+
+.pals{ display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.pal{ cursor:pointer; border:2px solid transparent; border-radius:8px; overflow:hidden; }
+.pal.on{ border-color:var(--acc); }
+.pal .bars{ display:flex; height:26px; } .pal .bars div{ flex:1; }
+.pal .nm{ font-size:10px; text-align:center; color:var(--ink-soft); padding:2px 0; background:rgba(255,255,255,.7); }
+
+.btn{ border:1px solid var(--line); background:rgba(255,255,255,.85); border-radius:8px; padding:8px 14px; cursor:pointer; font:inherit; font-size:13px; letter-spacing:.06em; }
+.btn:hover{ border-color:var(--acc); color:var(--acc); }
+.btn.pri{ background:var(--acc); border-color:var(--acc); color:#fff; }
+.btn.pri:hover{ background:#8e2b24; color:#fff; }
+.btn.sm{ padding:5px 9px; font-size:12px; }
+.toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+.toolbar .sp{ flex:1; }
+
+.item{ border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px; background:rgba(255,255,255,.55); }
+.item .row{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+.item .row:last-child{ margin-bottom:0; }
+.item .row input[type=text]{ flex:1; }
+.item .ord{ width:52px; flex:none !important; text-align:center; }
+
+.previewbox{ background:repeating-linear-gradient(45deg,#ece7dc 0 10px,#e6e0d4 10px 20px); border:1px solid var(--line); border-radius:12px; padding:16px; display:flex; justify-content:center; overflow:auto; }
+.stage{ position:relative; overflow:hidden; }
+.stage iframe{ border:0; transform-origin:top left; display:block; background:#fff; box-shadow:0 10px 40px rgba(0,0,0,.14); }
+
+.chk{ display:flex; flex-wrap:wrap; gap:8px; }
+.chk label{ display:flex; align-items:center; gap:4px; font-size:12px; background:rgba(255,255,255,.7); border:1px solid var(--line); border-radius:6px; padding:3px 8px; cursor:pointer; }
+
+/* ---------- Tab2/3/4 ---------- */
+.pcards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; }
+.pcard{ border:1px solid var(--line); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.66); cursor:pointer; }
+.pcard:hover{ border-color:var(--acc); }
+.pcard .five{ display:flex; height:60px; }
+.pcard .five div{ flex:1; }
+.pcard .body{ padding:12px 14px; }
+.pcard .nm{ font-family:"Noto Serif CJK SC",serif; font-weight:800; font-size:15px; letter-spacing:.1em; }
+.pcard .hex{ font-size:11px; color:var(--ink-soft); letter-spacing:.04em; margin-top:4px; line-height:1.7; }
+
+.cand{ border:1px solid var(--line); border-radius:8px; padding:9px 12px; margin-bottom:7px; background:rgba(255,255,255,.6); display:flex; gap:10px; align-items:center; cursor:pointer; }
+.cand.on{ border-color:var(--acc); background:rgba(168,50,42,.06); }
+.cand .tx{ flex:1; font-family:"Noto Serif CJK SC",serif; font-size:15px; font-weight:700; }
+
+.abgrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.abbox{ background:repeating-linear-gradient(45deg,#ece7dc 0 10px,#e6e0d4 10px 20px); border-radius:10px; padding:10px; display:flex; justify-content:center; overflow:hidden; }
+.abbox iframe{ border:0; transform-origin:top left; display:block; background:#fff; }
+.tagpill{ display:inline-block; border:1px solid var(--acc); color:var(--acc); border-radius:999px; padding:1px 10px; font-size:11px; letter-spacing:.1em; }
+
+.kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
+.kpi{ background:rgba(255,255,255,.66); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+.kpi .n{ font-family:"Noto Serif CJK SC",serif; font-size:26px; font-weight:800; color:var(--acc); }
+.kpi .l{ font-size:12px; color:var(--ink-soft); letter-spacing:.1em; margin-top:2px; }
+.charts{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:900px){ .charts{ grid-template-columns:1fr; } .abgrid{ grid-template-columns:1fr; } }
+table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+th,td{ text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); }
+th{ color:var(--ink-soft); font-weight:600; letter-spacing:.08em; }
+tr:hover td{ background:rgba(168,50,42,.04); }
+.empty{ color:var(--ink-soft); font-size:12.5px; padding:14px 2px; }
+.toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:rgba(43,43,43,.94); color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; letter-spacing:.06em; z-index:999; opacity:0; transition:opacity .25s; pointer-events:none; }
+.toast.on{ opacity:1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1 class="serif">国风排版工作台</h1>
+      <div class="sub">9 版式 × 6 配色 × 双尺寸 · 离线单文件 · 预览即成品</div>
+    </div>
+    <div class="seal-mini serif">静心</div>
+  </div>
+
+  <div class="tabs">
+    <button data-tab="1" class="on">① 排版</button>
+    <button data-tab="2">② 配色</button>
+    <button data-tab="3">③ 标题 · AB</button>
+    <button data-tab="4">④ 看板</button>
+  </div>
+
+  <!-- ============ Tab1 排版 ============ -->
+  <section class="panel on" id="p1">
+    <div class="cols">
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>版式</h3>
+          <div class="grid9" id="tplGrid"></div>
+        </div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>尺寸 · 配色</h3>
+          <div class="seg" id="sizeSeg" style="margin-bottom:12px;">
+            <button data-size="portrait" class="on">竖版 9:16</button>
+            <button data-size="square">方版 1:1</button>
+          </div>
+          <div class="pals" id="palGrid"></div>
+          <div class="hint" id="palHint" style="margin-top:8px;"></div>
+        </div>
+        <div class="card">
+          <h3>文案</h3>
+          <div class="toolbar">
+            <button class="btn sm" id="btnSample">载入本版式示例</button>
+            <button class="btn sm" id="btnReset">重置</button>
+          </div>
+          <div id="form"></div>
+        </div>
+        <div class="card">
+          <h3>配图（仅竖版 9:16）</h3>
+          <div class="hint" style="margin-bottom:10px;">在竖版卡片顶部插入一张 16:9 配图；<b>上传</b>为离线可用（转 base64），<b>贴网址</b>可能因跨域限制浏览器内 PNG 导出（可改用 HTML/PDF 或 guofeng_render.py）。</div>
+          <div class="field"><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="imgOn"> 开启竖版配图</label></div>
+          <div class="field"><label>上传配图（推荐）</label><input type="file" id="imgFile" accept="image/*"></div>
+          <div class="field"><label>或图片网址</label><input type="text" id="imgUrl" placeholder="https://...（外链可能限制内联 PNG）"></div>
+          <div class="field"><label>配图说明（可选）</label><input type="text" id="imgCap" placeholder="如：摄于终南山 · 秋"></div>
+          <div class="toolbar" style="margin-bottom:0;"><button class="btn sm" id="imgClear">清除配图</button></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>预览 · 导出</h3>
+          <div class="toolbar">
+            <button class="btn pri" id="btnHtml">⬇ 下载 HTML</button>
+            <button class="btn" id="btnPdf">🖨 打印存 PDF</button>
+            <button class="btn" id="btnPng">🖼 导出 PNG</button>
+            <button class="btn" id="btnSave">☆ 收藏文案</button>
+            <span class="sp"></span>
+            <button class="btn sm" id="btnBatch">📦 批量清单</button>
+          </div>
+          <div class="hint" id="pvHint"></div>
+          <div class="previewbox" style="margin-top:10px;">
+            <div class="stage" id="stage"><iframe id="pv" title="预览"></iframe></div>
+          </div>
+        </div>
+        <div class="card" id="batchCard" style="display:none;">
+          <h3>批量导出 manifest.json</h3>
+          <div class="hint" style="margin-bottom:8px;">用当前文案 × 勾选组合生成清单，交给 <code>guofeng_render.py</code> 批量出高清图。</div>
+          <div class="field"><label>版式</label><div class="chk" id="bkTpl"></div></div>
+          <div class="field"><label>配色</label><div class="chk" id="bkPal"></div></div>
+          <div class="field"><label>尺寸</label><div class="chk" id="bkSize"></div></div>
+          <div class="toolbar" style="margin-bottom:0;">
+            <button class="btn pri sm" id="btnDoBatch">生成 manifest.json</button>
+            <span class="hint" id="bkInfo"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Tab2 配色 ============ -->
+  <section class="panel" id="p2">
+    <div class="card" style="margin-bottom:14px;">
+      <h3>六组定稿配色（点击套用到当前版式）</h3>
+      <div class="pcards" id="palCards"></div>
+    </div>
+    <div class="cols split">
+      <div class="card">
+        <h3>自定义配色</h3>
+        <div class="hint" style="margin-bottom:12px;">改动即刻生效（覆盖当前预设）；点「恢复预设」可清除。</div>
+        <div class="field"><label>底浅 bg</label><input type="color" id="cBg"></div>
+        <div class="field"><label>中过渡 bg2</label><input type="color" id="cBg2"></div>
+        <div class="field"><label>底深 bg3</label><input type="color" id="cBg3"></div>
+        <div class="field"><label>主色 accent（标签/序号/印章/角饰）</label><input type="color" id="cAcc"></div>
+        <div class="field"><label>辅色 accent2（金线渐隐）</label><input type="color" id="cAcc2"></div>
+        <div class="toolbar" style="margin-bottom:0;">
+          <button class="btn sm" id="btnRestorePal">恢复预设</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>字体搭配</h3>
+        <div class="field">
+          <label>标题 / 金句 · 宋体</label>
+          <div class="serif" style="font-size:26px; font-weight:800; letter-spacing:.06em;">安心，不是没有风浪</div>
+          <div class="hint">Noto Serif CJK SC → Songti SC → SimSun</div>
+        </div>
+        <div class="field">
+          <label>正文 / 说明 · 黑体</label>
+          <div style="font-size:15px;">是浪来了，你仍知自己站在船上。</div>
+          <div class="hint">Noto Sans CJK SC → PingFang SC → Microsoft YaHei</div>
+        </div>
+        <div class="hint" style="margin-top:10px;">建议：一种衬线 + 一种无衬线，字号对比 ≥2.5 倍，强调色面积 &lt;5%。</div>
+      </div>
+    </div>
+  <!-- ============ 配色 · 字体搭配参考卡（定稿 6 组） ============ -->
+  <details class="gfref" open><summary>配色 · 字体搭配参考卡（定稿 6 组）</summary><div class="gfref-body"><p class="gfref-tip">给 #poster 加 .scheme-* 切换整组配色；改字改「改字区」标注文案；双尺寸用 vmin 自动等比。</p><div class="gfref-row"><div class="gfref-name"><b>朱砂</b><span>zhusha</span></div><div class="gfref-sw"><i style="background:#A8322A">主 #A8322A</i><i style="background:#C9A227">辅 #C9A227</i><i style="background:#F7F1E6;color:#3a3532">底浅 #F7F1E6</i><i style="background:#ECDCC2;color:#3a3532">底深 #ECDCC2</i></div></div><div class="gfref-row"><div class="gfref-name"><b>黛青</b><span>daiqing</span></div><div class="gfref-sw"><i style="background:#2F4A5E">主 #2F4A5E</i><i style="background:#7CA0A8">辅 #7CA0A8</i><i style="background:#EEF3F4;color:#3a3532">底浅 #EEF3F4</i><i style="background:#D6E2E4;color:#3a3532">底深 #D6E2E4</i></div></div><div class="gfref-row"><div class="gfref-name"><b>赭石</b><span>zheshi</span></div><div class="gfref-sw"><i style="background:#9A5B33">主 #9A5B33</i><i style="background:#CDA15E">辅 #CDA15E</i><i style="background:#F4EEDF;color:#3a3532">底浅 #F4EEDF</i><i style="background:#E7D4B6;color:#3a3532">底深 #E7D4B6</i></div></div><div class="gfref-row"><div class="gfref-name"><b>黛绿</b><span>daiLv</span></div><div class="gfref-sw"><i style="background:#3C5A45">主 #3C5A45</i><i style="background:#9DB89C">辅 #9DB89C</i><i style="background:#EEF3EC;color:#3a3532">底浅 #EEF3EC</i><i style="background:#D6E4D4;color:#3a3532">底深 #D6E4D4</i></div></div><div class="gfref-row"><div class="gfref-name"><b>黛紫</b><span>daizi</span></div><div class="gfref-sw"><i style="background:#4A3B5C">主 #4A3B5C</i><i style="background:#B49BC4">辅 #B49BC4</i><i style="background:#F1EEF4;color:#3a3532">底浅 #F1EEF4</i><i style="background:#DDD3E6;color:#3a3532">底深 #DDD3E6</i></div></div><div class="gfref-row"><div class="gfref-name"><b>胭脂</b><span>yanzhi</span></div><div class="gfref-sw"><i style="background:#8E2B3A">主 #8E2B3A</i><i style="background:#D98C95">辅 #D98C95</i><i style="background:#F6ECEC;color:#3a3532">底浅 #F6ECEC</i><i style="background:#EBC9CE;color:#3a3532">底深 #EBC9CE</i></div></div><div class="gfref-fonts"><div><b>标题·金句</b><br>思源宋体 <small>Noto Serif CJK SC</small><br><span class="gfref-desc">典雅、书卷气，承载国风意境</span></div><div><b>正文·说明</b><br>思源黑体 <small>Noto Sans CJK SC</small><br><span class="gfref-desc">清爽、识别快，长句不费力</span></div></div></div>
+    <style>.gfref{--ink:#2f2b28;--soft:#6f6862;--line:#3a3532;border:1px solid rgba(58,53,50,.2);border-radius:10px;background:rgba(255,255,255,.4);overflow:hidden;margin-bottom:14px}.gfref summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:16px;letter-spacing:.04em;background:rgba(58,53,50,.07)}.gfref-body{padding:14px 16px}.gfref-tip{font-size:13px;color:var(--soft);margin:0 0 10px;line-height:1.6}.gfref-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(58,53,50,.14)}.gfref-row:last-of-type{border-bottom:0}.gfref-name{flex:0 0 84px}.gfref-name b{display:block;font-family:"Noto Serif CJK SC","Songti SC",serif;font-size:20px;font-weight:900}.gfref-name span{font-size:12px;color:var(--soft);letter-spacing:.1em}.gfref-sw{flex:1;display:flex;gap:8px}.gfref-sw i{flex:1;min-width:0;border-radius:5px;padding:7px 8px;font-size:11px;font-style:normal;font-weight:700;display:flex;flex-direction:column;justify-content:space-between;height:44px;line-height:1.3;color:#fff}.gfref-fonts{display:flex;gap:14px;margin-top:12px}.gfref-fonts>div{flex:1;border:1px solid rgba(58,53,50,.2);border-radius:8px;padding:10px 12px;font-size:13px}.gfref-fonts b{font-size:14px}.gfref-fonts small{color:var(--soft)}.gfref-desc{font-size:12px;color:var(--soft)}@media (max-width:520px){.gfref-row{flex-wrap:wrap!important}.gfref-name{flex:0 0 auto!important}.gfref-sw{flex:1 1 100%!important;flex-wrap:wrap!important}.gfref-sw i{flex:1 1 42%!important}.gfref-fonts{flex-wrap:wrap!important}}</style>
+  </details>
+  </section>
+
+  <!-- ============ Tab3 标题 · AB ============ -->
+  <section class="panel" id="p3">
+    <div class="cols abcols">
+      <div class="card">
+        <h3>关键词槽位</h3>
+        <div class="hint" style="margin-bottom:12px;">填入或从建议里选，引擎按公式组合生成候选标题（离线规则引擎，无需联网）。</div>
+        <div id="slots"></div>
+        <div class="toolbar" style="margin-bottom:0;">
+          <button class="btn pri" id="btnGen">生成候选</button>
+          <button class="btn sm" id="btnFillDemo">填示例</button>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>候选标题（勾选 2 个做 AB）</h3>
+          <div id="cands"></div>
+        </div>
+        <div class="card">
+          <h3>AB 对比</h3>
+          <div class="toolbar">
+            <select id="abTpl" style="width:auto; min-width:180px;"></select>
+            <button class="btn sm" id="btnAbRender">渲染 A / B</button>
+            <span class="sp"></span>
+            <button class="btn sm" id="btnWinA">A 胜</button>
+            <button class="btn sm" id="btnWinB">B 胜</button>
+            <button class="btn pri sm" id="btnApplyWinner">应用胜出标题 ▶ 工作台</button>
+          </div>
+          <div class="abgrid" id="abWrap">
+            <div><div class="hint" style="margin-bottom:6px;"><span class="tagpill">A</span> <span id="abTxtA"></span></div><div class="abbox"><iframe id="abFrameA"></iframe></div></div>
+            <div><div class="hint" style="margin-bottom:6px;"><span class="tagpill">B</span> <span id="abTxtB"></span></div><div class="abbox"><iframe id="abFrameB"></iframe></div></div>
+          </div>
+          <div class="field" style="margin-top:12px;"><label>备注</label><input type="text" id="abNote" placeholder="本次结论记录，如：反常识句式胜出"></div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <h3>AB 记录</h3>
+          <div id="abLog"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Tab4 看板 ============ -->
+  <section class="panel" id="p4">
+    <div class="kpis" id="kpis"></div>
+    <div class="charts" style="margin-bottom:14px;">
+      <div class="card"><h3>版式使用频次</h3><div id="chTpl"></div></div>
+      <div class="card"><h3>配色分布</h3><div id="chPal"></div></div>
+    </div>
+    <div class="charts">
+      <div class="card"><h3>近 30 天出图趋势</h3><div id="chTrend"></div></div>
+      <div class="card"><h3>AB 胜负</h3><div id="chAb"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>文案库</h3>
+      <div id="libTable"></div>
+      <div class="toolbar" style="margin:12px 0 0;">
+        <button class="btn sm" id="btnClearHist">清空出图历史</button>
+        <span class="hint">文案库与 AB 记录不会受影响</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   国风排版工作台  ·  离线单文件
+   渲染管线 1:1 移植自 guofeng_gen.py（母版 + 占位符注入 + --FS 缩放）
+   ===================================================================== */
+const GF = (function () {
+  'use strict';
+
+  /* ---------- 转义 ---------- */
+  const EMAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => EMAP[c]); }
+  function br(v) { return String(v == null ? '' : v).replace(/\n/g, '<br>'); }
+  /* 保留换行 + 支持高亮某个词（默认用于 01 金句卡的「当下」） */
+  function hili(text, word) {
+    let s = esc(text);
+    if (word) { const w = esc(word); s = s.split(w).join('<span class="accent">' + w + '</span>'); }
+    return br(s);
+  }
+
+  /* ---------- 宣纸肌理 data-URI（与生成脚本一致） ---------- */
+  const PAPER = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+  /* ---------- 母版（__ROOTVARS__ / __BODY__ / __SEAL__ 三占位） ---------- */
+  const MASTER = `<!DOCTYPE html>
+<!-- 国风版式模板 · 高级感升级版 (2026-10-17)
+  改字：修改下方「改字区」标注的文案即可；换色：改 :root 的 --accent/--accent2/--bg*；
+  双尺寸：竖版 1080x1920 / 方版 1080x1080 由 --H 切换，改字互不影响。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+:root{__ROOTVARS__}
+@page{ size:var(--W) var(--H); margin:0; }
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ background:var(--bg3); }
+body{ font-family:"Noto Sans CJK SC","PingFang SC","Microsoft YaHei",sans-serif; }
+.poster{
+  position:relative; width:var(--W); height:var(--H); overflow:hidden;
+  background:radial-gradient(120% 100% at 50% 20%, var(--bg) 0%, var(--bg2) 56%, var(--bg3) 100%);
+  color:var(--ink);
+}
+.poster::before{ content:""; position:absolute; inset:0; background-image:var(--paper);
+  background-size:200px 200px; opacity:.085; mix-blend-mode:multiply; pointer-events:none; z-index:1; }
+.frame{ position:absolute; inset:36px; border:1px solid var(--line); pointer-events:none; z-index:2; }
+.corner{ position:absolute; width:24px; height:24px; border:2px solid var(--accent); z-index:3; pointer-events:none; }
+.c1{ top:24px; left:24px; border-right:0; border-bottom:0; }
+.c2{ top:24px; right:24px; border-left:0; border-bottom:0; }
+.c3{ bottom:24px; left:24px; border-right:0; border-top:0; }
+.c4{ bottom:24px; right:24px; border-left:0; border-top:0; }
+.content{ position:absolute; inset:0; z-index:4; display:flex; flex-direction:column;
+  padding:calc(var(--H)*0.082) calc(1080px*0.1); }
+.serif{ font-family:"Noto Serif CJK SC","Songti SC","SimSun",serif; }
+.muted{ color:var(--ink-soft); }
+.accent{ color:var(--accent); }
+.tag{ display:inline-block; font-size:calc(1080px*0.027); letter-spacing:.26em; color:var(--accent);
+  border:1.5px solid var(--accent); border-radius:999px; padding:.34em 1.25em; font-weight:600; }
+.py{ font-family:"Noto Sans CJK SC",sans-serif; font-size:calc(1080px*0.02); letter-spacing:.34em;
+  color:var(--ink-soft); text-transform:uppercase; }
+.rule{ height:1px; background:var(--line); border:0; }
+.gold{ height:1px; background:linear-gradient(90deg,transparent,var(--accent2),transparent); border:0; }
+.foot{ font-size:calc(1080px*0.023); color:var(--ink-soft); letter-spacing:.1em; text-align:center; }
+.seal{ position:absolute; right:calc(1080px*0.07); bottom:calc(1080px*0.07); width:84px; height:84px;
+  border:3px solid var(--accent); border-radius:10px; color:var(--accent);
+  font-family:"Noto Serif CJK SC",serif; font-weight:700; font-size:30px;
+  display:flex; align-items:center; justify-content:center; writing-mode:vertical-rl; letter-spacing:8px;
+  opacity:.92; z-index:5; }
+  .illu{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:calc(1080px*0.02); margin-bottom:calc(1080px*0.045); }
+  .illu .pic{ width:calc(1080px*0.8); height:calc(1080px*0.45); border-radius:calc(1080px*0.016); overflow:hidden;
+    border:1px solid var(--line); background:var(--bg3); box-shadow:0 calc(1080px*0.012) calc(1080px*0.035) rgba(0,0,0,.14); }
+  .illu .pic img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .illu .ph{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); font-size:calc(1080px*0.024); letter-spacing:.18em; }
+  .illu .cap{ font-size:calc(1080px*0.021); color:var(--ink-soft); letter-spacing:.08em; text-align:center; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="frame"></div>
+  <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+  <div class="content">
+__BODY__
+  </div>
+  <div class="seal">__SEAL__</div>
+</div>
+</body>
+</html>
+`;
+
+  /* ---------- 6 组定稿配色 ---------- */
+  const PALETTES = [
+    { name: '朱砂', bg: '#F7F1E6', bg2: '#F2E9DA', bg3: '#ECDCC2', accent: '#A8322A', accent2: '#C9A227' },
+    { name: '黛青', bg: '#EEF3F4', bg2: '#E4ECEE', bg3: '#D6E2E4', accent: '#2F4A5E', accent2: '#7CA0A8' },
+    { name: '赭石', bg: '#F4EEDF', bg2: '#EFE6D2', bg3: '#E7D4B6', accent: '#9A5B33', accent2: '#CDA15E' },
+    { name: '黛绿', bg: '#EEF3EC', bg2: '#E4ECE4', bg3: '#D6E4D4', accent: '#3C5A45', accent2: '#9DB89C' },
+    { name: '黛紫', bg: '#F1EEF4', bg2: '#E8E2EC', bg3: '#DDD3E6', accent: '#4A3B5C', accent2: '#B49BC4' },
+    { name: '胭脂', bg: '#F6ECEC', bg2: '#F0E0E0', bg3: '#EBC9CE', accent: '#8E2B3A', accent2: '#D98C95' }
+  ];
+  /* 各版式默认配色索引（与生成器 TEMPLATES 一一对应） */
+  const DEFAULT_PAL = { '01': 0, '02': 1, '03': 2, '04': 3, '05': 5, '06': 4, '07': 0, '08': 1, '09': 4, '10': 5, '11': 2, '12': 5 };
+
+  /* ---------- 条目工具 ---------- */
+  const ORDS = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌'];
+  function items(d, n) {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const it = (d.items && d.items[i]) || {};
+      out.push({ ord: it.ord || ORDS[i] || String(i + 1), title: it.title || '', desc: it.desc || '', desc2: it.desc2 || '' });
+    }
+    return out;
+  }
+
+  /* ---------- 10 个版式渲染函数（body 注入 .content） ---------- */
+  const B01 = d => `
+    <!-- 改字区：标签 / 金句 / 出处 -->
+    <div style="text-align:center;">
+      <span class="tag serif">${esc(d.tag)}</span>
+    </div>
+    <div style="flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--H)*0.03);">
+      <p class="serif" style="font-size:calc(1080px*0.082); line-height:1.55; font-weight:800; color:var(--ink); text-align:center;">
+        ${hili(d.title, d.accentWord)}
+      </p>
+    </div>
+    <div style="text-align:center;">
+      <p class="muted serif" style="font-size:calc(1080px*0.03); letter-spacing:.12em;">${esc(d.source)}</p>
+      <hr class="gold" style="width:22%; margin:calc(var(--H)*0.022) auto calc(var(--H)*0.02);">
+      <p class="py">${esc(d.py)}</p>
+    </div>
+    <div class="foot" style="margin-top:calc(var(--H)*0.025);">${esc(d.foot)}</div>`;
+
+  const B02 = d => `
+    <!-- 改字区：主标题 / 副标题 / 三则清单 -->
+    <div>
+      <h1 class="serif" style="font-size:calc(1080px*0.075); font-weight:800; line-height:1.2;">${br(d.title)}</h1>
+      <p class="muted" style="font-size:calc(1080px*0.032); margin-top:calc(var(--H)*0.018); letter-spacing:.08em;">${esc(d.subtitle)}</p>
+      <p class="py" style="margin-top:calc(var(--H)*0.006);">${esc(d.py)}</p>
+    </div>
+    <hr class="rule" style="margin:calc(var(--H)*0.035) 0;">
+    <div style="display:flex; flex-direction:column; gap:calc(var(--H)*0.028);">
+      ${items(d, (d.items && d.items.length) || 3).map(it => `
+      <div style="display:flex; align-items:baseline; gap:calc(1080px*0.035);">
+        <span class="serif accent" style="font-size:calc(1080px*0.052); font-weight:800;">${esc(it.ord)}</span>
+        <p style="font-size:calc(1080px*0.034); line-height:1.55;">${esc(it.desc)}<span class="muted">${esc(it.desc2)}</span></p>
+      </div>`).join('')}
+    </div>
+    <div class="foot" style="margin-top:auto; padding-top:calc(var(--H)*0.03);">${esc(d.foot)}</div>`;
+
+  const B03 = d => `
+    <!-- 改字区：左侧分类 / 右侧标题 + 两段正文 -->
+    <div style="flex:1 1 auto; display:flex; gap:calc(1080px*0.07); align-items:center;">
+      <div style="flex:0 0 24%; border-right:1px solid var(--line); padding-right:calc(1080px*0.04);
+                  display:flex; flex-direction:column; justify-content:center; gap:calc(var(--H)*0.02);">
+        <p class="serif accent" style="font-size:calc(1080px*0.06); font-weight:800; writing-mode:vertical-rl; letter-spacing:.14em;">${esc(d.leftCat)}</p>
+        <p class="muted" style="font-size:calc(1080px*0.026); writing-mode:vertical-rl; letter-spacing:.12em;">${esc(d.leftSub)}</p>
+      </div>
+      <div style="flex:1 1 auto; display:flex; flex-direction:column; justify-content:center;">
+        <h2 class="serif" style="font-size:calc(1080px*0.056); font-weight:800; line-height:1.25;">${br(d.title)}</h2>
+        <p style="font-size:calc(1080px*0.034); line-height:1.7; margin-top:calc(var(--H)*0.024);">${esc(d.p1)}</p>
+        <p class="muted" style="font-size:calc(1080px*0.034); line-height:1.7; margin-top:calc(var(--H)*0.014);">${esc(d.p2)}</p>
+      </div>
+    </div>
+    <div class="foot" style="margin-top:auto; padding-top:calc(var(--H)*0.03);">${esc(d.foot)}</div>`;
+
+  const B04 = d => `
+    <!-- 改字区：标题 / 四宫格(序号·标题·说明) -->
+    <div>
+      <span class="tag serif">${esc(d.tag)}</span>
+      <h2 class="serif" style="font-size:calc(1080px*0.055); font-weight:800; margin-top:calc(var(--H)*0.02); line-height:1.2;">${br(d.title)}</h2>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:calc(1080px*0.03); flex:1 1 auto; min-height:0; margin-top:calc(var(--H)*0.03);">
+      ${items(d, 4).map(it => `
+      <div style="background:rgba(255,255,255,.5); border:1px solid var(--line); border-radius:16px; padding:calc(1080px*0.038); display:flex; flex-direction:column; justify-content:center;">
+        <span class="serif accent" style="font-size:calc(1080px*0.042); font-weight:800;">${esc(it.ord)}</span>
+        <p class="serif" style="font-size:calc(1080px*0.035); font-weight:700; margin-top:calc(var(--H)*0.014); line-height:1.3;">${esc(it.title)}</p>
+        <p class="muted" style="font-size:calc(1080px*0.026); margin-top:calc(var(--H)*0.01); line-height:1.5;">${br(it.desc)}</p>
+      </div>`).join('')}
+    </div>
+    <div class="foot" style="margin-top:calc(var(--H)*0.026);">${esc(d.foot)}</div>`;
+
+  const B05 = d => `
+    <!-- 改字区：中心字 / 环绕经句 / 解读 -->
+    <div style="text-align:center;">
+      <span class="tag serif">${esc(d.tag)}</span>
+    </div>
+    <div style="flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--H)*0.032);">
+      <div style="width:calc(1080px*0.33); height:calc(1080px*0.33); border-radius:50%; border:2.5px solid var(--accent); display:flex; align-items:center; justify-content:center;">
+        <span class="serif accent" style="font-size:calc(1080px*0.17); font-weight:800;">${esc(d.centerChar)}</span>
+      </div>
+      <p class="serif" style="font-size:calc(1080px*0.04); line-height:1.7; letter-spacing:.08em; text-align:center;">${esc(d.centerQuote)}</p>
+    </div>
+    <div style="text-align:center;">
+      <p class="muted" style="font-size:calc(1080px*0.034); line-height:1.6;">${esc(d.desc)}</p>
+      <p class="py" style="margin-top:calc(var(--H)*0.012);">${esc(d.py)}</p>
+    </div>
+    <div class="foot" style="margin-top:calc(var(--H)*0.024);">${esc(d.foot)}</div>`;
+
+  const B06 = d => `
+    <!-- 改字区：顶部色块标题 / 副标 / 引言 -->
+    <div style="background:var(--accent); border-radius:16px; padding:calc(var(--H)*0.034) calc(1080px*0.05);
+                display:flex; align-items:baseline; justify-content:space-between; box-shadow:0 6px 24px rgba(0,0,0,.08);">
+      <h1 class="serif" style="color:#fff; font-size:calc(1080px*0.062); font-weight:800; letter-spacing:.04em;">${esc(d.titleTop)}</h1>
+      <span style="color:rgba(255,255,255,.85); font-size:calc(1080px*0.026); letter-spacing:.12em;">${esc(d.brand)}</span>
+    </div>
+    <div style="flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; padding:0 1%;">
+      <p class="serif" style="font-size:calc(1080px*0.058); line-height:1.65; font-weight:800;">${br(d.quote1)}</p>
+      <p class="serif" style="font-size:calc(1080px*0.058); line-height:1.65; font-weight:800; margin-top:calc(var(--H)*0.022);">${br(d.quote2)}</p>
+    </div>
+    <div class="foot" style="margin-top:calc(var(--H)*0.03);">${esc(d.foot)}</div>`;
+
+  const B07 = d => `
+<!-- 改字区：主张金句 / 四宫格支撑点 -->
+<div style="flex:1 1 auto; display:flex; flex-direction:column;">
+  <div style="text-align:center;"><span class="tag">${esc(d.tag)}</span></div>
+  <div style="text-align:center; margin-top:calc(var(--H)*0.05);">
+    <p class="serif" style="font-size:calc(1080px*0.07); line-height:1.5; font-weight:800; color:var(--ink);">${br(d.title)}</p>
+    <p class="py" style="margin-top:calc(var(--H)*0.028);">${esc(d.py)}</p>
+  </div>
+  <div class="gold" style="margin:calc(var(--H)*0.052) 10% calc(var(--H)*0.042);"></div>
+  <div style="flex:1 1 auto; display:grid; grid-template-columns:1fr 1fr; gap:calc(var(--H)*0.034) calc(1080px*0.06); padding:0 3%;">
+    ${items(d, 4).map(it => `
+    <div>
+      <span class="serif accent" style="font-size:calc(1080px*0.05); font-weight:800;">${esc(it.ord)}</span>
+      <p class="serif" style="font-size:calc(1080px*0.032); font-weight:700; margin-top:calc(var(--H)*0.012); line-height:1.3;">${esc(it.title)}</p>
+      <p class="muted" style="font-size:calc(1080px*0.023); margin-top:calc(var(--H)*0.006); line-height:1.5;">${br(it.desc)}</p>
+    </div>`).join('')}
+  </div>
+  <div class="foot" style="margin-top:calc(var(--H)*0.022);">${esc(d.foot)}</div>
+</div>`;
+
+  const B08 = d => `
+<!-- 改字区：左侧竖排主张 / 右侧解读 -->
+<div style="flex:1 1 auto; display:flex; align-items:stretch; gap:calc(1080px*0.06);">
+  <div style="flex:0 0 36%; display:flex; flex-direction:column; justify-content:center; align-items:center; border-right:1px solid var(--line); padding-right:calc(1080px*0.04);">
+    <p class="py" style="writing-mode:vertical-rl; letter-spacing:.34em; margin-bottom:calc(var(--H)*0.04);">${esc(d.leftPy)}</p>
+    <p class="serif" style="writing-mode:vertical-rl; font-size:calc(1080px*0.07); font-weight:800; line-height:1.5; color:var(--ink);">${br(d.leftBig)}</p>
+  </div>
+  <div style="flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; padding-left:calc(1080px*0.01);">
+    <span class="tag" style="align-self:flex-start;">${esc(d.tag)}</span>
+    <p class="serif" style="font-size:calc(1080px*0.045); font-weight:800; line-height:1.5; margin-top:calc(var(--H)*0.03);">${br(d.title)}</p>
+    <p class="muted" style="font-size:calc(1080px*0.03); line-height:1.85; margin-top:calc(var(--H)*0.028);">${br(d.bodyMuted)}</p>
+    <div class="gold" style="margin-top:calc(var(--H)*0.03);"></div>
+    <p class="foot" style="text-align:left; margin-top:calc(var(--H)*0.02);">${esc(d.foot)}</p>
+  </div>
+</div>`;
+
+  const B09 = d => `
+<!-- 改字区：全幅标题色块 / 三则清单 -->
+<div style="flex:1 1 auto; display:flex; flex-direction:column;">
+  <div style="background:var(--accent); color:var(--bg); padding:calc(var(--H)*0.052) calc(1080px*0.08); border-radius:14px;">
+    <p class="py" style="color:var(--bg); opacity:.85; letter-spacing:.3em;">${esc(d.pyTop)}</p>
+    <h1 class="serif" style="color:#fff; font-size:calc(1080px*0.06); font-weight:800; letter-spacing:.03em; margin-top:calc(var(--H)*0.018); line-height:1.15;">${br(d.title)}</h1>
+  </div>
+  <div style="flex:1 1 auto; display:flex; flex-direction:column; justify-content:center; gap:calc(var(--H)*0.03); padding:calc(var(--H)*0.045) 2% 0;">
+    ${items(d, 3).map(it => `
+    <div style="display:flex; align-items:flex-start; gap:calc(1080px*0.045);">
+      <span class="serif accent" style="font-size:calc(1080px*0.05); font-weight:800; flex:0 0 auto;">${esc(it.ord)}</span>
+      <div><p class="serif" style="font-size:calc(1080px*0.034); font-weight:700; line-height:1.3;">${esc(it.title)}</p><p class="muted" style="font-size:calc(1080px*0.025); margin-top:calc(var(--H)*0.008); line-height:1.5;">${esc(it.desc)}</p></div>
+    </div>`).join('')}
+  </div>
+  <div class="foot" style="margin-top:calc(var(--H)*0.02);">${esc(d.foot)}</div>
+</div>`;
+
+  /* 排版1（大字金句卡）+ 排版5（居中禅意卡）融合：禅意圆·中心字为视觉焦点，下接大字金句 */
+  const B10 = d => `
+    <!-- 改字区：标签 / 禅意圆·中心字 / 金句大标题 -->
+    <div style="text-align:center;">
+      <span class="tag serif">${esc(d.tag)}</span>
+    </div>
+    <div style="flex:1 1 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:calc(var(--H)*0.026);">
+      <div style="width:calc(1080px*0.26); height:calc(1080px*0.26); border-radius:50%; border:2.5px solid var(--accent); display:flex; align-items:center; justify-content:center;">
+        <span class="serif accent" style="font-size:calc(1080px*0.12); font-weight:800;">${esc(d.centerChar)}</span>
+      </div>
+      <p class="serif" style="font-size:calc(1080px*0.03); line-height:1.7; letter-spacing:.08em; text-align:center; color:var(--ink-soft);">${esc(d.centerQuote)}</p>
+      <p class="serif" style="font-size:calc(1080px*0.062); line-height:1.5; font-weight:800; color:var(--ink); text-align:center; margin-top:calc(var(--H)*0.014);">${hili(d.title, d.accentWord)}</p>
+    </div>
+    <div style="text-align:center;">
+      <p class="muted serif" style="font-size:calc(1080px*0.03); letter-spacing:.12em;">${esc(d.source)}</p>
+      <hr class="gold" style="width:22%; margin:calc(var(--H)*0.022) auto calc(var(--H)*0.02);">
+      <p class="py">${esc(d.py)}</p>
+    </div>
+    <div class="foot" style="margin-top:calc(var(--H)*0.025);">${esc(d.foot)}</div>`;
+
+  /* B03 主卡（左栏竖排分类） + B02 作用在右侧（上下分栏清单） */
+  const B11 = d => `
+    <!-- 改字区：左侧竖排分类(取03) / 右侧上下分栏清单(取02) -->
+    <div style="flex:1 1 auto; display:flex; gap:calc(1080px*0.06); align-items:stretch;">
+      <div style="flex:0 0 22%; border-right:1px solid var(--line); padding-right:calc(1080px*0.04);
+                  display:flex; flex-direction:column; justify-content:center; gap:calc(var(--H)*0.02);">
+        <p class="serif accent" style="font-size:calc(1080px*0.058); font-weight:800; writing-mode:vertical-rl; letter-spacing:.14em;">${esc(d.leftCat)}</p>
+        <p class="muted" style="font-size:calc(1080px*0.026); writing-mode:vertical-rl; letter-spacing:.12em;">${esc(d.leftSub)}</p>
+      </div>
+      <div style="flex:1 1 auto; display:flex; flex-direction:column; justify-content:center;">
+        <div>
+          <h1 class="serif" style="font-size:calc(1080px*0.058); font-weight:800; line-height:1.2;">${br(d.title)}</h1>
+          <p class="muted" style="font-size:calc(1080px*0.03); margin-top:calc(var(--H)*0.016); letter-spacing:.08em;">${esc(d.subtitle)}</p>
+          <p class="py" style="margin-top:calc(var(--H)*0.006);">${esc(d.py)}</p>
+        </div>
+        <hr class="rule" style="margin:calc(var(--H)*0.03) 0;">
+        <div style="display:flex; flex-direction:column; gap:calc(var(--H)*0.024);">
+          ${items(d, (d.items && d.items.length) || 3).map(it => `
+          <div style="display:flex; align-items:baseline; gap:calc(1080px*0.035);">
+            <span class="serif accent" style="font-size:calc(1080px*0.05); font-weight:800; flex:0 0 auto;">${esc(it.ord)}</span>
+            <p style="font-size:calc(1080px*0.032); line-height:1.55;">${esc(it.desc)}<span class="muted">${esc(it.desc2)}</span></p>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="foot" style="margin-top:auto; padding-top:calc(var(--H)*0.03);">${esc(d.foot)}</div>`;
+
+  const B12 = d => `
+    <!-- 改字区：禅意圆焦点 / 标题 / 四宫格 -->
+    <div>
+      <span class="tag serif">${esc(d.tag)}</span>
+      <h2 class="serif" style="font-size:calc(1080px*0.05); font-weight:800; margin-top:calc(var(--H)*0.018); line-height:1.2;">${br(d.title)}</h2>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:calc(var(--H)*0.012); margin-top:calc(var(--H)*0.02);">
+      <div style="width:calc(1080px*0.19); height:calc(1080px*0.19); border-radius:50%; border:2.5px solid var(--accent); display:flex; align-items:center; justify-content:center;">
+        <span class="serif accent" style="font-size:calc(1080px*0.1); font-weight:800;">${esc(d.centerChar)}</span>
+      </div>
+      <p class="serif" style="font-size:calc(1080px*0.032); line-height:1.6; letter-spacing:.06em; text-align:center;">${esc(d.centerQuote)}</p>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:calc(1080px*0.028); flex:1 1 auto; min-height:0; margin-top:calc(var(--H)*0.028);">
+      ${items(d, 4).map(it => `
+      <div style="background:rgba(255,255,255,.5); border:1px solid var(--line); border-radius:16px; padding:calc(1080px*0.034); display:flex; flex-direction:column; justify-content:center;">
+        <span class="serif accent" style="font-size:calc(1080px*0.04); font-weight:800;">${esc(it.ord)}</span>
+        <p class="serif" style="font-size:calc(1080px*0.033); font-weight:700; margin-top:calc(var(--H)*0.012); line-height:1.3;">${esc(it.title)}</p>
+        <p class="muted" style="font-size:calc(1080px*0.025); margin-top:calc(var(--H)*0.009); line-height:1.45;">${br(it.desc)}</p>
+      </div>`).join('')}
+    </div>
+    <div class="foot" style="margin-top:calc(var(--H)*0.024);">${esc(d.foot)}</div>`;
+
+  /* ---------- 字段元信息 ---------- */
+  const F = {
+    tag: { l: '标签', t: 'text' },
+    title: { l: '主标题 / 金句（换行请回车）', t: 'ta' },
+    accentWord: { l: '高亮词（主色显示，留空则不高亮）', t: 'text' },
+    source: { l: '出处', t: 'text' },
+    py: { l: '拼音小字', t: 'text' },
+    subtitle: { l: '副标题', t: 'text' },
+    leftCat: { l: '左侧分类（竖排）', t: 'text' },
+    leftSub: { l: '左侧小字（竖排）', t: 'text' },
+    p1: { l: '正文第一段', t: 'text' },
+    p2: { l: '正文第二段', t: 'text' },
+    centerChar: { l: '中心字（建议单字）', t: 'text' },
+    centerQuote: { l: '环绕经句', t: 'text' },
+    desc: { l: '解读短句', t: 'text' },
+    titleTop: { l: '色块标题', t: 'text' },
+    brand: { l: '右侧品牌名', t: 'text' },
+    quote1: { l: '引言第一段（换行请回车）', t: 'ta' },
+    quote2: { l: '引言第二段（换行请回车）', t: 'ta' },
+    leftPy: { l: '左侧竖排拼音', t: 'text' },
+    leftBig: { l: '左侧竖排大标题（换行请回车）', t: 'ta' },
+    bodyMuted: { l: '正文解读（换行请回车）', t: 'ta' },
+    pyTop: { l: '色块内小标', t: 'text' },
+    foot: { l: '页脚', t: 'text' },
+    seal: { l: '印章文字', t: 'text' }
+  };
+
+  /* ---------- 版式表 ---------- */
+  const LAYOUTS = {
+    '01': { id: '01', name: '大字金句卡', n: 0, f: ['tag', 'title', 'accentWord', 'source', 'py', 'foot', 'seal'], body: B01 },
+    '02': { id: '02', name: '上下分栏卡', n: 3, f: ['title', 'subtitle', 'py', 'items', 'foot', 'seal'], body: B02 },
+    '03': { id: '03', name: '左右分栏卡', n: 0, f: ['leftCat', 'leftSub', 'title', 'p1', 'p2', 'foot', 'seal'], body: B03 },
+    '04': { id: '04', name: '四宫格清单卡', n: 4, f: ['tag', 'title', 'items', 'foot', 'seal'], body: B04 },
+    '05': { id: '05', name: '居中禅意卡', n: 0, f: ['tag', 'centerChar', 'centerQuote', 'desc', 'py', 'foot', 'seal'], body: B05 },
+    '06': { id: '06', name: '全幅标题卡', n: 0, f: ['titleTop', 'brand', 'quote1', 'quote2', 'foot', 'seal'], body: B06 },
+    '07': { id: '07', name: '金句四宫格主张卡', n: 4, f: ['tag', 'title', 'py', 'items', 'foot', 'seal'], body: B07 },
+    '08': { id: '08', name: '左右禅意解读卡', n: 0, f: ['leftPy', 'leftBig', 'tag', 'title', 'bodyMuted', 'foot', 'seal'], body: B08 },
+    '09': { id: '09', name: '全幅三则日签卡', n: 3, f: ['pyTop', 'title', 'items', 'foot', 'seal'], body: B09 },
+    '10': { id: '10', name: '禅意金句卡', n: 0, f: ['tag', 'centerChar', 'centerQuote', 'title', 'accentWord', 'source', 'py', 'foot', 'seal'], body: B10 },
+    '11': { id: '11', name: '分类清单卡', n: 3, f: ['leftCat', 'leftSub', 'title', 'subtitle', 'py', 'items', 'foot', 'seal'], body: B11 },
+    '12': { id: '12', name: '禅意四宫格卡', n: 4, f: ['tag', 'title', 'centerChar', 'centerQuote', 'items', 'foot', 'seal'], body: B12 }
+  };
+  /* 排序后的版式键序：'10' 是标准整数键，Object.keys 会把它排到最前，必须显式排序保证 01→10 顺序 */
+  const LKEYS = Object.keys(LAYOUTS).sort();
+
+  /* ---------- 各版式示例文案（与现有静态成品一致） ---------- */
+  const SAMPLES = {
+    '01': { tag: '每日一悟', title: '所谓焦虑，\n不过是心\n不肯安在当下。', accentWord: '当下', source: '—— 圣为 · 夜读', py: 'SUO WEI JIAO LV' },
+    '02': { title: '把日子\n过成自己的', subtitle: '三个不必', py: 'SAN GE BU BI', items: [
+      { ord: '壹', desc: '不必追上谁的节奏，', desc2: '慢一点也是你的时辰。' },
+      { ord: '贰', desc: '不必解释给谁听，', desc2: '懂的人自会懂。' },
+      { ord: '叁', desc: '不必把圆满交给外物，', desc2: '安心只在手心。' }] },
+    '03': { leftCat: '第叁则', leftSub: '· 修心 ·', title: '安心，\n不是没有风浪', p1: '是浪来了，你仍知自己站在船上。', p2: '所谓修行，不过是把慌，一层层放下。' },
+    '04': { tag: '内容创作', title: '内容创作的\n四条安心法则', items: [
+      { ord: '壹', title: '先安己，后动人', desc: '自己稳了，话才落得进别人心里。' },
+      { ord: '贰', title: '一卡一义理', desc: '一张说清一件事，胜过十张喧哗。' },
+      { ord: '叁', title: '不投流，只做内容', desc: '信任是内容慢慢养出来的。' },
+      { ord: '肆', title: '长期主义', desc: '日拱一卒，时间会替你说话。' }] },
+    '05': { tag: '一卡一义理', centerChar: '照', centerQuote: '照见五蕴皆空，度一切苦厄。', desc: '看见，便是松手的开端。', py: 'ZHAO JIAN' },
+    '06': { titleTop: '日签 · 处暑', brand: '圣为', quote1: '夏天把热烈\n交还给风，', quote2: '你把手里的紧，\n也放一放。' },
+    '07': { tag: '主 张', title: '把「快」交给别人，\n把「慢」留给自己。', py: 'SLOW IS A CHOICE', items: [
+      { ord: '壹', title: '不赶风口', desc: '风口来了又走，\n自己的节奏才长久。' },
+      { ord: '贰', title: '不堆数量', desc: '一张说清一件事，\n胜过十张喧哗。' },
+      { ord: '叁', title: '不追热点', desc: '热点冷却得快，\n真心才扛得久。' },
+      { ord: '肆', title: '不投流', desc: '信任是内容\n慢慢养出来的。' }] },
+    '08': { leftPy: '反 共 识', leftBig: '不必\n都看懂', tag: '解 读', title: '有人看不懂，\n才说明你\n走在了前面。',
+      bodyMuted: '讨好所有人的内容，\n最后谁也留不住。\n先把话说给那几个\n真正同频的人，\n剩下的，交给时间。' },
+    '09': { pyTop: '日 签', title: '把今天，\n过成自己的', items: [
+      { ord: '壹', title: '先安己，后动人', desc: '自己稳了，话才落得进别人心里。' },
+      { ord: '贰', title: '一卡一义理', desc: '一张说清一件事，胜过十张喧哗。' },
+      { ord: '叁', title: '长期主义', desc: '日拱一卒，时间会替你说话。' }] },
+    '10': { tag: '一卡一义理', centerChar: '安', centerQuote: '安住当下，便是归处。', title: '所谓焦虑，\n不过是心\n不肯安在当下。', accentWord: '当下', source: '—— 圣为 · 夜读', py: 'AN ZHU DANG XIA' },
+    '11': { leftCat: '第叁则', leftSub: '· 修心 ·', title: '把日子\n过成自己的', subtitle: '三个不必', py: 'SAN GE BU BI', items: [
+      { ord: '壹', desc: '不必追上谁的节奏，', desc2: '慢一点也是你的时辰。' },
+      { ord: '贰', desc: '不必解释给谁听，', desc2: '懂的人自会懂。' },
+      { ord: '叁', desc: '不必把圆满交给外物，', desc2: '安心只在手心。' }] },
+    '12': { tag: '内容创作', title: '内容创作的\n四条安心法则', centerChar: '安', centerQuote: '安住当下，便是归处。', items: [
+      { ord: '壹', title: '先安己，后动人', desc: '自己稳了，话才落得进别人心里。' },
+      { ord: '贰', title: '一卡一义理', desc: '一张说清一件事，胜过十张喧哗。' },
+      { ord: '叁', title: '不投流，只做内容', desc: '信任是内容慢慢养出来的。' },
+      { ord: '肆', title: '长期主义', desc: '日拱一卒，时间会替你说话。' }] }
+  };
+  const BASE = {
+    layout: '01', size: 'portrait', palette: 0, custom: null, seal: '静心',
+    showImg: false, img: '', imgCaption: '',
+    foot: '来源：静心知识库｜@圣为Ai设计'
+  };
+  function docFor(layout, size) {
+    const d = Object.assign({}, BASE, SAMPLES[layout]);
+    d.layout = layout; d.size = size || 'portrait'; d.palette = DEFAULT_PAL[layout];
+    d.items = JSON.parse(JSON.stringify(SAMPLES[layout].items || []));
+    return d;
+  }
+
+  /* ---------- 核心：构建完整海报 HTML ---------- */
+  function rootvars(H, p, fs) {
+    return `--ink:#2b2b2b;--ink-soft:#5a554e;--bg:${p.bg};--bg2:${p.bg2};--bg3:${p.bg3};`
+      + `--accent:${p.accent};--accent2:${p.accent2};--line:rgba(60,55,50,.16);`
+      + `--W:1080px;--H:${H}px;--FS:${fs};--paper:${PAPER};`;
+  }
+  function colors(d) { return d.custom || PALETTES[d.palette] || PALETTES[0]; }
+  function sizeOf(d) { return d.size === 'square' ? { w: 1080, h: 1080, fs: 0.86 } : { w: 1080, h: 1920, fs: 1 }; }
+  function illuHTML(d) {
+    const cap = d.imgCaption ? `<div class="cap">${esc(d.imgCaption)}</div>` : '';
+    const pic = d.img ? `<div class="pic"><img src="${esc(d.img)}" alt=""></div>` : `<div class="pic"><div class="ph">配图区（16:9）</div></div>`;
+    return `<div class="illu">${pic}${cap}</div>`;
+  }
+  function buildPoster(d) {
+    const s = sizeOf(d);
+    const band = (d.showImg && d.img && d.size === 'portrait') ? illuHTML(d) : '';
+    let html = MASTER
+      .replace('__ROOTVARS__', rootvars(s.h, colors(d), s.fs))
+      .replace('__BODY__', band + LAYOUTS[d.layout].body(d))
+      .replace('__SEAL__', esc(d.seal || '静心'));
+    html = html.split('calc(1080px*').join('calc(var(--FS)*1080px*');
+    html = html.split('calc(var(--H)*').join('calc(var(--FS)*var(--H)*');
+    return html;
+  }
+
+  /* ---------- 标题规则引擎 ---------- */
+  const TPAT = [
+    '把{domain}过成{state}', '所谓{thing}，不过是{insight}', '与其{anti}，不如{advice}',
+    '慢一点，{advice}', '{verb}风口不如{verb2}{thing}', '你不需要{anti}，只需要{advice}',
+    '关于{thing}，我想说三句', '日签 · {solarterm}｜{advice}', '{insight}，是我今年最好的收获',
+    '不{verb}，不{verb2}，只是{advice}'
+  ];
+  const POOL = {
+    domain: ['日子', '心', '时间', '热爱', '文字'],
+    state: ['自己的', '清醒的', '不慌的', '慢的'],
+    thing: ['焦虑', '长期主义', '内容', '成长', '选择'],
+    insight: ['心不肯安在当下', '你本自具足', '慢即是快', '少即是多'],
+    anti: ['风口', '热点', '完美', '所有人'],
+    verb: ['追', '赶', '卷', '解释'],
+    verb2: ['留给', '交给', '还给'],
+    advice: ['做自己', '慢慢来', '先安己', '深呼吸', '把手里的紧放一放'],
+    solarterm: ['立春', '雨水', '处暑', '白露', '霜降']
+  };
+  function genTitles(slots, limit) {
+    const keys = Object.keys(POOL);
+    const get = k => (slots && slots[k]) ? String(slots[k]).trim() : null;
+    const out = [];
+    for (let i = 0; i < TPAT.length && out.length < (limit || 8); i++) {
+      for (let r = 0; r < 12 && out.length < (limit || 8); r++) {
+        let s = TPAT[i];
+        let ok = true;
+        keys.forEach(k => {
+          const re = new RegExp('\\{' + k + '\\}', 'g');
+          if (re.test(s)) {
+            const v = get(k) || POOL[k][Math.floor(Math.random() * POOL[k].length)];
+            if (!v) ok = false; else s = s.replace(re, v);
+          }
+        });
+        if (ok && s.indexOf('{') < 0 && out.indexOf(s) < 0) out.push(s);
+      }
+    }
+    return out;
+  }
+
+  return { esc, br, hili, MASTER, PAPER, PALETTES, DEFAULT_PAL, LAYOUTS, LKEYS, SAMPLES, BASE, F, docFor, colors, sizeOf, buildPoster, rootvars, items, ORDS, POOL, genTitles };
+})();
+if (typeof module !== 'undefined' && module.exports) { module.exports = GF; }
+
+/* =====================================================================
+   UI 层（仅在浏览器环境执行）
+   ===================================================================== */
+if (typeof document !== 'undefined') (function () {
+  'use strict';
+  const LKEYS = GF.LKEYS; /* 排序后的版式键序（01→10） */
+  const $ = s => document.querySelector(s);
+  const $id = s => document.getElementById(s);
+  const { PALETTES, LAYOUTS, SAMPLES, F, docFor, colors, sizeOf, buildPoster, ORDS, POOL, genTitles } = GF;
+  const esc = GF.esc;
+
+  /* ---------- 存储 ---------- */
+  const LS = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { toast('本地存储写入失败：' + e.message); } }
+  };
+  const K = { cur: 'gf_current', lib: 'gf_library', his: 'gf_history', ab: 'gf_ab' };
+
+  let doc = Object.assign(docFor('01', 'portrait'), LS.get(K.cur, {}));
+  if (!LAYOUTS[doc.layout]) doc = docFor('01', 'portrait');
+  if (!doc.items) doc.items = [];
+
+  let toastTimer = null;
+  function toast(m) {
+    const t = $id('toast'); t.textContent = m; t.classList.add('on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 2600);
+  }
+
+  /* ---------- Tab 切换 ---------- */
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); $id('p' + b.dataset.tab).classList.add('on');
+    if (b.dataset.tab === '4') renderDash();
+    if (b.dataset.tab === '2') syncColorInputs();
+    if (b.dataset.tab === '1') preview(); /* 隐藏期间 clientWidth 失效，切回时重算缩放 */
+  }));
+
+  /* ---------- Tab1：版式网格 / 尺寸 / 配色 ---------- */
+  function buildTplGrid() {
+    $id('tplGrid').innerHTML = LKEYS.map(k =>
+      `<div class="tpl${k === doc.layout ? ' on' : ''}" data-tpl="${k}"><b>${LAYOUTS[k].name}</b><i>${k}</i></div>`).join('');
+    $id('tplGrid').querySelectorAll('.tpl').forEach(el => el.addEventListener('click', () => {
+      const from = doc.layout;
+      doc.layout = el.dataset.tpl;
+      const need = LAYOUTS[doc.layout].n;
+      const s = SAMPLES[doc.layout] || {};
+      Object.keys(s).forEach(k => { if (k !== 'items') doc[k] = s[k]; });
+      if (need) doc.items = JSON.parse(JSON.stringify(s.items || doc.items || []));
+      doc.palette = GF.DEFAULT_PAL[doc.layout]; doc.custom = null;
+      buildTplGrid(); buildPalGrid(); buildForm(); preview(); syncColorInputs();
+      toast('已切换到「' + LAYOUTS[doc.layout].name + '」' + (from !== doc.layout ? '，并载入该版式示例' : ''));
+    }));
+  }
+  function buildPalGrid() {
+    $id('palGrid').innerHTML = PALETTES.map((p, i) =>
+      `<div class="pal${(doc.custom == null && i === doc.palette) ? ' on' : ''}" data-pal="${i}" title="${p.name}">
+        <div class="bars"><div style="background:${p.bg}"></div><div style="background:${p.bg2}"></div><div style="background:${p.bg3}"></div><div style="background:${p.accent}"></div><div style="background:${p.accent2}"></div></div>
+        <div class="nm">${p.name}</div></div>`).join('');
+    $id('palGrid').querySelectorAll('.pal').forEach(el => el.addEventListener('click', () => {
+      doc.palette = +el.dataset.pal; doc.custom = null; buildPalGrid(); preview(); syncColorInputs();
+      $id('palHint').textContent = '当前配色：' + PALETTES[doc.palette].name;
+    }));
+    $id('palHint').textContent = doc.custom ? '当前：自定义配色' : '当前配色：' + (PALETTES[doc.palette] || {}).name;
+  }
+  $id('sizeSeg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    doc.size = b.dataset.size;
+    $id('sizeSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    preview();
+  }));
+  function syncSizeSeg() { $id('sizeSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.size === doc.size)); }
+
+  /* ---------- Tab1：动态表单 ---------- */
+  function buildForm() {
+    const L = LAYOUTS[doc.layout];
+    let h = '';
+    L.f.forEach(k => {
+      if (k === 'items') {
+        const need = L.n;
+        while (doc.items.length < need) doc.items.push({ ord: ORDS[doc.items.length] || '', title: '', desc: '', desc2: '' });
+        h += `<div class="field"><label>清单条目（${need} 条）</label><div id="items">` +
+          doc.items.slice(0, need).map((it, i) => `
+          <div class="item">
+            <div class="row"><input type="text" class="ord" data-f="items.${i}.ord" value="${esc(it.ord)}" placeholder="序号">
+              <input type="text" data-f="items.${i}.title" value="${esc(it.title)}" placeholder="小标题"></div>
+            <div class="row"><textarea data-f="items.${i}.desc" placeholder="说明（回车换行）">${esc(it.desc)}</textarea></div>
+            ${L.id === '02' ? `<div class="row"><input type="text" data-f="items.${i}.desc2" value="${esc(it.desc2)}" placeholder="弱化补充句"></div>` : ''}
+          </div>`).join('') + `</div></div>`;
+      } else {
+        const m = F[k]; if (!m) return;
+        const v = doc[k] == null ? '' : doc[k];
+        h += `<div class="field"><label>${m.l}</label>` +
+          (m.t === 'ta' ? `<textarea data-f="${k}" rows="2">${esc(v)}</textarea>`
+            : `<input type="text" data-f="${k}" value="${esc(v)}">`) + `</div>`;
+      }
+    });
+    $id('form').innerHTML = h;
+    $id('form').querySelectorAll('[data-f]').forEach(el => {
+      el.addEventListener('input', () => {
+        const p = el.dataset.f.split('.');
+        if (p.length === 3) { doc[p[0]][+p[1]][p[2]] = el.value; }
+        else doc[p[0]] = el.value;
+        schedule();
+      });
+    });
+  }
+  let pvT = null, svT = null;
+  function schedule() { clearTimeout(pvT); pvT = setTimeout(preview, 260); clearTimeout(svT); svT = setTimeout(save, 500); }
+  function save() { LS.set(K.cur, doc); }
+
+  /* ---------- 预览 ---------- */
+  function preview() {
+    const s = sizeOf(doc);
+    const box = $id('stage').parentElement;
+    if (!box.clientWidth) return; /* 容器不可见时跳过，切回 Tab / ResizeObserver 会补算 */
+    const cs = getComputedStyle(box);
+    /* 不设保底放大：窄屏（预览区 <200px）时保底值会撑破右缘，导致右边距被吃掉 */
+    const avail = Math.max(40, box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+    const k = Math.min(avail / s.w, 1);
+    const ifr = $id('pv');
+    ifr.style.width = s.w + 'px'; ifr.style.height = s.h + 'px';
+    ifr.style.transform = 'scale(' + k + ')';
+    $id('stage').style.width = (s.w * k) + 'px';
+    $id('stage').style.height = (s.h * k) + 'px';
+    ifr.srcdoc = buildPoster(doc);
+    $id('pvHint').textContent = `实际尺寸 ${s.w}×${s.h}px｜预览缩放 ${Math.round(k * 100)}%｜方版自动 --FS:0.86 防溢出`;
+    LS.set(K.cur, doc);
+  }
+  window.addEventListener('resize', () => { clearTimeout(pvT); pvT = setTimeout(preview, 200); });
+  new ResizeObserver(() => { clearTimeout(pvT); pvT = setTimeout(preview, 120); }).observe($id('stage').parentElement);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => preview());
+
+  /* ---------- 导出 ---------- */
+  function fname(ext) {
+    const s = doc.size === 'square' ? '方版' : '竖版';
+    const p = doc.custom ? '自定义' : PALETTES[doc.palette].name;
+    return `国风_${LAYOUTS[doc.layout].name}_${s}_${p}.${ext}`;
+  }
+  function download(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  function log(type) {
+    const h = LS.get(K.his, []);
+    h.unshift({ ts: Date.now(), action: type, layout: doc.layout, size: doc.size, palette: doc.custom ? -1 : doc.palette });
+    LS.set(K.his, h.slice(0, 200));
+  }
+  $id('btnHtml').addEventListener('click', () => {
+    download(new Blob([buildPoster(doc)], { type: 'text/html;charset=utf-8' }), fname('html'));
+    log('html'); toast('HTML 已下载');
+  });
+  $id('btnPdf').addEventListener('click', () => {
+    log('pdf'); toast('正在唤起打印，请在对话框选「另存为 PDF」');
+    try { $id('pv').contentWindow.focus(); $id('pv').contentWindow.print(); }
+    catch (e) { window.open(); }
+  });
+  /* PNG：原生 foreignObject + canvas（零 CDN） */
+  function pngSource() {
+    const h = buildPoster(doc);
+    const css = (h.match(/<style>([\s\S]*?)<\/style>/) || [, ''])[1].replace(':root{', '.gfholder{');
+    const body = (h.match(/<body>([\s\S]*)<\/body>/) || [, ''])[1];
+    let frag = '<div xmlns="http://www.w3.org/1999/xhtml" class="gfholder" style="width:1080px;height:' + sizeOf(doc).h + 'px">'
+      + '<style>' + css + '</style>' + body + '</div>';
+    /* XML 合规：void 元素必须自闭合 */
+    frag = frag.replace(/<br\s*\/?>/g, '<br/>').replace(/<hr([^>]*)>/g, '<hr$1/>');
+    return frag;
+  }
+  $id('btnPng').addEventListener('click', async () => {
+    const s = sizeOf(doc), scale = 2;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${s.w}" height="${s.h}"><foreignObject x="0" y="0" width="${s.w}" height="${s.h}">${pngSource()}</foreignObject></svg>`;
+    const tryDraw = (src) => new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => {
+        const cv = document.createElement('canvas');
+        cv.width = s.w * scale; cv.height = s.h * scale;
+        const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, cv.width, cv.height);
+        cv.toBlob(b => b ? res(b) : rej(new Error('toBlob 返回空')), 'image/png');
+      };
+      img.onerror = () => rej(new Error('SVG 加载失败'));
+      img.src = src;
+    });
+    try {
+      const blob = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
+      let out = null;
+      try { out = await tryDraw(blob); } catch (e1) {
+        try { out = await tryDraw('data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)))); }
+        catch (e2) { throw e1; }
+      }
+      download(out, fname('png')); log('png'); toast('PNG 已导出（' + (s.w * scale) + '×' + (s.h * scale) + '）');
+    } catch (err) {
+      alert('浏览器限制了内联截图（' + err.message + '）。\n建议改用「🖨 打印存 PDF」（矢量无损），或用附带的 guofeng_render.py 批量渲染高清 PNG。');
+    }
+  });
+  $id('btnSave').addEventListener('click', () => {
+    const name = prompt('给这条文案起个名字', (LAYOUTS[doc.layout].name + ' · ' + new Date().toLocaleDateString()));
+    if (name == null) return;
+    const lib = LS.get(K.lib, []);
+    lib.unshift({ id: Date.now(), ts: Date.now(), name: name || '未命名', doc: JSON.parse(JSON.stringify(doc)) });
+    LS.set(K.lib, lib.slice(0, 100)); toast('已收藏到文案库');
+  });
+  $id('btnSample').addEventListener('click', () => {
+    const s = SAMPLES[doc.layout] || {};
+    Object.keys(s).forEach(k => doc[k] = JSON.parse(JSON.stringify(s[k])));
+    doc.palette = GF.DEFAULT_PAL[doc.layout]; doc.custom = null;
+    buildPalGrid(); buildForm(); preview(); syncColorInputs(); toast('已载入示例');
+  });
+  $id('btnReset').addEventListener('click', () => {
+    doc = docFor(doc.layout, doc.size); buildPalGrid(); buildForm(); preview(); syncColorInputs(); toast('已重置');
+  });
+
+  /* ---------- 批量清单 ---------- */
+  const bkState = { tpl: [doc.layout], pal: PALETTES.map((p, i) => i), size: ['portrait', 'square'] };
+  function buildBatchPanel() {
+    const mk = (host, opts, key) => {
+      $id(host).innerHTML = opts.map(o => `<label><input type="checkbox" value="${o.v}" ${bkState[key].indexOf(o.v) >= 0 ? 'checked' : ''}>${o.t}</label>`).join('');
+      $id(host).querySelectorAll('input').forEach(el => el.addEventListener('change', () => {
+        const v = key === 'pal' ? +el.value : el.value;
+        if (el.checked) { if (bkState[key].indexOf(v) < 0) bkState[key].push(v); }
+        else bkState[key] = bkState[key].filter(x => x !== v);
+        updInfo();
+      }));
+    };
+    mk('bkTpl', LKEYS.map(k => ({ v: k, t: LAYOUTS[k].name })), 'tpl');
+    mk('bkPal', PALETTES.map((p, i) => ({ v: i, t: p.name })), 'pal');
+    mk('bkSize', [{ v: 'portrait', t: '竖版' }, { v: 'square', t: '方版' }], 'size');
+    updInfo();
+  }
+  function updInfo() { $id('bkInfo').textContent = `共 ${bkState.tpl.length * bkState.pal.length * bkState.size.length} 张`; }
+  $id('btnBatch').addEventListener('click', () => {
+    const c = $id('batchCard'); c.style.display = c.style.display === 'none' ? 'block' : 'none';
+    if (c.style.display === 'block') buildBatchPanel();
+  });
+  $id('btnDoBatch').addEventListener('click', () => {
+    const out = [];
+    bkState.tpl.forEach(t => bkState.pal.forEach(p => bkState.size.forEach(z => {
+      const s = sizeOf({ size: z });
+      out.push({ name: `国风_${LAYOUTS[t].name}_${z === 'square' ? '方版' : '竖版'}_${PALETTES[p].name}`,
+        html: buildPoster(Object.assign({}, doc, { layout: t, palette: p, custom: null, size: z })), w: s.w, h: s.h });
+    })));
+    download(new Blob([JSON.stringify(out)], { type: 'application/json' }), 'manifest.json');
+    log('batch'); toast('manifest.json 已生成（' + out.length + ' 张）→ 用 guofeng_render.py --batch manifest.json 渲染');
+  });
+
+  /* ---------- Tab2 配色 ---------- */
+  function buildPalCards() {
+    $id('palCards').innerHTML = PALETTES.map((p, i) => `
+      <div class="pcard" data-p="${i}">
+        <div class="five"><div style="background:${p.bg}"></div><div style="background:${p.bg2}"></div><div style="background:${p.bg3}"></div><div style="background:${p.accent}"></div><div style="background:${p.accent2}"></div></div>
+        <div class="body"><div class="nm">${p.name}</div>
+          <div class="hex">主 ${p.accent}　辅 ${p.accent2}<br>底浅 ${p.bg}　中 ${p.bg2}　底深 ${p.bg3}</div></div>
+      </div>`).join('');
+    $id('palCards').querySelectorAll('.pcard').forEach(el => el.addEventListener('click', () => {
+      doc.palette = +el.dataset.p; doc.custom = null; buildPalGrid(); syncColorInputs(); preview(); toast('已套用「' + PALETTES[doc.palette].name + '」');
+    }));
+  }
+  function syncColorInputs() {
+    const c = colors(doc);
+    $id('cBg').value = c.bg; $id('cBg2').value = c.bg2; $id('cBg3').value = c.bg3;
+    $id('cAcc').value = c.accent; $id('cAcc2').value = c.accent2;
+  }
+  ['cBg', 'cBg2', 'cBg3', 'cAcc', 'cAcc2'].forEach(id => $id(id).addEventListener('input', () => {
+    doc.custom = { bg: $id('cBg').value, bg2: $id('cBg2').value, bg3: $id('cBg3').value, accent: $id('cAcc').value, accent2: $id('cAcc2').value };
+    buildPalGrid(); preview();
+  }));
+  $id('btnRestorePal').addEventListener('click', () => { doc.custom = null; buildPalGrid(); syncColorInputs(); preview(); toast('已恢复预设配色'); });
+
+  /* ---------- Tab3 标题 · AB ---------- */
+  const SLOT_META = { domain: '主体', state: '状态', thing: '议题', insight: '洞察', anti: '反义词', verb: '动词', verb2: '动词2', advice: '主张', solarterm: '节气' };
+  let slotsV = LS.get('gf_slots', {}), cands = [], picked = [];
+  function buildSlots() {
+    $id('slots').innerHTML = Object.keys(POOL).map(k => `
+      <div class="field"><label>${SLOT_META[k] || k}</label>
+        <input type="text" list="dl_${k}" data-slot="${k}" value="${esc(slotsV[k] || '')}" placeholder="${esc(POOL[k].slice(0, 3).join(' / '))}">
+        <datalist id="dl_${k}">${POOL[k].map(v => `<option value="${esc(v)}">`).join('')}</datalist>
+      </div>`).join('');
+    $id('slots').querySelectorAll('[data-slot]').forEach(el => el.addEventListener('input', () => { slotsV[el.dataset.slot] = el.value; LS.set('gf_slots', slotsV); }));
+  }
+  $id('btnFillDemo').addEventListener('click', () => {
+    slotsV = { domain: '日子', state: '自己的', thing: '焦虑', insight: '心不肯安在当下', anti: '风口', verb: '追', verb2: '留给', advice: '慢慢来', solarterm: '处暑' };
+    LS.set('gf_slots', slotsV); buildSlots(); toast('已填入示例关键词');
+  });
+  $id('btnGen').addEventListener('click', () => {
+    cands = genTitles(slotsV, 8); picked = [];
+    renderCands();
+    if (!cands.length) toast('没组合出标题，试试多填几个槽位');
+  });
+  function renderCands() {
+    $id('cands').innerHTML = cands.length ? cands.map((t, i) =>
+      `<div class="cand${picked.indexOf(i) >= 0 ? ' on' : ''}" data-i="${i}"><span class="tx">${esc(t)}</span><span class="hint">${picked.indexOf(i) >= 0 ? '已选 ' + 'AB'[picked.indexOf(i)] : '点击选择'}</span></div>`).join('')
+      : '<div class="empty">点「生成候选」产出标题 → 勾选 2 个做 AB 对比</div>';
+    $id('cands').querySelectorAll('.cand').forEach(el => el.addEventListener('click', () => {
+      const i = +el.dataset.i, at = picked.indexOf(i);
+      if (at >= 0) picked.splice(at, 1);
+      else if (picked.length < 2) picked.push(i);
+      else { picked.shift(); picked.push(i); }
+      renderCands(); renderAb();
+    }));
+  }
+  function renderAb() {
+    $id('abTxtA').textContent = picked[0] != null ? cands[picked[0]] : '（未选 A）';
+    $id('abTxtB').textContent = picked[1] != null ? cands[picked[1]] : '（未选 B）';
+  }
+  function buildAbTpl() {
+    $id('abTpl').innerHTML = LKEYS.map(k => `<option value="${k}">${LAYOUTS[k].name}</option>`).join('');
+    $id('abTpl').value = '01';
+  }
+  function drawAbFrame(ifr, text) {
+    const s = sizeOf(doc);
+    const d = Object.assign({}, doc, { layout: $id('abTpl').value, title: String(text || '').replace(/，/g, '，\n') });
+    ['01', '05'].indexOf($id('abTpl').value) >= 0 && (d.accentWord = '');
+    const box = ifr.parentNode;
+    if (!box.clientWidth) return; /* 容器不可见时跳过，切回 Tab 后重新渲染即可 */
+    const avail = Math.max(40, (box.clientWidth || 0) - 20); /* .abbox 左右 padding 各 10；窄屏不设保底防溢出 */
+    const k = Math.min(avail / s.w, 1);
+    ifr.style.width = s.w + 'px'; ifr.style.height = s.h + 'px'; ifr.style.transform = 'scale(' + k + ')';
+    ifr.style.marginRight = (s.w * k - s.w) + 'px'; /* transform 不改布局盒，用负边距抵消，保证居中且不横向溢出 */
+    box.style.height = (s.h * k + 20) + 'px';
+    ifr.srcdoc = buildPoster(d);
+  }
+  $id('btnAbRender').addEventListener('click', () => {
+    if (picked.length < 2) { toast('请先勾选 2 个候选标题'); return; }
+    drawAbFrame($id('abFrameA'), cands[picked[0]]);
+    drawAbFrame($id('abFrameB'), cands[picked[1]]);
+    toast('A / B 已渲染');
+  });
+  function abResult(win) {
+    if (picked.length < 2) { toast('请先勾选 2 个候选标题'); return; }
+    const rec = { ts: Date.now(), layout: $id('abTpl').value, candidates: [cands[picked[0]], cands[picked[1]]], winner: win, note: $id('abNote').value || '' };
+    const arr = LS.get(K.ab, []); arr.unshift(rec); LS.set(K.ab, arr);
+    abWinner = rec.candidates[win];
+    renderAbLog(); toast('已记录：' + 'AB'[win] + ' 胜');
+  }
+  $id('btnWinA').addEventListener('click', () => abResult(0));
+  $id('btnWinB').addEventListener('click', () => abResult(1));
+  function renderAbLog() {
+    const arr = LS.get(K.ab, []);
+    $id('abLog').innerHTML = arr.length ? `<table><tr><th>时间</th><th>A</th><th>B</th><th>胜</th><th>备注</th><th></th></tr>` +
+      arr.slice(0, 30).map((r, i) => `<tr>
+        <td>${new Date(r.ts).toLocaleString()}</td><td>${esc(r.candidates[0])}</td><td>${esc(r.candidates[1])}</td>
+        <td><b style="color:var(--acc)">${r.winner === 0 ? 'A' : 'B'}</b></td><td>${esc(r.note)}</td>
+        <td><button class="btn sm" data-use="${i}">套用</button></td></tr>`).join('') + '</table>'
+      : '<div class="empty">暂无 AB 记录。选 2 个候选 → 渲染 → 点 A胜 / B胜</div>';
+    $id('abLog').querySelectorAll('[data-use]').forEach(el => el.addEventListener('click', () => {
+      const r = LS.get(K.ab, [])[+el.dataset.use];
+      const win = r.candidates[r.winner];
+      doc.layout = r.layout; doc.title = win; doc.accentWord = '';
+      if (!doc.items || !doc.items.length) doc.items = JSON.parse(JSON.stringify(SAMPLES[r.layout].items || []));
+      abWinner = win;
+      buildTplGrid(); buildForm(); preview(); save();
+      document.querySelector('.tabs button[data-tab="1"]').click();
+      toast('已套用胜出标题到 Tab1');
+    }));
+  }
+
+  /* ---------- 胜出标题桥接（AB 胜出 → 应用到工作台；跨 Tab 同步由外壳派发 StorageEvent） ---------- */
+  let abWinner = null; /* 最近一次 A/B 胜出的候选标题 */
+  function applyWinnerTitle(t) {
+    if (!t) { toast('请先在「AB 对比」里点 A 胜 / B 胜 确定胜出标题'); return; }
+    doc.title = t;
+    buildForm(); preview(); save();
+    try { localStorage.setItem('gf_ab_winner', t); } catch (e) {}
+    document.querySelector('.tabs button[data-tab="1"]').click();
+    toast('已应用胜出标题：' + t);
+  }
+  $id('btnApplyWinner').addEventListener('click', () => applyWinnerTitle(abWinner));
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'gf_ab_winner' && e.newValue) {
+      doc.title = e.newValue;
+      buildForm(); preview();
+      document.querySelector('.tabs button[data-tab="1"]').click();
+    }
+  });
+
+  /* ---------- Tab4 看板（原生 SVG） ---------- */
+  function barChart(data, labels, color) {
+    if (!data.length || !data.some(v => v > 0)) return '<div class="empty">暂无数据</div>';
+    const max = Math.max.apply(null, data), w = 100, bw = w / data.length * .6;
+    return `<svg viewBox="0 0 100 60" style="width:100%;height:180px">
+      ${data.map((v, i) => {
+        const h = v / max * 44, x = (i + .5) * (w / data.length) - bw / 2;
+        return `<rect x="${x}" y="${52 - h}" width="${bw}" height="${h}" fill="${color}" opacity=".85" rx="1"/>
+          <text x="${(i + .5) * (w / data.length)}" y="58.5" font-size="3.2" text-anchor="middle" fill="#6a635a">${esc(labels[i])}</text>
+          <text x="${(i + .5) * (w / data.length)}" y="${50 - h}" font-size="3.4" text-anchor="middle" fill="#2b2b2b">${v}</text>`;
+      }).join('')}</svg>`;
+  }
+  function donut(data, labels, colorsArr) {
+    const tot = data.reduce((a, b) => a + b, 0);
+    if (!tot) return '<div class="empty">暂无数据</div>';
+    let a0 = 0, R = 30, cx = 40, cy = 40, seg = '';
+    data.forEach((v, i) => {
+      if (!v) return;
+      const frac = v / tot, a1 = a0 + frac * Math.PI * 2;
+      const large = frac > .5 ? 1 : 0;
+      const p = (r, ang) => [cx + r * Math.sin(ang), cy - r * Math.cos(ang)];
+      const [x1, y1] = p(R, a0), [x2, y2] = p(R, a1), [x3, y3] = p(R * .58, a1), [x4, y4] = p(R * .58, a0);
+      seg += `<path d="M${x1} ${y1} A${R} ${R} 0 ${large} 1 ${x2} ${y2} L${x3} ${y3} A${R * .58} ${R * .58} 0 ${large} 0 ${x4} ${y4} Z" fill="${colorsArr[i] || '#ccc'}" opacity=".85"/>`;
+      a0 = a1;
+    });
+    const legend = data.map((v, i) => v ? `<div style="font-size:12px;display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;background:${colorsArr[i]};display:inline-block;border-radius:2px"></span>${esc(labels[i])} ${v}</div>` : '').join('');
+    return `<div style="display:flex;gap:14px;align-items:center"><svg viewBox="0 0 80 80" style="width:120px;height:120px;flex:none">${seg}</svg><div>${legend}</div></div>`;
+  }
+  function lineChart(days, vals) {
+    if (!vals.some(v => v > 0)) return '<div class="empty">暂无数据</div>';
+    const max = Math.max.apply(null, vals) || 1;
+    const pts = vals.map((v, i) => `${(i / (vals.length - 1 || 1)) * 100},${50 - v / max * 42}`).join(' ');
+    return `<svg viewBox="0 0 100 56" style="width:100%;height:180px">
+      <polyline points="${pts}" fill="none" stroke="#A8322A" stroke-width="1.2"/>
+      ${vals.map((v, i) => v ? `<circle cx="${(i / (vals.length - 1 || 1)) * 100}" cy="${50 - v / max * 42}" r="1" fill="#A8322A"/>` : '').join('')}
+      <text x="0" y="55" font-size="3.4" fill="#6a635a">${esc(days[0])}</text>
+      <text x="100" y="55" font-size="3.4" text-anchor="end" fill="#6a635a">${esc(days[days.length - 1])}</text>
+      <text x="50" y="6" font-size="3.4" text-anchor="middle" fill="#6a635a">峰值 ${max}</text></svg>`;
+  }
+  function renderDash() {
+    const his = LS.get(K.his, []), lib = LS.get(K.lib, []), abs = LS.get(K.ab, []);
+    const tplN = LKEYS.map(k => his.filter(r => r.layout === k).length);
+    const palN = PALETTES.map((p, i) => his.filter(r => r.palette === i).length);
+    const palColors = PALETTES.map(p => p.accent);
+    const topT = LAYOUTS[(his.length ? LKEYS.reduce((a, b) => tplN[LKEYS.indexOf(b)] > tplN[LKEYS.indexOf(a)] ? b : a) : '01')].name;
+    const topP = palN.indexOf(Math.max.apply(null, palN.concat([-1])));
+    const winA = abs.filter(r => r.winner === 0).length;
+    $id('kpis').innerHTML = [
+      ['累计出图', his.length], ['文案库', lib.length],
+      ['最常用版式', topT], ['最常用配色', topP >= 0 ? PALETTES[topP].name : '—'],
+      ['AB 样本', abs.length], ['A 胜', abs.length ? Math.round(winA / abs.length * 100) + '%' : '—']
+    ].map(([l, n]) => `<div class="kpi"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+    $id('chTpl').innerHTML = barChart(tplN, LKEYS.map(k => k + ' ' + LAYOUTS[k].name.slice(0, 4)), '#A8322A');
+    $id('chPal').innerHTML = donut(palN, PALETTES.map(p => p.name), palColors);
+    const days = [], vals = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+      const next = d.getTime() + 86400000;
+      days.push((d.getMonth() + 1) + '/' + d.getDate());
+      vals.push(his.filter(r => r.ts >= d.getTime() && r.ts < next).length);
+    }
+    $id('chTrend').innerHTML = lineChart(days, vals);
+    $id('chAb').innerHTML = donut([winA, abs.length - winA], ['A 胜', 'B 胜'], ['#A8322A', '#9A5B33']);
+    const libRows = lib.length ? `<table><tr><th>名称</th><th>版式</th><th>时间</th><th></th></tr>` +
+      lib.map((r, i) => `<tr><td>${esc(r.name)}</td><td>${esc((LAYOUTS[r.doc && r.doc.layout] || {}).name || '—')}</td>
+        <td>${new Date(r.ts).toLocaleString()}</td>
+        <td><button class="btn sm" data-load="${i}">载入</button> <button class="btn sm" data-del="${i}">删除</button></td></tr>`).join('') + '</table>'
+      : '<div class="empty">文案库为空。在 Tab1 编辑好文案后点「☆ 收藏文案」即可沉淀到这里</div>';
+    $id('libTable').innerHTML = libRows;
+    $id('libTable').querySelectorAll('[data-load]').forEach(el => el.addEventListener('click', () => {
+      const r = lib[+el.dataset.load];
+      doc = JSON.parse(JSON.stringify(r.doc));
+      syncSizeSeg(); buildTplGrid(); buildPalGrid(); buildForm(); preview(); syncColorInputs();
+      document.querySelector('.tabs button[data-tab="1"]').click(); toast('已载入「' + r.name + '」');
+    }));
+    $id('libTable').querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => {
+      const arr = LS.get(K.lib, []); const nm = arr[+el.dataset.del].name;
+      arr.splice(+el.dataset.del, 1); LS.set(K.lib, arr); renderDash(); toast('已删除「' + nm + '」');
+    }));
+  }
+  $id('btnClearHist').addEventListener('click', () => { if (confirm('确定清空出图历史？文案库与 AB 记录不受影响。')) { LS.set(K.his, []); renderDash(); toast('已清空出图历史'); } });
+
+  /* ---------- 配图面板 ---------- */
+  function wireImg() {
+    const on = $id('imgOn'), file = $id('imgFile'), url = $id('imgUrl'), cap = $id('imgCap'), clr = $id('imgClear');
+    function sync() {
+      doc.showImg = on.checked;
+      doc.img = (url.value || '').trim() || (file.dataset.data || '');
+      doc.imgCaption = cap.value;
+      schedule();
+    }
+    on.addEventListener('change', sync);
+    cap.addEventListener('input', sync);
+    url.addEventListener('input', () => { file.value = ''; file.dataset.data = ''; sync(); });
+    file.addEventListener('change', () => {
+      const f = file.files && file.files[0];
+      if (!f) return;
+      if (f.size > 5 * 1024 * 1024) { alert('图片过大（>5MB），建议压缩后再上传'); return; }
+      const r = new FileReader();
+      r.onload = () => { file.dataset.data = r.result; url.value = ''; sync(); };
+      r.readAsDataURL(f);
+    });
+    clr.addEventListener('click', () => {
+      doc.showImg = false; doc.img = ''; doc.imgCaption = '';
+      on.checked = false; file.value = ''; file.dataset.data = ''; url.value = ''; cap.value = ''; schedule();
+    });
+    on.checked = !!doc.showImg;
+    cap.value = doc.imgCaption || '';
+    if (doc.img && doc.img.indexOf('data:') === 0) { file.dataset.data = doc.img; }
+    else if (doc.img) { url.value = doc.img; }
+  }
+
+  /* ---------- 初始化 ---------- */
+  syncSizeSeg(); buildTplGrid(); buildPalGrid(); buildForm(); buildPalCards(); syncColorInputs(); wireImg();
+  buildSlots(); buildAbTpl(); renderAbLog(); preview();
+})();
+</script>
+
+<script>
+(function(){
+  /* 多文件开发模式：?tab=N 打开对应内部 Tab，并隐藏内层导航栏（避免与外壳顶栏重复） */
+  function apply(){
+    try{
+      var p = new URLSearchParams(location.search);
+      var tab = p.get('tab') || '1';
+      var b = document.querySelector('.tabs button[data-tab="'+tab+'"]');
+      if(b) b.click();
+      var s = document.createElement('style');
+      s.textContent = '.tabs{display:none!important}';
+      document.head.appendChild(s);
+    }catch(e){}
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(apply,0); });
+  } else { setTimeout(apply,0); }
+})();
+</script>
+<!--__DEF_TAB__-->
+</body>
+</html>

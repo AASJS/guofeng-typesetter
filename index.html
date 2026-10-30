@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>公众号排版助手 · 多 Tab 工作站</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="workstation">
+  <div class="topbar">
+    <div class="logo">公众号排版助手 <small>多 Tab 工作站</small></div>
+    <div class="tabs" id="tabs" role="tablist" aria-label="工作站导航">
+      <button role="tab" data-tab="paiban" class="active" aria-selected="true" aria-controls="tab-paiban" tabindex="0">排版</button>
+      <button role="tab" data-tab="peise" aria-selected="false" aria-controls="tab-peise" tabindex="-1">配色</button>
+      <button role="tab" data-tab="biaoti" aria-selected="false" aria-controls="tab-biaoti" tabindex="-1">标题生成与AB测试</button>
+      <button role="tab" data-tab="kanban" aria-selected="false" aria-controls="tab-kanban" tabindex="-1">历史数据看板</button>
+      <button role="tab" data-tab="guofeng" aria-selected="false" aria-controls="tab-guofeng" tabindex="-1">国风卡片</button>
+    </div>
+  </div>
+
+  <div class="panels">
+    <!-- 排版：嵌入国风排版工作台（默认打开内部 Tab① 排版） -->
+    <section role="tabpanel" class="panel active wb-panel" id="tab-paiban">
+      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="1" title="国风排版工作台 · 排版"></iframe>
+      <div class="wb-loading">加载国风排版工作台…</div>
+    </section>
+    <!-- 配色 / 标题AB / 看板：同一份工作台，分别默认打开对应内部 Tab；内层 Tab 栏已隐藏，避免与顶栏重复 -->
+    <section role="tabpanel" class="panel wb-panel" id="tab-peise">
+      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="2" title="国风排版工作台 · 配色"></iframe>
+      <div class="wb-loading">加载国风排版工作台…</div>
+    </section>
+    <section role="tabpanel" class="panel wb-panel" id="tab-biaoti">
+      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="3" title="国风排版工作台 · 标题AB"></iframe>
+      <div class="wb-loading">加载国风排版工作台…</div>
+    </section>
+    <section role="tabpanel" class="panel wb-panel" id="tab-kanban">
+      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="4" title="国风排版工作台 · 看板"></iframe>
+      <div class="wb-loading">加载国风排版工作台…</div>
+    </section>
+    <section role="tabpanel" class="panel" id="tab-guofeng"><div class="panel-inner" style="padding:0;height:100%;display:flex;flex-direction:column"><div id="guofeng-mount-2" style="flex:1;min-height:0"></div></div></section>
+  </div>
+  </div>
+
+  <!-- 引擎（国风卡片）：先于外壳脚本声明，defer 保证按序执行 -->
+  <script src="guofeng-card-engine.js" defer></script>
+  <script src="main.js" defer></script>
+</body>
+</html>

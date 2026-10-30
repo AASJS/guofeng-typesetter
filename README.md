@@ -28,6 +28,7 @@
 浏览器打开 `guofeng-card-studio.html` —— 选风格、填文案、实时预览、下载/复制 HTML，或切到「公众号内嵌模式」拿内联版本。
 
 ### 方式二：嵌进你的多 Tab 工作站
+工作站已提供**双交付**：可读多文件工程（`index.html` + `style.css` + `main.js` + `workbench.html`，日常改这个）+ `python3 build_single.py` 一键构建自包含单文件 `workstation-integration.html`（离线分发用，含键盘可达/超时重试/移动端适配/胜出标题桥接）。
 ```html
 <!-- 1) 引入引擎 -->
 <script src="guofeng-card-engine.js"></script>
@@ -108,7 +109,10 @@ guofeng-typesetter/
 ├── CHANGELOG.md                      # v1.0.0 → v3.1.0 全量版本记录
 ├── guofeng-card-engine.js            # 可挂载引擎（数据 + 5 模板 + API）
 ├── guofeng-card-studio.html          # 独立单文件版（加载引擎 + 挂载）
-├── workstation-integration.html      # 多 Tab 工作站接入 demo
+├── workstation-integration.html      # 多 Tab 工作站（build_single.py 产出的自包含单文件）
+├── index.html / style.css / main.js  # 工作站外壳多文件工程（可读源码）
+├── workbench.html                    # 国风排版工作台（未压缩源码，构建时内嵌）
+├── build_single.py                   # 单文件构建脚本（python3 build_single.py）
 ├── references/
 │   ├── themes.json                   # ★ 唯一可编辑数据源（配色/字体/装饰/字段/示例）
 │   ├── inspiration.json              # ★ 灵感库数据源（来源 + 灵感条目，可更新）

@@ -7,6 +7,26 @@
 
 ---
 
+## [3.4.0] - 2026-10-30
+
+### Added
+- **双交付工程结构**：工作站拆分为可读多文件工程（`index.html` + `style.css` + `main.js` + `workbench.html` + `guofeng-card-engine.js`）+ 构建脚本 `build_single.py`（产出自包含单文件版）。加新功能改多文件，发布跑一次构建，不再手改单文件。
+- **外壳第一批改造**（移植自本地工作站版本）：
+  - 键盘可达性：`role=tablist/tab/tabpanel` + `aria-selected` + roving tabindex + ←/→/Home/End 切换 + `:focus-visible` 焦点描边
+  - iframe 加载超时保护：15s 超时提示 + 一键重试
+  - 移动端：Tab `nowrap` 横滑 + 44px 最小触达高度
+  - 胜出标题桥接：Tab3「应用胜出标题 ▶ 工作台」一键把 AB 胜出标题写回 Tab1 并跨 Tab 同步（`gf_ab_winner` + StorageEvent）
+- **工作台增量合并**：未压缩 `workbench.html` 合入「应用胜出标题」按钮 + 跨 Tab 标题同步监听；Tab2 新增「配色 · 字体搭配参考卡（定稿 6 组）」折叠面板。
+
+### Changed
+- `workstation-integration.html` 改为 `build_single.py` 构建产物（含 srcdoc 注入 + 内层导航隐藏），体积 346K。
+- 单文件构建自动转义引擎注释中的 `</script>`，避免内联截断。
+
+### Verified
+- 无头 Chromium 全量回归：5 Tab 切换 / ARIA 翻转 / 方向键 / `?tab` 精准定位 / srcdoc 注入定位 / 胜出标题桥接回填 / 国风卡片挂载 / localStorage 读写 / 390px 全 Tab 无横向溢出。
+
+---
+
 ## [3.3.0] - 2026-10-29
 
 ### Added
