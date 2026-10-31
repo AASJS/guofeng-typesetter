@@ -377,6 +377,17 @@ tr:hover td{ background:rgba(168,50,42,.04); }
           <div id="aiMeta"></div>
           <div class="hint" style="margin-top:8px;line-height:1.8;">流程：标题/摘要 → 公众号后台；封面提示词 → 生图（3.35:1）；每张卡的配图提示词 → 生图后用「配图」上传回卡片；卡片组 HTML 在⑤导出。</div>
         </div>
+        <div class="card" style="margin-top:14px;">
+          <h3>④ 正文排版 <span class="hint">全文 → 公众号内联 HTML，粘贴即用</span></h3>
+          <div class="hint" style="margin-bottom:8px;line-height:1.8;">素材同上（⑤ 全文 / ① 单独粘贴）。风格跟随「②配色」当前配色，按中文排印规范生成：行距 1.75、标题收紧字距 + 强调色竖线、引文底色块、段落两端对齐；全部内联样式，公众号编辑器不掉格式。</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn pri" id="btnWpBuild">⚙️ 生成正文排版</button>
+            <button class="btn" id="btnWpCopy">📋 复制正文 HTML</button>
+            <button class="btn" id="btnWpPrev">👁 预览</button>
+          </div>
+          <div id="wpPrev" style="display:none;background:#fff;border:1px solid #ddd4c4;border-radius:10px;padding:20px 18px;max-width:520px;margin-top:12px;overflow:auto;max-height:480px;"></div>
+          <div class="hint" id="wpHint" style="margin-top:8px;"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1468,7 +1479,7 @@ if (typeof document !== 'undefined') (function () {
 
   /* ---------- Tab6 AI 排版 · 发布：提示词往返协议 + JSON 导入 + 物料一键复制 ---------- */
   const AI_KEY = 'gf_ai_publish';
-  const AIP = { article: null, style: null, src: '' };
+  const AIP = { article: null, style: null, src: '', wpHtml: '' };
 
   function aiCopy(text, label) {
     const done = () => toast('已复制' + (label || ''));
@@ -1603,8 +1614,55 @@ if (typeof document !== 'undefined') (function () {
     lfRender(); aiRender(); lfPersist(); aiPersist();
     toast('已生成「' + domain.label + '」风格提示词（联动配色·' + (PALETTES[doc.palette] || {}).name + '，建议再让 AI 精修）');
   }
+  /* —— ④ 正文排版：全文 → 公众号内联 HTML（风格跟随当前配色 + 中文排印规范） —— */
+  function wpBuild(src) {
+    const pal = PALETTES[doc.palette] || PALETTES[0];
+    const ACC = pal.accent || '#A8322A', BG2 = pal.bg2 || '#F2E9DA', INK = '#3f3f3f';
+    const bo = (s) => esc(s).replace(/\*\*([^*]+)\*\*/g, '<strong style="color:' + ACC + ';">$1</strong>');
+    const H2 = (t) => '<h2 style="margin:34px 0 14px;font-size:19px;line-height:1.4;letter-spacing:-.02em;font-weight:700;color:' + INK + ';border-left:4px solid ' + ACC + ';padding-left:10px;">' + bo(t) + '</h2>';
+    const H3 = (t) => '<h3 style="margin:26px 0 12px;font-size:16px;font-weight:700;color:' + ACC + ';letter-spacing:-.01em;">' + bo(t) + '</h3>';
+    const out = []; let para = [], list = [], quote = [];
+    const flushP = () => { if (para.length) { out.push('<p style="margin:0 0 18px;text-align:justify;">' + bo(para.join('<br>')) + '</p>'); para = []; } };
+    const flushL = () => { if (list.length) { out.push('<ul style="margin:0 0 18px;padding-left:20px;">' + list.map(li => '<li style="margin-bottom:8px;line-height:1.7;">' + bo(li) + '</li>').join('') + '</ul>'); list = []; } };
+    const flushQ = () => { if (quote.length) { out.push('<blockquote style="margin:0 0 18px;padding:12px 14px;background:' + BG2 + ';border-left:3px solid ' + ACC + ';color:#6a6a6a;font-size:14px;line-height:1.7;">' + bo(quote.join('<br>')) + '</blockquote>'); quote = []; } };
+    const flushAll = () => { flushP(); flushL(); flushQ(); };
+    src.replace(/\r/g, '').split('\n').forEach(raw => {
+      const ln = raw.trim();
+      if (!ln) { flushAll(); return; }
+      const mh = ln.match(/^(#{1,3})\s+(.*)$/);
+      if (mh) { flushAll(); out.push(mh[1].length <= 2 ? H2(mh[2]) : H3(mh[2])); return; }
+      if (/^【.+】$/.test(ln)) { flushAll(); out.push(H2(ln.slice(1, -1))); return; }
+      if (/^[一二三四五六七八九十]+、\S{1,18}$/.test(ln)) { flushAll(); out.push(H2(ln)); return; }
+      if (/^\d+[.、]\s*\S/.test(ln) && ln.length <= 22) { flushAll(); out.push(H3(ln)); return; }
+      if (/^>\s?/.test(ln)) { flushP(); flushL(); quote.push(ln.replace(/^>\s?/, '')); return; }
+      if (/^「.+」$/.test(ln)) { flushP(); flushL(); quote.push(ln.slice(1, -1)); return; }
+      if (/^[-*•]\s+/.test(ln)) { flushP(); flushQ(); list.push(ln.replace(/^[-*•]\s+/, '')); return; }
+      flushL(); flushQ(); para.push(ln);
+    });
+    flushAll();
+    return '<section style="font-size:15px;line-height:1.75;letter-spacing:.5px;color:' + INK + ';">' + out.join('') + '</section>';
+  }
+  $id('btnWpBuild').addEventListener('click', () => {
+    const src = $id('lfText').value.trim() || $id('aiSrc').value.trim();
+    if (!src) { toast('先在⑤粘贴文章全文（或在本页①单独粘贴）'); return; }
+    AIP.wpHtml = wpBuild(src);
+    aiPersist(); aiRender();
+    $id('wpHint').textContent = '已生成 ' + (AIP.wpHtml.length / 1024).toFixed(1) + ' KB 内联 HTML（风格跟随「②配色」·' + (PALETTES[doc.palette] || {}).name + '），已加入物料区可一并复制';
+    toast('正文排版已生成，可「👁 预览」或直接复制');
+  });
+  $id('btnWpCopy').addEventListener('click', () => {
+    if (!AIP.wpHtml) { toast('先点「⚙️ 生成正文排版」'); return; }
+    aiCopy(AIP.wpHtml, '正文排版 HTML');
+  });
+  $id('btnWpPrev').addEventListener('click', () => {
+    const p = $id('wpPrev');
+    if (!AIP.wpHtml) { toast('先点「⚙️ 生成正文排版」'); return; }
+    if (p.style.display === 'none') { p.innerHTML = AIP.wpHtml; p.style.display = 'block'; }
+    else { p.style.display = 'none'; }
+  });
+
   function aiPersist() {
-    try { LS.set(AI_KEY, { article: AIP.article, style: AIP.style, src: $id('aiSrc').value }); } catch (e) {}
+    try { LS.set(AI_KEY, { article: AIP.article, style: AIP.style, src: $id('aiSrc').value, wpHtml: AIP.wpHtml || '' }); } catch (e) {}
   }
   function aiRows() {
     const rows = [];
@@ -1614,11 +1672,12 @@ if (typeof document !== 'undefined') (function () {
       rows.push(['封面提示词', AIP.article.coverPrompt || '']);
     }
     LF.cards.forEach(c => { if (c.imgPrompt) rows.push(['卡' + c.no + ' 配图提示词', c.imgPrompt]); });
+    if (AIP.wpHtml) rows.push(['正文排版 HTML（粘贴到公众号编辑器正文）', AIP.wpHtml]);
     return rows;
   }
   function aiRender() {
     const box = $id('aiMeta');
-    if (!AIP.article && !LF.cards.some(c => c.imgPrompt)) {
+    if (!AIP.article && !AIP.wpHtml && !LF.cards.some(c => c.imgPrompt)) {
       box.innerHTML = '<div class="hint">还没有物料。路径一：点「复制 AI 提示词」→ 喂给 AI → JSON 粘到②导入；路径二：⑤拆卡后点「本地兜底提示词」。</div>';
       return;
     }
@@ -1656,6 +1715,7 @@ if (typeof document !== 'undefined') (function () {
       AIP.article = savedAi.article || null;
       AIP.style = savedAi.style || null;
       if (savedAi.src) $id('aiSrc').value = savedAi.src;
+      if (savedAi.wpHtml) AIP.wpHtml = savedAi.wpHtml;
       aiRender();
     }
   } catch (e) {}
