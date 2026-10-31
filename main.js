@@ -6,6 +6,49 @@
 (function () {
   'use strict';
 
+  /* ===== 0) 外壳主题（仅外壳层：令牌在 style.css --c-*；工作台纸面色不受影响） =====
+     三态循环：auto（跟随系统）→ light → dark，持久化到 localStorage */
+  function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function safeSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+  const THEME_KEY = 'gf_shell_theme';
+  const THEMES = ['auto', 'light', 'dark'];
+  const THEME_META = {
+    auto:  { icon: '🌗', label: '外壳主题：跟随系统' },
+    light: { icon: '☀️', label: '外壳主题：浅色（工作台不受影响）' },
+    dark:  { icon: '🌙', label: '外壳主题：暗色' }
+  };
+
+  function applyTheme(mode) {
+    const root = document.documentElement;
+    if (mode === 'light' || mode === 'dark') root.setAttribute('data-theme', mode);
+    else root.removeAttribute('data-theme');
+    const btn = document.getElementById('themeBtn');
+    if (btn) {
+      const meta = THEME_META[mode] || THEME_META.auto;
+      btn.textContent = meta.icon;
+      btn.title = meta.label;
+      btn.setAttribute('aria-label', meta.label);
+      btn.dataset.mode = mode;
+    }
+  }
+
+  function initTheme() {
+    const saved = safeGet(THEME_KEY);
+    applyTheme(THEMES.includes(saved) ? saved : 'auto');
+    const btn = document.getElementById('themeBtn');
+    if (!btn || btn.dataset.bound === '1') return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      const cur = btn.dataset.mode || 'auto';
+      const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
+      safeSet(THEME_KEY, next);
+      applyTheme(next);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initTheme);
+  else initTheme();
+
   /* ===== 1) Tab 切换（ARIA + roving tabindex + 键盘可达） ===== */
   const tabs = document.querySelectorAll('#tabs button');
   const panels = document.querySelectorAll('.panel');
@@ -56,7 +99,6 @@
      - iframe 常驻 .panels 容器（absolute 定位），移动 DOM 会导致 iframe 重载，因此永不挪动；
      - 切主 Tab = 切 holder 可见性 + postMessage 通知内层切 Tab（状态全保留，无闪烁）；
      - 首次进入加载 workbench.html?tab=1，15s 超时可重试；胜出标题桥接保留（load 后派发）。 */
-  function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   const WB_TIMEOUT = 15000; // iframe 加载超时阈值（ms）
   const WB_TABS = { paiban: '1', peise: '2', biaoti: '3', kanban: '4' };
 

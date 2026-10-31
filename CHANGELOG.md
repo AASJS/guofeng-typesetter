@@ -7,6 +7,12 @@
 
 ---
 
+## [3.6.0] - 2026-10-31
+
+### Added
+- **外壳语义令牌**：`style.css` 全部硬编码颜色抽取为 `--c-*` 语义令牌（bg / surface / elev / border / text / dim / faint / accent），工作台纸面色单独走 `--paper`（不随主题变）。改主题只动令牌定义，不碰具体规则。
+- **外壳主题切换**：顶栏 🌗 按钮，三态循环「跟随系统 → 浅色 → 暗色」，持久化到 `localStorage`（gf_shell_theme）；auto 态经 `prefers-color-scheme` 自动适配。**只影响外壳层**——工作台 iframe 与国风卡片保持纸面色卡设计，不受主题影响。
+
 ## [3.5.0] - 2026-10-31
 
 ### Added
