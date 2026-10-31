@@ -146,6 +146,7 @@ tr:hover td{ background:rgba(168,50,42,.04); }
     <button data-tab="2">② 配色</button>
     <button data-tab="3">③ 标题 · AB</button>
     <button data-tab="4">④ 看板</button>
+    <button data-tab="5">⑤ 长文拆卡</button>
   </div>
 
   <!-- ============ Tab1 排版 ============ -->
@@ -313,6 +314,38 @@ tr:hover td{ background:rgba(168,50,42,.04); }
       <div class="toolbar" style="margin:12px 0 0;">
         <button class="btn sm" id="btnClearHist">清空出图历史</button>
         <span class="hint">文案库与 AB 记录不会受影响</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Tab5 长文拆卡 ============ -->
+  <section class="panel" id="p5">
+    <div class="cols">
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>粘贴长文</h3>
+          <textarea id="lfText" rows="14" placeholder="粘贴公众号全文（1000+ 字也可以）。可识别的小标题写法：## 标题 /【标题】/ 一、标题 / 1. 标题 / 独立短行（不超过 20 字、不带标点）。全文没有小标题时按空行段落自动分组，每 2 段一卡。"
+            style="width:100%;font-family:inherit;font-size:13px;line-height:1.7;padding:10px;border:1px solid #ddd4c4;border-radius:8px;background:#fffdf8;color:inherit;resize:vertical;"></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn pri" id="btnLfSplit">✂️ 拆成卡片</button>
+            <button class="btn" id="btnLfExport">📦 导出全部卡片 HTML</button>
+            <button class="btn" id="btnLfClear">清空</button>
+            <span class="hint" id="lfStat"></span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>出卡设置</h3>
+          <div class="hint" style="line-height:1.9;">统一用「02 上下分栏卡」承载要点，沿用当前配色与尺寸——先在 ② 配色 里调好风格再回来拆。<br>
+          每张卡可「载入排版 ▶」到 Tab1 微调，用现有导出链路（PNG / 打印 PDF）出图；<br>
+          或一键「导出全部卡片 HTML」：一个离线文件里排好全部卡片，每张卡带独立「下载 PNG」按钮。</div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>卡片草案 <span class="hint" id="lfCount"></span></h3>
+          <div id="lfList"></div>
+          <div class="hint" style="margin-top:8px;line-height:1.8;">拆分规则：要点取每节前 3 条 6~40 字的完整句（在逗号处拆成上下两行）；金句优先含「不是…而是 / 真正的 / 所谓 / 本质上」的短句。最多 12 张，超出部分请分段拆。</div>
+        </div>
       </div>
     </div>
   </section>
@@ -1199,6 +1232,208 @@ if (typeof document !== 'undefined') (function () {
       toast('已套用胜出标题到 Tab1');
     }));
   }
+
+  /* ---------- Tab5 长文拆卡：粘贴全文 → 自动拆卡 → 逐卡微调 → 批量导出 ---------- */
+  const LF_KEY = 'gf_longform';
+  const LF = { cards: [] };
+  const LF_ORDS = ['壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖', '拾', '拾壹', '拾贰'];
+
+  function lfSentences(t) {
+    return String(t).split(/(?<=[。！？!?；;])/).map(x => x.trim()).filter(Boolean);
+  }
+  function lfIsHead(t) {
+    let m = t.match(/^#{1,4}\s*(.{1,30})$/); if (m) return m[1];
+    m = t.match(/^【(.{1,30})】$/); if (m) return m[1];
+    m = t.match(/^[一二三四五六七八九十]{1,3}[、.．]\s*(.{1,30})$/); if (m) return m[1];
+    m = t.match(/^\d{1,2}[、.．]\s*(.{1,30})$/); if (m) return m[1];
+    if (t.length <= 20 && !/[，。；！？、,;.!?"“”’‘]/.test(t)) return t;
+    return null;
+  }
+  function lfGolden(sents) {
+    const cands = sents.filter(x => x.length >= 8 && x.length <= 34);
+    const hit = cands.find(x => /(不是.{1,14}而是|真正的|所谓|本质上|长期主义|反共识|慢慢来|与其.{1,10}不如)/.test(x));
+    return ((hit || cands[cands.length - 1] || sents[0] || '').replace(/[。；]$/, ''));
+  }
+  function lfPoints(sents) {
+    const out = [];
+    for (const x of sents) {
+      const clean = x.replace(/[。]$/, '');
+      if (clean.length >= 6 && clean.length <= 40) out.push(clean);
+      if (out.length >= 3) break;
+    }
+    return out;
+  }
+  function lfSplit(text) {
+    const lines = String(text).replace(/\r/g, '').split('\n');
+    const sections = [];
+    let cur = null;
+    for (const raw of lines) {
+      const t = raw.trim();
+      if (!t) continue;
+      const h = lfIsHead(t);
+      if (h !== null) { cur = { title: h, body: [] }; sections.push(cur); }
+      else { if (!cur) { cur = { title: '', body: [] }; sections.push(cur); } cur.body.push(t); }
+    }
+    /* 没识别到小标题：按空行段落分组，每 2 段一卡 */
+    if (sections.length === 1 && !sections[0].title) {
+      const paras = String(text).replace(/\r/g, '').split(/\n\s*\n+/).map(x => x.trim()).filter(Boolean);
+      if (paras.length >= 2) {
+        sections.length = 0;
+        for (let i = 0; i < paras.length && sections.length < 12; i += 2) {
+          const grp = paras.slice(i, i + 2).join('\n');
+          const first = lfSentences(grp)[0] || '';
+          sections.push({ title: first.replace(/[。！？]$/, '').slice(0, 14), body: [grp] });
+        }
+      }
+    }
+    return sections.slice(0, 12).map((sec, i) => {
+      const sents = lfSentences(sec.body.join(''));
+      const pts = lfPoints(sents);
+      /* 金句避开已选要点，不够再回退全句池 */
+      const rest = sents.filter(x => !pts.includes(x.replace(/[。]$/, '')));
+      return {
+        no: String(i + 1).padStart(2, '0'),
+        title: (sec.title || ('要点 ' + (i + 1))).slice(0, 16),
+        points: pts,
+        golden: lfGolden(rest) || lfGolden(sents)
+      };
+    }).filter(c => c.points.length || c.golden);
+  }
+  function lfItems(c) {
+    return c.points.map((p, j) => {
+      const k = p.indexOf('，');
+      const a = k > 0 ? p.slice(0, k) : p;
+      const b = k > 0 ? p.slice(k + 1).replace(/[。]$/, '') : '';
+      return { ord: LF_ORDS[j] || String(j + 1), title: '', desc: a, desc2: b };
+    });
+  }
+  function lfMakeDoc(c, total) {
+    return Object.assign({}, doc, {
+      layout: '02',
+      title: c.title,
+      subtitle: c.no + ' / ' + String(total).padStart(2, '0'),
+      py: '',
+      accentWord: '',
+      items: lfItems(c)
+    });
+  }
+  function lfPersist() {
+    try { LS.set(LF_KEY, { text: $id('lfText').value, cards: LF.cards }); } catch (e) {}
+  }
+  function lfRender() {
+    const box = $id('lfList');
+    if (!LF.cards.length) {
+      box.innerHTML = '<div class="hint">还没有卡片。左侧粘贴全文 → 点「✂️ 拆成卡片」。小标题写法见占位提示；没有小标题就按空行段落分组。</div>';
+      $id('lfCount').textContent = '';
+      return;
+    }
+    $id('lfCount').textContent = '共 ' + LF.cards.length + ' 张（' + LF.cards[0].no + ' ~ ' + String(LF.cards.length).padStart(2, '0') + '）';
+    box.innerHTML = LF.cards.map((c, i) =>
+      '<div style="border:1px solid #e5dcc9;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fffdf8;">'
+      + '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">'
+      + '<span style="font-size:12px;color:#9a8f80;white-space:nowrap;">' + c.no + '</span>'
+      + '<input data-lf="title" data-i="' + i + '" value="' + esc(c.title) + '" style="flex:1;min-width:0;padding:6px 8px;border:1px solid #ddd4c4;border-radius:6px;font-family:inherit;font-size:13px;">'
+      + '<button class="btn sm pri" data-lfload="' + i + '">载入排版 ▶</button></div>'
+      + c.points.map((p, j) => '<input data-lf="pt" data-i="' + i + '" data-j="' + j + '" value="' + esc(p) + '" placeholder="要点 ' + (j + 1) + '" style="width:100%;padding:5px 8px;border:1px solid #e5dcc9;border-radius:6px;font-family:inherit;font-size:12px;margin-bottom:4px;">').join('')
+      + '<input data-lf="golden" data-i="' + i + '" value="' + esc(c.golden) + '" placeholder="金句（可留空）" style="width:100%;padding:5px 8px;border:1px solid #e5dcc9;border-radius:6px;font-family:inherit;font-size:12px;"></div>'
+    ).join('');
+    box.querySelectorAll('input[data-lf]').forEach(inp => inp.addEventListener('input', () => {
+      const c = LF.cards[+inp.dataset.i]; if (!c) return;
+      if (inp.dataset.lf === 'title') c.title = inp.value;
+      else if (inp.dataset.lf === 'golden') c.golden = inp.value;
+      else c.points[+inp.dataset.j] = inp.value;
+      lfPersist();
+    }));
+    box.querySelectorAll('[data-lfload]').forEach(b => b.addEventListener('click', () => lfLoad(+b.dataset.lfload)));
+  }
+  function lfLoad(i) {
+    const c = LF.cards[i]; if (!c) return;
+    doc.layout = '02';
+    doc.title = c.title;
+    doc.subtitle = c.no + ' / ' + String(LF.cards.length).padStart(2, '0');
+    doc.py = ''; doc.accentWord = '';
+    doc.items = lfItems(c);
+    buildTplGrid(); buildForm(); preview(); save();
+    document.querySelector('.tabs button[data-tab="1"]').click();
+    toast('已载入第 ' + c.no + ' 张卡 → Tab1 微调后用现有导出');
+  }
+  function lfExport() {
+    if (!LF.cards.length) { toast('先拆分出卡片再导出'); return; }
+    const total = LF.cards.length;
+    const metas = LF.cards.map(c => {
+      const d = lfMakeDoc(c, total);
+      const sz = sizeOf(d);
+      const h = buildPoster(d);
+      const css = (h.match(/<style>([\s\S]*?)<\/style>/) || ['', ''])[1].replace(':root{', '.gfholder{');
+      const body = (h.match(/<body>([\s\S]*)<\/body>/) || ['', ''])[1];
+      let frag = '<div xmlns="http://www.w3.org/1999/xhtml" class="gfholder" style="width:1080px;height:' + sz.h + 'px"><style>' + css + '</style>' + body + '</div>';
+      frag = frag.replace(/<br\s*\/?>/g, '<br/>').replace(/<hr([^>]*)>/g, '<hr$1/>');
+      return { html: h, frag: frag, w: sz.w, ph: sz.h };
+    });
+    /* JSON 内嵌：把 < 转成 unicode 转义（u003c），防止字符串里的闭合标签提前终止脚本 */
+    const data = JSON.stringify(metas).replace(/</g, '\\u003c');
+    const g = '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>长文拆卡 · ' + total + ' 张</title><style>'
+      + 'body{font-family:"Noto Sans SC",-apple-system,"PingFang SC",sans-serif;background:#efe9dc;margin:0;padding:32px 16px;}'
+      + 'h1{font-size:20px;text-align:center;color:#2b2b2b;letter-spacing:.06em;margin:0 0 6px;}'
+      + '.tip{text-align:center;color:#7a7266;font-size:13px;margin:0 0 28px;}'
+      + '.lfitem{margin:0 auto 44px;max-width:560px;}'
+      + '.lfbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}'
+      + '.lfbar span{font-size:13px;color:#7a7266;letter-spacing:.12em;}'
+      + '.lfbar button{padding:7px 16px;border:1px solid #A8322A;border-radius:6px;background:#fff;color:#A8322A;font-family:inherit;font-size:13px;cursor:pointer;}'
+      + '.lfstage{border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(60,50,30,.18);line-height:0;background:#f5f2ea;}'
+      + '.lfstage iframe{width:100%;border:0;display:block;}'
+      + '</style></head><body><h1>长文拆卡</h1><p class="tip">每张卡可单独「下载 PNG」；整页 Ctrl+P 可打印存 PDF。</p><div id="wrap"></div>'
+      + '<scr' + 'ipt>'
+      + 'var META = ' + data + ';'
+      + 'var wrap = document.getElementById("wrap");'
+      + 'META.forEach(function (m, i) {'
+      + '  var num = ("0" + (i + 1)).slice(-2);'
+      + '  var it = document.createElement("div"); it.className = "lfitem";'
+      + '  var bar = document.createElement("div"); bar.className = "lfbar";'
+      + '  bar.innerHTML = "<span>" + num + " / " + META.length + "</span>";'
+      + '  var btn = document.createElement("button"); btn.textContent = "下载 PNG"; btn.onclick = function(){ dl(i); };'
+      + '  var stage = document.createElement("div"); stage.className = "lfstage";'
+      + '  var fr = document.createElement("iframe"); fr.id = "lf" + i;'
+      + '  fr.setAttribute("sandbox", "allow-same-origin");'
+      + '  fr.style.height = (560 * m.ph / m.w) + "px";'
+      + '  fr.srcdoc = m.html;'
+      + '  stage.appendChild(fr); it.appendChild(bar); it.appendChild(stage); wrap.appendChild(it);'
+      + '});'
+      + 'function dl(i) {'
+      + '  var m = META[i];'
+      + '  var svg = \'<svg xmlns="http://www.w3.org/2000/svg" width="\' + m.w + \'" height="\' + m.ph + \'"><foreignObject x="0" y="0" width="100%" height="100%">\' + m.frag + \'</foreignObject></svg>\';'
+      + '  var img = new Image();'
+      + '  img.onload = function () {'
+      + '    var cv = document.createElement("canvas"); cv.width = m.w * 2; cv.height = m.ph * 2;'
+      + '    cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);'
+      + '    cv.toBlob(function (b) { if (!b) { alert("导出失败，可整页打印存 PDF"); return; } var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "卡" + ("0" + (i + 1)).slice(-2) + ".png"; a.click(); }, "image/png");'
+      + '  };'
+      + '  img.onerror = function () { alert("该卡内联截图被浏览器限制，可整页打印存 PDF"); };'
+      + '  img.src = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));'
+      + '}'
+      + '</scr' + 'ipt></body></html>';
+    const blob = new Blob([g], { type: 'text/html;charset=utf-8' });
+    download(blob, '长文拆卡_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.html');
+    log('lf_export');
+    toast('已导出 ' + total + ' 张卡的 HTML（含逐卡下载 PNG）');
+  }
+  $id('btnLfSplit').addEventListener('click', () => {
+    const t = $id('lfText').value.trim();
+    if (!t) { toast('先粘贴全文'); return; }
+    LF.cards = lfSplit(t);
+    if (!LF.cards.length) { toast('没拆出内容：检查是否有正文段落'); return; }
+    lfRender(); lfPersist();
+    toast('已拆出 ' + LF.cards.length + ' 张卡（单次上限 12 张）');
+  });
+  $id('btnLfExport').addEventListener('click', lfExport);
+  $id('btnLfClear').addEventListener('click', () => {
+    $id('lfText').value = ''; LF.cards = []; lfRender(); lfPersist();
+  });
+  $id('lfText').addEventListener('input', lfPersist);
+  try {
+    const savedLf = LS.get(LF_KEY, null);
+    if (savedLf && savedLf.text) { $id('lfText').value = savedLf.text; LF.cards = savedLf.cards || []; lfRender(); }
+  } catch (e) {}
 
   /* ---------- 胜出标题桥接（AB 胜出 → 应用到工作台；跨 Tab 同步由外壳派发 StorageEvent） ---------- */
   let abWinner = null; /* 最近一次 A/B 胜出的候选标题 */
