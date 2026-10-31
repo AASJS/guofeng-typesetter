@@ -1840,7 +1840,10 @@ ${f1}${f2}
 .gc-insp-card .ft{font-size:11px;color:var(--gc-muted)}
 .gc-insp-card .tg{display:flex;gap:4px;flex-wrap:wrap}
 .gc-insp-card .tg span{font-size:10px;background:var(--gc-panel2);border:1px solid var(--gc-line);color:var(--gc-muted);padding:2px 7px;border-radius:10px}
-.gc-insp-card .copy{margin-top:auto;background:var(--gc-accent);color:#1c1c1e;border:none;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.gc-insp-card .apply{margin-top:auto;background:transparent;color:var(--gc-accent);border:1px solid var(--gc-accent);padding:7px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.gc-insp-card .apply:hover{background:rgba(201,169,98,.12)}
+.gc-insp-card .apply:active{transform:scale(.97)}
+.gc-insp-card .copy{margin-top:0;background:var(--gc-accent);color:#1c1c1e;border:none;padding:7px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
 .gc-insp-card .copy:active{transform:scale(.97)}
 .gc-insp-empty{padding:40px;text-align:center;color:var(--gc-muted);font-size:13px}
 @media (max-width:760px){
@@ -2029,6 +2032,7 @@ ${f1}${f2}
     }
 
     /* —— 灵感库面板 —— */
+    let appliedInsp = null; /* { el, btn, snap }：当前已应用的灵感（再点即还原配色） */
     function renderInsp(filter) {
       const grid = $('.gc-insp-grid');
       const list = (INSPIRATIONS.entries || []).filter(e => !filter || filter === 'all' || e.category === filter);
@@ -2047,7 +2051,45 @@ ${f1}${f2}
           ${swatches ? `<div class="sw">${swatches}</div>` : ''}
           <div class="ft">字体：${(e.fonts || []).join(' / ') || '—'}</div>
           ${tags ? `<div class="tg">${tags}</div>` : ''}
+          <button class="apply">应用此灵感</button>
           <button class="copy">复制 CSS 片段</button>`;
+        /* 应用此灵感：色板/字体气质写入当前风格主题（预览即时生效）；再次点击还原 */
+        card.querySelector('.apply').onclick = () => {
+          const t = DATA.themes[current];
+          const btn = card.querySelector('.apply');
+          if (!t) { btn.textContent = '无当前风格'; return; }
+          if (appliedInsp && appliedInsp.el === e) { /* 还原 */
+            const s = appliedInsp.snap;
+            t.bodyBg = s.bodyBg;
+            t.colors = JSON.parse(JSON.stringify(s.colors));
+            t.fonts = JSON.parse(JSON.stringify(s.fonts));
+            appliedInsp = null;
+            renderStylebar(); renderForm(); update();
+            btn.textContent = '应用此灵感';
+            return;
+          }
+          if (!appliedInsp) appliedInsp = { snap: { bodyBg: t.bodyBg, colors: JSON.parse(JSON.stringify(t.colors || {})), fonts: JSON.parse(JSON.stringify(t.fonts || {})) } };
+          const p = e.palette || {};
+          if (p.bg) t.bodyBg = p.bg;
+          if (t.colors) {
+            if (p.ink) t.colors['--ink'] = p.ink;
+            if (p.accent) {
+              t.colors['--accent'] = p.accent;
+              if (t.colors['--accent-bright']) t.colors['--accent-bright'] = p.accent;
+            }
+            if (p.bg && t.colors['--paper']) t.colors['--paper'] = p.bg;
+          }
+          const serif = (e.fonts || []).some(f => /serif|宋|明|楷|Playfair|Fraunces|Didot/i.test(f));
+          if ((e.fonts || []).length && t.fonts) {
+            t.fonts.base = serif ? 'serif' : 'sans';
+            if (t.fonts.display) t.fonts.display = serif ? 'serif' : 'sans';
+          }
+          if (appliedInsp.btn && appliedInsp.btn !== btn) appliedInsp.btn.textContent = '应用此灵感';
+          appliedInsp.el = e; appliedInsp.btn = btn;
+          renderStylebar(); renderForm(); update();
+          btn.textContent = '↩ 还原配色';
+          try { container.dispatchEvent(new CustomEvent('gc:insp-applied', { detail: { id: e.id || e.title, style: current } })); } catch (err) {}
+        };
         card.querySelector('.copy').onclick = () => {
           const snip = e.cssSnippet || '';
           const b = card.querySelector('.copy');
