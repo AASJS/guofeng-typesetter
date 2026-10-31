@@ -3,7 +3,7 @@
 > 输入一段文案，自动匹配最高级的版式系统，输出可直接浏览器打开的单文件 HTML 图文卡片。
 > 整合 GitHub 热门开源排版项目（heti / Han.css / tailwindcss-typography / Gutenberg 等）的中文排版最佳实践。
 
-**版本**：v3.3.0 · **许可**：MIT · **作者**：静心知识库 · @圣为Ai设计
+**版本**：v3.8.0 · **许可**：MIT · **作者**：静心知识库 · @圣为Ai设计
 
 ---
 
@@ -20,7 +20,8 @@
 - **离线可用**：纯原生 JS，无任何外部框架依赖；字体走 CDN，断网也能渲染（回退系统字体）
 - **AI 排版 · 发布（v3.8.0）**：复制预制提示词喂给 AI → 返回 JSON 一键导入 → 卡片组 + 发布物料（标题/摘要/封面提示词/每卡配图提示词）全部一键复制到公众号助手；无 AI 时有本地兜底提示词
 - **长文拆卡（v3.7.0）**：工作站新 Tab——粘贴 1000+ 字公众号全文，自动拆成风格统一的卡片组（识别五种小标题写法 / 无标题按段落分组），每卡 3 要点 + 1 金句可微调；逐卡「载入排版」走现有导出链路，或一键导出带「逐卡下载 PNG」的离线 HTML 画册
-- **灵感库（可更新）**：联网沉淀 Awwwards / 时尚杂志 / 高端品牌 / 2026 字体趋势等「美观高级时尚感」排版范式（16 条 / 6 来源），Studio 内点「灵感库」即可按分类浏览、复制可复用 CSS 片段；改 `references/inspiration.json`（或跑 `update_inspiration.js`）即可增量更新，无需改引擎
+- **灵感库（联网可更新）**：Awwwards / 时尚杂志 / 高端品牌 / 2026 字体趋势 / 中文版式网格等「美观高级时尚感」排版范式，现收录 **20 条 / 7 来源**；Studio 内点「灵感库」按分类浏览、复制可复用 CSS 片段；`update_inspiration.js` 命令行追加或让 AI 助手联网抓取提炼后入库，`sync_inspiration.js` 同步进引擎
+- **工作站工程化（v3.4.0–v3.6.0）**：可读多文件工程 + 构建链；工作台单实例化（4 份 iframe 合并为 1 份，内存约 1/4，状态跨 Tab 共享）；预览增量更新（文本原位 patch，无闪烁/滚动复位）；配图上传自动压缩（canvas 降采样，实测 5.4MB→32KB）；外壳语义令牌 + 🌗 三态主题切换（跟随系统/浅/暗，仅外壳层，工作台纸面色不变）；键盘可达 + 超时重试 + 移动端 44px 触达
 
 ---
 
@@ -29,8 +30,10 @@
 ### 方式一：直接用（零配置）
 浏览器打开 `guofeng-card-studio.html` —— 选风格、填文案、实时预览、下载/复制 HTML，或切到「公众号内嵌模式」拿内联版本。
 
-### 方式二：嵌进你的多 Tab 工作站
-工作站已提供**双交付**：可读多文件工程（`index.html` + `style.css` + `main.js` + `workbench.html`，日常改这个）+ `python3 build_single.py` 一键构建自包含单文件 `workstation-integration.html`（离线分发用，含键盘可达/超时重试/移动端适配/胜出标题桥接）。
+### 方式二：用多 Tab 工作站（推荐）
+工作站已提供**双交付**：可读多文件工程（`index.html` + `style.css` + `main.js` + `workbench.html`，日常改这个）+ `python3 build_single.py` 一键构建自包含单文件 `workstation-integration.html`（离线分发用）。
+
+外壳 7 个主 Tab：**排版 / 配色 / 标题·AB / 历史数据看板 / 长文拆卡 / AI 排版·发布 / 国风卡片**——前 6 个共用一份常驻工作台实例（postMessage 定位内层 Tab，状态跨 Tab 共享），第 7 个是独立挂载的国风卡片引擎。特性：键盘可达（方向键切 Tab）、15s 加载超时可重试、移动端 44px 触达、胜出标题跨 Tab 桥接、🌗 主题切换（仅外壳层）。
 ```html
 <!-- 1) 引入引擎 -->
 <script src="guofeng-card-engine.js"></script>
@@ -51,6 +54,19 @@ node scripts/update_inspiration.js list   # 查看当前灵感库统计
 python3 scripts/validate_card.py <卡片.html>            # 普通模式校验
 python3 scripts/validate_card.py --wechat <卡片.html>   # 公众号模式校验
 ```
+
+---
+
+## 🤖 AI 排版 · 发布工作流（v3.8.0）
+
+「AI 排版 · 发布」Tab 的标准用法（**素材 → AI → 生图 → 发表** 四步闭环）：
+
+1. **拆卡**：在「长文拆卡」Tab 粘贴全文 → ✂️ 拆成卡片草案（可逐项微调）
+2. **AI 精修**：切到「AI 排版 · 发布」→ 📋 复制 AI 提示词（素材 + 严格 JSON 协议）→ 喂给 AI → 把返回 JSON 粘进输入框 → ⬇️ 导入（卡片草案自动同步，配色建议一并返回；没有 AI 也能用 🪄 本地兜底生成提示词）
+3. **生图**：从物料区逐条复制**配图提示词**（9:16 国风宣纸水墨、画面无文字）交给生图工具，图片经工作台「配图」上传回卡片（自动 canvas 压缩）；**封面提示词**（3.35:1 横版）同理生成公众号封面
+4. **发表**：一键复制**文章标题 / 摘要 / 全部物料**，连同卡片 PNG 粘贴到公众号助手发表
+
+> 灵感库里的 CSS 片段可直接贴进公众号文章源码；想把灵感变成卡片风格，把参数抄进 `themes.json` → `node scripts/sync_themes.js` 即可。
 
 ---
 
@@ -108,12 +124,12 @@ themes.json (数据)  ──┐
 guofeng-typesetter/
 ├── README.md                         # 本文件
 ├── SKILL.md                          # 工作流 + 决策树 + 排版质量基线
-├── CHANGELOG.md                      # v1.0.0 → v3.1.0 全量版本记录
+├── CHANGELOG.md                      # v1.0.0 → v3.8.0 全量版本记录
 ├── guofeng-card-engine.js            # 可挂载引擎（数据 + 5 模板 + API）
 ├── guofeng-card-studio.html          # 独立单文件版（加载引擎 + 挂载）
 ├── workstation-integration.html      # 多 Tab 工作站（build_single.py 产出的自包含单文件）
-├── index.html / style.css / main.js  # 工作站外壳多文件工程（可读源码）
-├── workbench.html                    # 国风排版工作台（未压缩源码，构建时内嵌）
+├── index.html / style.css / main.js  # 工作站外壳多文件工程（可读源码，7 主 Tab + 主题切换）
+├── workbench.html                    # 国风排版工作台（未压缩源码：排版/配色/AB/看板/长文拆卡/AI排版发布）
 ├── build_single.py                   # 单文件构建脚本（python3 build_single.py）
 ├── references/
 │   ├── themes.json                   # ★ 唯一可编辑数据源（配色/字体/装饰/字段/示例）
@@ -153,9 +169,16 @@ guofeng-typesetter/
 - **v3.0.0** 数据 + 模板重构（`themes.json` + 5 通用布局，加风格 = 填表）
 - **v3.1.0** 加入更新日志与道术双群实战海报示例
 - **v3.2.0** poster 招募海报布局（9:16 竖版，实战泛化）+ poster_dao / poster_shu 两套主题
-- **v3.3.0** 灵感库（联网沉淀 16 条/6 来源，结构化可更新）+ Studio「灵感库」面板 + sync/update_inspiration 脚本
+- **v3.3.0** 灵感库（联网沉淀，结构化可更新）+ Studio「灵感库」面板 + sync/update_inspiration 脚本
+- **v3.4.0** 双向合并：多文件可读工程 + 外壳第一批改造（ARIA 键盘导航/超时重试/移动端优化/胜出标题桥接）+ build_single.py 双交付
+- **v3.5.0** 预览增量更新（原位 patch 无闪烁）+ 配图上传 canvas 压缩（5.4MB→32KB）+ 工作台单实例化（4 iframe→1，postMessage 切 Tab）
+- **v3.6.0** 外壳 CSS 语义令牌 + 🌗 三态主题切换（跟随系统/浅/暗，仅外壳层，持久化）
+- **v3.7.0** 长文拆卡：1000+ 字全文自动拆统一风格卡片组 + 逐卡载入排版 + 离线 HTML 画册（逐卡下载 PNG）
+- **v3.8.0** AI 排版·发布：提示词往返协议 + JSON 导入 + 发布物料（标题/摘要/封面提示词/每卡配图提示词）一键复制；灵感库联网更新入库（20 条/7 来源）
 
 ## 🤝 后续可扩展
+- 文章正文排版接 [doocs/md](https://github.com/doocs/md)（自定义主题 CSS）/ md2wechat（npm，面向 AI Agent 的 MD→公众号 HTML）类开源转换器，1000+ 字正文直接出公众号内联 HTML（Agent 侧流水线）
+- 配图提示词 → AI 生图 → 自动回填卡片配图位（当前手动上传，已有压缩链路）
 - 接历史数据看板做「风格→阅读量」加权推荐（P1 数据反哺）
 - 生成后自动截图 → 视觉评分（对比度/留白/层级）不达标打回重生成
 - 自定义风格持久化沉淀进 ima 知识库
