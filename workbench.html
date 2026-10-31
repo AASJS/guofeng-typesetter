@@ -1494,14 +1494,14 @@ if (typeof document !== 'undefined') (function () {
       '  "article": {',
       '    "title": "主标题（≤20 字，反共识 / 长期主义句式优先）",',
       '    "digest": "公众号摘要（≤120 字，说清给谁解决什么问题）",',
-      '    "coverPrompt": "公众号封面图生成提示词（3.35:1 横版，国风宣纸质感，写清主体画面 / 配色 / 情绪氛围，画面中不要出现文字）"',
+      '    "coverPrompt": "公众号封面图生成提示词（3.35:1 横版，国风宣纸质感，视觉风格必须与文章主题匹配：认知破局→水墨山水气势开阔 / 长期主义→浅绛古意时光绵长 / 内心治愈→禅意留白静谧 / 职场→文人书斋 / 家庭→温暖工笔 / 方法干货→界画工整；写清主体画面 / 配色 / 情绪氛围，画面中不要出现文字）"',
       '  },',
       '  "cards": [',
-      '    { "no": "01", "title": "小节标题（≤16 字）", "points": ["要点1", "要点2", "要点3"], "golden": "本节金句（8~30 字）", "imgPrompt": "该卡配图生成提示词（9:16 或 1:1，国风宣纸质感 / 水墨留白构图，与要点内容对应、具体可生图，画面中不要出现文字）" }',
+      '    { "no": "01", "title": "小节标题（≤16 字）", "points": ["要点1", "要点2", "要点3"], "golden": "本节金句（8~30 字）", "imgPrompt": "该卡配图生成提示词（9:16 或 1:1，视觉风格随该卡内容主题走同一套意象体系、逐卡意象不重复，与要点内容对应、具体可生图，画面中不要出现文字）" }',
       '  ],',
       '  "style": { "palette": "朱砂|黛青|赭石|黛绿|黛紫|胭脂 之一", "note": "一句话说明为何选这套配色" }',
       '}',
-      '要求：拆 3~8 张卡；每条要点 6~40 字完整句；金句优先「不是…而是 / 真正的 / 所谓 / 本质上」句式且不与要点重复；提示词要具体到能直接生图。',
+      '要求：拆 3~8 张卡；每条要点 6~40 字完整句；金句优先「不是…而是 / 真正的 / 所谓 / 本质上」句式且不与要点重复；全部配图/封面提示词共用一套与文案主题匹配的视觉风格（不要默认全是山水），逐卡意象差异化；提示词要具体到能直接生图。',
       '',
       '【文章素材】',
       src
@@ -1525,24 +1525,83 @@ if (typeof document !== 'undefined') (function () {
     })).filter(c => c.points.length || c.golden);
     AIP.article = (obj.article && obj.article.title) ? obj.article : null;
     AIP.style = obj.style || null;
+    /* AI 没给 imgPrompt 的卡，用本地自适应生成兜底（按文案主题+当前配色） */
+    const miss = LF.cards.filter(c => !c.imgPrompt);
+    if (miss.length) {
+      const all = LF.cards.map(c => [c.title, c.golden].concat(c.points).join(' ')).join('\n') + '\n' + ($id('aiSrc').value || '');
+      const domain = lfDomainOf(all), style = lfStyleSuffix();
+      LF.cards.forEach((c, i) => {
+        if (!c.imgPrompt) c.imgPrompt = '（9:16 竖版）' + domain.visual + '：' + lfImageryFor(c, domain, i) + '，呼应「' + (c.golden || c.title || '') + '」。' + style;
+      });
+    }
     lfRender(); aiRender(); lfPersist(); aiPersist();
-    toast('已导入 ' + LF.cards.length + ' 张卡' + (AIP.article ? ' + 发布物料（⑤ 里可逐卡载入排版）' : '（无 article，物料区留空）'));
+    toast('已导入 ' + LF.cards.length + ' 张卡' + (miss.length ? '（' + miss.length + ' 张配图提示词由本地按文案风格补齐）' : '') + (AIP.article ? ' + 发布物料（⑤ 里可逐卡载入排版）' : '（无 article，物料区留空）'));
+  }
+  /* ---- 配图风格自适应：按文案主题识别视觉域，配色联动，逐卡意象差异化 ---- */
+  const VISUAL_DOMAINS = [
+    { id: 'mind', label: '内心治愈', kws: ['焦虑', '内心', '情绪', '松弛', '治愈', '安顿', '心静', '冥想', '呼吸', '睡眠', '独处', '平静', '压力'],
+      visual: '禅意极简画风，大面积留白，柔和淡雅，静谧安稳的氛围',
+      imagery: ['一盏清茶置于案头，热气袅袅', '庭前花影落在素墙', '空谷幽兰，晨雾微光', '月下竹林，风过叶动', '静水无波，倒映天色'] },
+    { id: 'cognition', label: '认知破局', kws: ['认知', '思维', '反共识', '本质', '逻辑', '智慧', '破局', '觉察', '真相', '觉醒', '常识', '错觉'],
+      visual: '水墨山水，浓淡对比强烈，留白大气，气势开阔而有转机感',
+      imagery: ['云海翻涌，一峰破雾而出', '孤舟穿过远山峡口', '破晓晨光穿透云层', '镜中山水倒影与实景错位', '层峦叠嶂间一线通路'] },
+    { id: 'time', label: '长期主义', kws: ['时间', '长期', '复利', '坚持', '沉淀', '岁月', '耐心', '慢慢', '积累', '十年', '日拱一卒', '余生'],
+      visual: '水墨浅绛，暖赭调，苍润古意，时光绵长的秩序感',
+      imagery: ['四季轮回中的同一棵古树', '老树横截面的年轮特写', '绵延山径通向天际', '溪流沿石阶层层而下', '古道残阳，行者渐远'] },
+    { id: 'work', label: '职场事业', kws: ['职场', '工作', '事业', '管理', '老板', '升职', '效率', '会议', '项目', '创业', '同事', '汇报', '加班'],
+      visual: '文人书斋画风，工整克制，青灰暖光，案头气息',
+      imagery: ['孤灯下摊开的书卷与笔墨', '层叠卷宗静置案头', '案头镇纸与一枝斜梅', '远山城郭，晨霭初散'] },
+    { id: 'family', label: '家庭养育', kws: ['孩子', '父母', '家庭', '陪伴', '育儿', '教育', '亲子', '成长', '妈妈', '爸爸', '家人'],
+      visual: '温暖工笔，柔和生活气息，暖米色调，烟火气与安宁并存',
+      imagery: ['庭院里放飞纸鸢的背影', '灯火人家，窗内暖光', '屋檐下的燕巢与雏燕', '春溪边嬉水的孩童身影'] },
+    { id: 'plain', label: '通用国风', kws: [],
+      visual: '宣纸水墨，留白构图，气韵平和',
+      imagery: ['远山淡影，一叶扁舟', '素宣之上几笔墨竹', '孤鹤掠过晨雾水面'] },
+    { id: 'biz', label: '方法干货', kws: ['方法', '系统', '策略', '模型', '步骤', '清单', '框架', '工具', '复盘', '执行', '拆解', '流程', 'SOP'],
+      visual: '界画工整，结构清晰，墨线利落，微冷色调，理性秩序感',
+      imagery: ['棋局残谱，一子落定', '舆图山川，墨线纵横', '营造楼阁的精准梁架', '案上算筹与账册'] }
+  ];
+  const PAL_WORDS = { '朱砂': '朱红点染为眼', '黛青': '黛蓝青灰主调', '赭石': '赭褐暖调', '黛绿': '黛绿苍润', '黛紫': '黛紫幽婉', '胭脂': '胭脂暖粉点染' };
+  function lfDomainOf(text) {
+    let best = null, bestN = 0;
+    VISUAL_DOMAINS.forEach(d => {
+      const n = d.kws.reduce((s, k) => s + (text.split(k).length - 1), 0);
+      if (n > bestN) { bestN = n; best = d; }
+    });
+    return bestN >= 2 ? best : VISUAL_DOMAINS.find(d => d.id === 'plain'); /* 特征词不足 → 通用国风 */
+  }
+  function lfStyleSuffix() {
+    const pal = (PALETTES[doc.palette] || {}).name;
+    return '国风' + (PAL_WORDS[pal] || '宣纸质感') + '，宣纸质感，柔和自然光，高级感，画面干净，不要出现任何文字';
+  }
+  function lfImageryFor(card, domain, idx) {
+    const t = [card.title, card.golden].concat(card.points).join(' ');
+    /* 意象候选按与卡片文字的重合度选，选不出就按卡序轮转保证组内不重复 */
+    let pick = -1, pickN = 0;
+    domain.imagery.forEach((im, i) => {
+      const n = im.split(/[，、\s]/).filter(w => w.length > 1 && t.indexOf(w.slice(0, 2)) >= 0).length;
+      if (n > pickN) { pickN = n; pick = i; }
+    });
+    if (pick < 0) pick = idx % domain.imagery.length;
+    return domain.imagery[pick];
   }
   function aiLocalPrompts() {
     if (!LF.cards.length) { toast('先在⑤拆卡，或先导入 AI 结果'); return; }
-    const style = '国风宣纸质感，水墨留白构图，柔和自然光，高级感，画面干净，不要出现任何文字';
-    LF.cards.forEach(c => {
-      c.imgPrompt = '（9:16 竖版）以「' + (c.title || (c.points[0] || '').slice(0, 10)) + '」为意象的画面：' + (c.golden || (c.points[0] || '')) + '。' + style;
+    const all = LF.cards.map(c => [c.title, c.golden].concat(c.points).join(' ')).join('\n') + '\n' + ($id('aiSrc').value || '');
+    const domain = lfDomainOf(all);
+    const style = lfStyleSuffix();
+    LF.cards.forEach((c, i) => {
+      c.imgPrompt = '（9:16 竖版）' + domain.visual + '：' + lfImageryFor(c, domain, i)
+        + '，呼应「' + (c.golden || c.title || (c.points[0] || '').slice(0, 12)) + '」。' + style;
     });
-    if (!AIP.article) {
-      AIP.article = {
-        title: LF.cards[0].title || '',
-        digest: LF.cards.map(c => c.golden || c.points[0]).filter(Boolean).slice(0, 3).join('；').slice(0, 110),
-        coverPrompt: '（3.35:1 横版）国风公众号封面：宣纸底色，水墨山影与大面积留白，呼应「' + (LF.cards[0].title || '') + '」。' + style
-      };
-    }
+    /* 物料区每次生成都刷新（显式点击 = 覆盖旧兜底；AI 导入仍可整体覆盖） */
+    AIP.article = {
+      title: LF.cards[0].title || '',
+      digest: LF.cards.map(c => c.golden || c.points[0]).filter(Boolean).slice(0, 3).join('；').slice(0, 110),
+      coverPrompt: '（3.35:1 横版）国风公众号封面，' + domain.visual + '：' + domain.imagery[0] + '，呼应「' + (LF.cards[0].title || '') + '」。' + style
+    };
     lfRender(); aiRender(); lfPersist(); aiPersist();
-    toast('已生成本地兜底提示词（建议再让 AI 精修）');
+    toast('已生成「' + domain.label + '」风格提示词（联动配色·' + (PALETTES[doc.palette] || {}).name + '，建议再让 AI 精修）');
   }
   function aiPersist() {
     try { LS.set(AI_KEY, { article: AIP.article, style: AIP.style, src: $id('aiSrc').value }); } catch (e) {}
