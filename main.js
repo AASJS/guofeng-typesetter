@@ -100,7 +100,7 @@
      - 切主 Tab = 切 holder 可见性 + postMessage 通知内层切 Tab（状态全保留，无闪烁）；
      - 首次进入加载 workbench.html?tab=1，15s 超时可重试；胜出标题桥接保留（load 后派发）。 */
   const WB_TIMEOUT = 15000; // iframe 加载超时阈值（ms）
-  const WB_TABS = { paiban: '1', peise: '2', biaoti: '3', kanban: '4', longform: '5' };
+  const WB_TABS = { paiban: '1', peise: '2', biaoti: '3', kanban: '4', longform: '5', aipub: '6' };
 
   function switchInner(frame, n) {
     try { frame.contentWindow.postMessage({ type: 'wb-switch-tab', tab: n }, '*'); } catch (e) {}

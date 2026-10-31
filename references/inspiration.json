@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "updated": "2026-10-29",
+  "updated": "2026-10-31",
   "description": "国风排版灵感库 · 来自 Awwwards / 时尚杂志 / 高端品牌 / 2026 字体趋势等公开来源的「美观、高级、时尚感」排版范式。结构化的可更新数据源：编辑本文件即可追加灵感，再跑 scripts/sync_inspiration.js 同步进引擎，或在 Studio 内直接浏览。",
   "sources": [
     {
@@ -8,7 +8,12 @@
       "title": "Awwwards — Web Design Trends 2026",
       "url": "https://www.awwwards.com/",
       "fetchedAt": "2026-10-29",
-      "tags": ["trend", "editorial", "typography", "minimal"],
+      "tags": [
+        "trend",
+        "editorial",
+        "typography",
+        "minimal"
+      ],
       "summary": "2026 趋势：排版即主角（Typography as the Hero）、探索式布局、电影感英雄区、自然提炼色（Nature Distilled）、噪点+色度混搭。"
     },
     {
@@ -16,7 +21,12 @@
       "title": "Award-Winning Websites 2025–2030 Reference",
       "url": "https://github.com/coroboros/research/blob/main/articles/award-winning-websites-2025-2030/award-winning-websites-2025-2030.md",
       "fetchedAt": "2026-10-29",
-      "tags": ["archetype", "minimal", "editorial", "luxury"],
+      "tags": [
+        "archetype",
+        "minimal",
+        "editorial",
+        "luxury"
+      ],
       "summary": "获奖站八大原型（Minimalist / Editorial / Corporate Luxury 等）的字体、配色、网格、间距与可复用 CSS 片段；含 60-30-10、流体字号/间距系统。"
     },
     {
@@ -24,7 +34,12 @@
       "title": "STUDIO ANDOR — Luxury Branding Trends 2025",
       "url": "https://studioandor.com/blog/luxury-website-design-trends",
       "fetchedAt": "2026-10-29",
-      "tags": ["brand", "luxury", "typography", "texture"],
+      "tags": [
+        "brand",
+        "luxury",
+        "typography",
+        "texture"
+      ],
       "summary": "静奢趋势：bold yet understated 定制衬线、大地色/摩卡慕斯/香槟金、极简+极繁点缀、数字触感纹理（噪点/压印/箔）。"
     },
     {
@@ -32,7 +47,11 @@
       "title": "MaisFonts — Typography in Fashion Magazines (Vogue/BAZAAR/Elle)",
       "url": "https://sa.maisfontes.com/blog/fashion-magazine-typography-vogue-harpers-bazaar-elle",
       "fetchedAt": "2026-10-29",
-      "tags": ["magazine", "typography", "serif"],
+      "tags": [
+        "magazine",
+        "typography",
+        "serif"
+      ],
       "summary": "时尚杂志排版密码：Vogue=Didot 高对比优雅、BAZAAR=Bodoni 戏剧感、Elle=Futura 都市感；衬线标题+无衬线信息分层。"
     },
     {
@@ -40,7 +59,11 @@
       "title": "大作 — 2026 年字体趋势（八种表现型排版）",
       "url": "https://blog.bigbigwork.com/archives/202511222",
       "fetchedAt": "2026-10-29",
-      "tags": ["typography", "trend", "expressive"],
+      "tags": [
+        "typography",
+        "trend",
+        "expressive"
+      ],
       "summary": "2026 八大字体趋势：时髦曲线衬线、新颖斜体、安静无衬线、意式风情、前沿风尚、文字图形化、可爱舒适、混乱手写。"
     },
     {
@@ -48,8 +71,23 @@
       "title": "Purple Hills Studio — Trendy Fonts for 2025",
       "url": "https://www.purplehillstudio.com/blog/trendy-fonts-for-2025",
       "fetchedAt": "2026-10-29",
-      "tags": ["typography", "font-pairing"],
+      "tags": [
+        "typography",
+        "font-pairing"
+      ],
       "summary": "当红字体清单：Neue Montreal / Canela / Söhne / Cooper Black / GT America / Inter 等，覆盖极简、编辑、复古回潮。"
+    },
+    {
+      "id": "cn-grid-2026",
+      "title": "中文版式网格与知识卡片（2026）",
+      "url": "https://hajiarui.com/html/news/1415.html",
+      "fetchedAt": "2026-10-31",
+      "tags": [
+        "grid",
+        "chinese",
+        "knowledge-card"
+      ],
+      "summary": "中文版面高级感三件套：网格/字距/层级；知识付费深蓝金信息卡片范式"
     }
   ],
   "entries": [
@@ -59,11 +97,27 @@
       "category": "trend",
       "source": "awwwards-2026",
       "designLanguage": "超大、朴素的无衬线字体铺满画面，置于纯色 / 柔和渐变 / 黑白之上；让字体本身讲故事，不需要配图也能成立。",
-      "palette": { "bg": "#111111", "ink": "#FFFFFF", "accent": "#E94F37" },
-      "fonts": ["Neue Montreal", "Inter", "Suisse Int'l"],
+      "palette": {
+        "bg": "#111111",
+        "ink": "#FFFFFF",
+        "accent": "#E94F37"
+      },
+      "fonts": [
+        "Neue Montreal",
+        "Inter",
+        "Suisse Int'l"
+      ],
       "cssSnippet": ".hero-type{font-size:clamp(64px,14vw,200px);font-weight:800;line-height:.95;letter-spacing:-.02em;color:var(--ink)}",
-      "applicableTo": ["single", "poster", "editorial"],
-      "tags": ["oversized", "minimal", "black-white"],
+      "applicableTo": [
+        "single",
+        "poster",
+        "editorial"
+      ],
+      "tags": [
+        "oversized",
+        "minimal",
+        "black-white"
+      ],
       "note": "适合反共识金句卡 / 招募海报主标题：字大到溢出边缘，克制即高级。"
     },
     {
@@ -72,11 +126,29 @@
       "category": "brand",
       "source": "luxury-andor",
       "designLanguage": "定制高对比衬线体，字脚锐利、字形修长；与极精致的元信息无衬线搭配，于克制中显贵气。",
-      "palette": { "bg": "#F8F5F0", "ink": "#1A1A1A", "accent": "#C5A572" },
-      "fonts": ["Didot", "Bodoni", "GT Sectra", "Apercu", "Founders Grotesk"],
+      "palette": {
+        "bg": "#F8F5F0",
+        "ink": "#1A1A1A",
+        "accent": "#C5A572"
+      },
+      "fonts": [
+        "Didot",
+        "Bodoni",
+        "GT Sectra",
+        "Apercu",
+        "Founders Grotesk"
+      ],
       "cssSnippet": ".lux-title{font-family:'Playfair Display',serif;font-weight:700;letter-spacing:.01em;color:var(--ink)}.lux-meta{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#9a9388}",
-      "applicableTo": ["single", "darkgold", "editorial"],
-      "tags": ["luxury", "serif", "restraint"],
+      "applicableTo": [
+        "single",
+        "darkgold",
+        "editorial"
+      ],
+      "tags": [
+        "luxury",
+        "serif",
+        "restraint"
+      ],
       "note": "对应宋韵禅意 / 暗色鎏金：标题用衬线、信息用无衬线、主色只做锚点。"
     },
     {
@@ -85,11 +157,26 @@
       "category": "magazine",
       "source": "fashion-mags",
       "designLanguage": "衬线大标题（Playfair/GT Sectra 60–120px）配无衬线正文（Inter/Neue Haas 16–18px），多列不对称网格，引文破版。",
-      "palette": { "bg": "#FAF8F4", "ink": "#1a1a1a", "accent": "#B8442C" },
-      "fonts": ["Playfair Display", "GT Sectra", "Inter", "Neue Haas Grotesk"],
+      "palette": {
+        "bg": "#FAF8F4",
+        "ink": "#1a1a1a",
+        "accent": "#B8442C"
+      },
+      "fonts": [
+        "Playfair Display",
+        "GT Sectra",
+        "Inter",
+        "Neue Haas Grotesk"
+      ],
       "cssSnippet": ".editorial-layout{display:grid;grid-template-columns:repeat(12,1fr);gap:1.5rem}.feature{grid-column:1/8}.sidebar{grid-column:9/13}.pull-quote{grid-column:3/11;font-style:italic;font-size:var(--fs-xl)}",
-      "applicableTo": ["editorial"],
-      "tags": ["serif-sans", "grid", "magazine"],
+      "applicableTo": [
+        "editorial"
+      ],
+      "tags": [
+        "serif-sans",
+        "grid",
+        "magazine"
+      ],
       "note": "杂志编辑系统的核心：标题衬线、正文无衬线、引文斜体破版。"
     },
     {
@@ -98,11 +185,26 @@
       "category": "magazine",
       "source": "fashion-mags",
       "designLanguage": "Didot 极细发丝线 + 强竖画，照片之上如薄纱般透出；开放空间给字体呼吸，制造欧洲奢侈品气质。",
-      "palette": { "bg": "#0F0F0F", "ink": "#F4F1EA", "accent": "#C9A962" },
-      "fonts": ["Didot", "Prata", "Bodoni Moda"],
+      "palette": {
+        "bg": "#0F0F0F",
+        "ink": "#F4F1EA",
+        "accent": "#C9A962"
+      },
+      "fonts": [
+        "Didot",
+        "Prata",
+        "Bodoni Moda"
+      ],
       "cssSnippet": ".didot-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(48px,9vw,128px);line-height:1.05;color:var(--ink)}",
-      "applicableTo": ["editorial", "darkgold"],
-      "tags": ["didot", "high-contrast", "luxury"],
+      "applicableTo": [
+        "editorial",
+        "darkgold"
+      ],
+      "tags": [
+        "didot",
+        "high-contrast",
+        "luxury"
+      ],
       "note": "免费平替用 Prata / Bodoni Moda（Google Fonts），避免商用 Didot 授权问题。"
     },
     {
@@ -111,11 +213,26 @@
       "category": "archetype",
       "source": "award-ref",
       "designLanguage": "2–3 色，每个元素都需证明存在价值；巨幅留白，宏观区块间距 120–200px+，字体承载设计。",
-      "palette": { "bg": "#FAFAF5", "ink": "#2D2D2D", "accent": "#2D2D2D" },
-      "fonts": ["Inter", "Neue Haas Grotesk", "Söhne"],
+      "palette": {
+        "bg": "#FAFAF5",
+        "ink": "#2D2D2D",
+        "accent": "#2D2D2D"
+      },
+      "fonts": [
+        "Inter",
+        "Neue Haas Grotesk",
+        "Söhne"
+      ],
       "cssSnippet": ".wrapper{display:grid;grid-template-columns:1fr min(65ch,100%) 1fr;gap:clamp(3rem,8vw,12rem);padding:clamp(2rem,5vw,8rem)}.wrapper>*{grid-column:2}.full-bleed{grid-column:1/-1}",
-      "applicableTo": ["single", "poster"],
-      "tags": ["minimal", "whitespace", "type-driven"],
+      "applicableTo": [
+        "single",
+        "poster"
+      ],
+      "tags": [
+        "minimal",
+        "whitespace",
+        "type-driven"
+      ],
       "note": "留白即奢侈：内容块间距给足，而非用分割线堆砌。"
     },
     {
@@ -127,8 +244,19 @@
       "palette": {},
       "fonts": [],
       "cssSnippet": ":root{--space-s:clamp(1rem,.75rem + 1.25vw,1.5rem);--space-l:clamp(2rem,1rem + 5vw,6rem);--fs-xl:clamp(1.95rem,1.77rem + .91vw,2.44rem);--fs-hero:clamp(3.05rem,2.76rem + 1.43vw,3.81rem)}section{padding-block:var(--space-l)}",
-      "applicableTo": ["single", "editorial", "grid", "asymmetric", "business", "poster"],
-      "tags": ["fluid", "scale", "8px-grid"],
+      "applicableTo": [
+        "single",
+        "editorial",
+        "grid",
+        "asymmetric",
+        "business",
+        "poster"
+      ],
+      "tags": [
+        "fluid",
+        "scale",
+        "8px-grid"
+      ],
       "note": "通用基线：所有卡片的字号/间距都从这一套 clamp 变量派生，保持韵律。"
     },
     {
@@ -137,11 +265,25 @@
       "category": "archetype",
       "source": "award-ref",
       "designLanguage": "严格网格，步骤用 80–120px 超大等宽序号，直角无圆角，结论条用单一品牌红。",
-      "palette": { "bg": "#FFFFFF", "ink": "#0A0A0A", "accent": "#C8202A" },
-      "fonts": ["Neue Haas Grotesk", "Suisse Int'l", "JetBrains Mono"],
+      "palette": {
+        "bg": "#FFFFFF",
+        "ink": "#0A0A0A",
+        "accent": "#C8202A"
+      },
+      "fonts": [
+        "Neue Haas Grotesk",
+        "Suisse Int'l",
+        "JetBrains Mono"
+      ],
       "cssSnippet": ".step{display:flex;gap:28px;border-top:1px solid var(--line);padding-top:32px}.step-no{flex:0 0 110px;font-family:'JetBrains Mono',monospace;font-size:88px;font-weight:700;color:var(--accent);line-height:1}.conclusion{background:var(--accent);color:#fff;padding:24px 32px;font-weight:700}",
-      "applicableTo": ["grid"],
-      "tags": ["grid", "mono", "numbers"],
+      "applicableTo": [
+        "grid"
+      ],
+      "tags": [
+        "grid",
+        "mono",
+        "numbers"
+      ],
       "note": "已沉淀为 swiss 主题：编号步骤 + 红底结论条。"
     },
     {
@@ -150,11 +292,25 @@
       "category": "trend",
       "source": "awwwards-2026",
       "designLanguage": "取自泥土、黏土、沙、石的低饱和色板，叠加 Pantone 2025 摩卡慕斯；柔和、精致、有触感。",
-      "palette": { "bg": "#E8E4DF", "ink": "#3A352C", "accent": "#A47764" },
-      "fonts": ["Cormorant Garamond", "Fraunces"],
+      "palette": {
+        "bg": "#E8E4DF",
+        "ink": "#3A352C",
+        "accent": "#A47764"
+      },
+      "fonts": [
+        "Cormorant Garamond",
+        "Fraunces"
+      ],
       "cssSnippet": ":root{--sand:#E8E4DF;--mocha:#A47764;--clay:#9C6B4A;--gold:#C5A572;--ink:#3A352C}",
-      "applicableTo": ["sage", "single"],
-      "tags": ["earthy", "muted", "tactile"],
+      "applicableTo": [
+        "sage",
+        "single"
+      ],
+      "tags": [
+        "earthy",
+        "muted",
+        "tactile"
+      ],
       "note": "草木绿之外的高级自然色方案，适配中医/东方美学/自然疗愈内容。"
     },
     {
@@ -163,11 +319,26 @@
       "category": "typography",
       "source": "bigbigwork-2026",
       "designLanguage": "带 70 年代活力的圆润高对比衬线，俏皮又开放；正取代极简无衬线 Logo（如 Eventbrite / Affinity 焕新）。",
-      "palette": { "bg": "#F3EAE0", "ink": "#241F1D", "accent": "#E0457B" },
-      "fonts": ["Fraunces", "Recoleta", "Canela"],
+      "palette": {
+        "bg": "#F3EAE0",
+        "ink": "#241F1D",
+        "accent": "#E0457B"
+      },
+      "fonts": [
+        "Fraunces",
+        "Recoleta",
+        "Canela"
+      ],
       "cssSnippet": ".curvy{font-family:'Fraunces',serif;font-weight:600;font-optical-sizing:auto;font-style:normal;letter-spacing:.01em}",
-      "applicableTo": ["editorial", "poster"],
-      "tags": ["serif", "groovy", "retro"],
+      "applicableTo": [
+        "editorial",
+        "poster"
+      ],
+      "tags": [
+        "serif",
+        "groovy",
+        "retro"
+      ],
       "note": "大胆张扬的衬线，适合年轻化、有态度的品牌标题。"
     },
     {
@@ -176,11 +347,26 @@
       "category": "typography",
       "source": "bigbigwork-2026",
       "designLanguage": "带液态/气泡特质的个性斜体（如 Tilt Beauty / SKIMS），年轻、反叛、有态度；给足留白才出彩。",
-      "palette": { "bg": "#111111", "ink": "#FFFFFF", "accent": "#7C5CFF" },
-      "fonts": ["Fraunces (italic)", "Recolfa", "Sohne (oblique)"],
+      "palette": {
+        "bg": "#111111",
+        "ink": "#FFFFFF",
+        "accent": "#7C5CFF"
+      },
+      "fonts": [
+        "Fraunces (italic)",
+        "Recolfa",
+        "Sohne (oblique)"
+      ],
       "cssSnippet": ".italic-pop{font-style:italic;font-weight:800;font-size:clamp(40px,8vw,120px);transform:skewX(-6deg);letter-spacing:-.01em}",
-      "applicableTo": ["poster", "editorial"],
-      "tags": ["italic", "playful", "gen-z"],
+      "applicableTo": [
+        "poster",
+        "editorial"
+      ],
+      "tags": [
+        "italic",
+        "playful",
+        "gen-z"
+      ],
       "note": "目标年轻受众的宣言式标题；避免与繁杂背景挤在一起。"
     },
     {
@@ -189,11 +375,26 @@
       "category": "typography",
       "source": "bigbigwork-2026",
       "designLanguage": "极简无衬线，小尺寸、低声细语；靠金属箔、压印纹理、精致标签显贵气（如 Edwart Chocolatier / SCENARIO）。",
-      "palette": { "bg": "#F6F3EE", "ink": "#2A2A28", "accent": "#B89B6E" },
-      "fonts": ["Söhne", "Apercu", "Inter (light)"],
+      "palette": {
+        "bg": "#F6F3EE",
+        "ink": "#2A2A28",
+        "accent": "#B89B6E"
+      },
+      "fonts": [
+        "Söhne",
+        "Apercu",
+        "Inter (light)"
+      ],
       "cssSnippet": ".quiet{font-family:'Inter',sans-serif;font-weight:300;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}",
-      "applicableTo": ["business", "single"],
-      "tags": ["sans", "minimal", "luxury"],
+      "applicableTo": [
+        "business",
+        "single"
+      ],
+      "tags": [
+        "sans",
+        "minimal",
+        "luxury"
+      ],
       "note": "高端包装/品牌副信息的首选：克制即高级，靠质感细节取胜。"
     },
     {
@@ -202,11 +403,26 @@
       "category": "trend",
       "source": "bigbigwork-2026",
       "designLanguage": "把字母放大、扭曲、融入华丽边框，让文字成为背景图案 / Logo 艺术品本身（装饰艺术 / Y2K / 迷幻 90s）。",
-      "palette": { "bg": "#0E0E0E", "ink": "#EDEDED", "accent": "#C9A962" },
-      "fonts": ["Playfair Display", "Cinzel", "Bodoni"],
+      "palette": {
+        "bg": "#0E0E0E",
+        "ink": "#EDEDED",
+        "accent": "#C9A962"
+      },
+      "fonts": [
+        "Playfair Display",
+        "Cinzel",
+        "Bodoni"
+      ],
       "cssSnippet": ".type-bg{position:absolute;inset:0;display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:46vw;font-weight:900;color:rgba(255,255,255,.05);line-height:1;pointer-events:none}",
-      "applicableTo": ["poster", "asymmetric"],
-      "tags": ["graphic", "watermark", "decorative"],
+      "applicableTo": [
+        "poster",
+        "asymmetric"
+      ],
+      "tags": [
+        "graphic",
+        "watermark",
+        "decorative"
+      ],
       "note": "对应海报水印字：超大字作背景层，制造纵深与品牌感。"
     },
     {
@@ -215,11 +431,25 @@
       "category": "trend",
       "source": "awwwards-2026",
       "designLanguage": "全幅高清照片/视频背景 + 其上超大朴素字体，氛围由图定、信息由字给，最简布局也最难忘。",
-      "palette": { "bg": "#000000", "ink": "#FFFFFF", "accent": "#FFFFFF" },
-      "fonts": ["Neue Montreal", "Inter"],
+      "palette": {
+        "bg": "#000000",
+        "ink": "#FFFFFF",
+        "accent": "#FFFFFF"
+      },
+      "fonts": [
+        "Neue Montreal",
+        "Inter"
+      ],
       "cssSnippet": ".hero{position:relative;height:100vh;display:grid;place-items:center;background:url('hero.jpg')center/cover}.hero h1{position:relative;font-size:clamp(40px,10vw,140px);font-weight:800;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.4)}",
-      "applicableTo": ["poster", "single"],
-      "tags": ["cinematic", "hero", "photo"],
+      "applicableTo": [
+        "poster",
+        "single"
+      ],
+      "tags": [
+        "cinematic",
+        "hero",
+        "photo"
+      ],
       "note": "海报/封面版式：背景图 + 大字标题，图字平衡即高级。"
     },
     {
@@ -228,11 +458,26 @@
       "category": "brand",
       "source": "award-ref",
       "designLanguage": "60% 中性基底（背景/留白/表面）+ 30% 次级（文字/边框/结构）+ 10% 强调色（CTA/高亮/交互）。强调色因稀有而有效。",
-      "palette": { "bg": "#F2EFEA", "ink": "#2B2B2B", "accent": "#C8202A" },
+      "palette": {
+        "bg": "#F2EFEA",
+        "ink": "#2B2B2B",
+        "accent": "#C8202A"
+      },
       "fonts": [],
       "cssSnippet": ":root{--c-60:#F2EFEA;--c-30:#2B2B2B;--c-10:#C8202A}/* 背景/文字/强调 按此比例分配 */",
-      "applicableTo": ["single", "editorial", "grid", "asymmetric", "business", "poster"],
-      "tags": ["color-theory", "ratio", "accent"],
+      "applicableTo": [
+        "single",
+        "editorial",
+        "grid",
+        "asymmetric",
+        "business",
+        "poster"
+      ],
+      "tags": [
+        "color-theory",
+        "ratio",
+        "accent"
+      ],
       "note": "所有风格的配色基线：主色锚点 ≤5 处，不要喧宾夺主。"
     },
     {
@@ -242,10 +487,22 @@
       "source": "awwwards-2026",
       "designLanguage": "单个可变字体文件，字重/字宽连续轴；滚动或悬停时 Light→Bold 平滑形变，无布局抖动，一个文件顶 4–8 个静态字重。",
       "palette": {},
-      "fonts": ["Inter (variable)", "Roboto Flex", "Fraunces (variable)"],
+      "fonts": [
+        "Inter (variable)",
+        "Roboto Flex",
+        "Fraunces (variable)"
+      ],
       "cssSnippet": "@font-face{font-family:'VF';src:url('vf.woff2')format('woff2')tech('variations')}.vf{font-family:'VF';font-variation-settings:'wght'400,'wdth'100;transition:font-variation-settings .4s}.vf:hover{font-variation-settings:'wght'900,'wdth'125}",
-      "applicableTo": ["single", "editorial", "poster"],
-      "tags": ["variable", "motion", "performance"],
+      "applicableTo": [
+        "single",
+        "editorial",
+        "poster"
+      ],
+      "tags": [
+        "variable",
+        "motion",
+        "performance"
+      ],
       "note": "概念级灵感：静态卡可借鉴「单字族 + 字重对比」制造层级，而非混用多字体。"
     },
     {
@@ -254,12 +511,137 @@
       "category": "archetype",
       "source": "award-ref",
       "designLanguage": "刻意拒绝精致：粗黑描边（2–4px）、硬投影（纯黑实心）、纯色平涂、零渐变；字体即设计（Monument Extended / Archivo Black 80–200px）。",
-      "palette": { "bg": "#FFFFFF", "ink": "#000000", "accent": "#FF90E8" },
-      "fonts": ["Monument Extended", "Archivo Black", "Space Mono"],
+      "palette": {
+        "bg": "#FFFFFF",
+        "ink": "#000000",
+        "accent": "#FF90E8"
+      },
+      "fonts": [
+        "Monument Extended",
+        "Archivo Black",
+        "Space Mono"
+      ],
       "cssSnippet": ".brutal{border:3px solid #000;box-shadow:8px 8px 0 #000;background:#fff;font-family:'Archivo Black',sans-serif}.brutal-accent{background:#FF90E8;border:3px solid #000}",
-      "applicableTo": ["grid", "poster"],
-      "tags": ["brutalist", "bold", "flat"],
+      "applicableTo": [
+        "grid",
+        "poster"
+      ],
+      "tags": [
+        "brutalist",
+        "bold",
+        "flat"
+      ],
       "note": "反差玩法：想从国风静美里『跳出来』做活动炸裂款时可用，但仍建议主色锚点克制。"
+    },
+    {
+      "title": "中文网格五法则（Grid Discipline）",
+      "category": "archetype",
+      "source": "cn-grid-2026",
+      "designLanguage": "12 栏网格打底；间距只用 8/16/24/32 一套数值表达亲疏关系（格式塔亲密性），不画线框；留白敢留 30%-50%；主副字号对比 ≥2 倍；全篇只破一处网格（主图出血或标题压边），破得越克制越高级。",
+      "palette": {
+        "bg": "#F5F1E8",
+        "ink": "#2B2B2B",
+        "accent": "#A8322A"
+      },
+      "fonts": [
+        "Noto Serif SC",
+        "Inter"
+      ],
+      "cssSnippet": ".grid-disc{--sp:8px;display:grid;grid-template-columns:repeat(12,1fr);gap:var(--sp)}.grid-disc>*{grid-column:span 12}.grid-disc .tight{margin-bottom:calc(var(--sp)*2)}.grid-disc .loose{margin-bottom:calc(var(--sp)*4)}",
+      "applicableTo": [
+        "editorial",
+        "poster",
+        "single"
+      ],
+      "tags": [
+        "grid",
+        "spacing-system",
+        "whitespace"
+      ],
+      "note": "金句卡排版自查：眯眼看灰度层级是否三眼可分；间距出现 13/27 这类随手值即返工。",
+      "id": "grid-discipline"
+    },
+    {
+      "title": "中文文字排印三件套（字距·字重·行距）",
+      "category": "typography",
+      "source": "cn-grid-2026",
+      "designLanguage": "中文字形方正笔画密，直接套西文参数会糊：正文行距 1.6-1.8 倍字号；标题字距收紧 -2%~-5% 更紧凑有力，正文保持默认保呼吸感；全篇字重 ≤3 种（粗标题/中小节/常规正文）；长标题控制断行，词语不拆散、末行不落单字。",
+      "palette": {
+        "bg": "#FBF8F1",
+        "ink": "#1F1D1A",
+        "accent": "#8F7434"
+      },
+      "fonts": [
+        "Noto Serif SC",
+        "Noto Sans SC"
+      ],
+      "cssSnippet": ".cn-type{line-height:1.7}.cn-type h1{letter-spacing:-.04em;font-weight:800}.cn-type h2{letter-spacing:-.02em;font-weight:600}.cn-type p{letter-spacing:0;font-weight:400}.cn-type p+p{margin-top:1.6em}",
+      "applicableTo": [
+        "single",
+        "editorial",
+        "wechat-article"
+      ],
+      "tags": [
+        "chinese-type",
+        "letter-spacing",
+        "hierarchy"
+      ],
+      "note": "公众号正文直用：正文 15-16px 行距 1.7，标题收紧字距，层级靠字重与留白不靠加粗堆叠。",
+      "id": "insp-18"
+    },
+    {
+      "title": "知识卡片九宫格（Deep-blue & Gold）",
+      "category": "brand",
+      "source": "cn-grid-2026",
+      "designLanguage": "知识付费信息图范式：深墨蓝渐变底 #0A1628，收益点以 2 列 3 行圆角卡片排布，卡片 #152238 半透明 + 极细金色 #D4AF37 边框 + 左上金点装饰；白色文字居中，顶部主标题配金色细体英文副题。信息密集但精致有序，9:16 竖版。",
+      "palette": {
+        "bg": "#0A1628",
+        "ink": "#FFFFFF",
+        "accent": "#D4AF37"
+      },
+      "fonts": [
+        "Noto Sans SC",
+        "Playfair Display"
+      ],
+      "cssSnippet": ".kcard{background:rgba(21,34,56,.9);border:1px solid #D4AF37;border-radius:10px;padding:18px 20px;position:relative}.kcard::before{content:'';position:absolute;top:14px;left:14px;width:6px;height:6px;border-radius:50%;background:#D4AF37}",
+      "applicableTo": [
+        "poster",
+        "single"
+      ],
+      "tags": [
+        "knowledge-card",
+        "dark-gold",
+        "grid-cards"
+      ],
+      "note": "课程大纲 / 权益清单 / 方法论六宫格首选；负向提示词：变形、水印、文字错乱。",
+      "id": "deep-blue-gold"
+    },
+    {
+      "title": "解构轻量化 + F 型动线（2026 商务趋势）",
+      "category": "trend",
+      "source": "cn-grid-2026",
+      "designLanguage": "2026 商务海报热门：在基础网格上适度做文字重叠、元素偏移的轻破格，不破坏可读性；核心标题与卖点置于左上视觉重心，辅助信息横排，贴合 F 型浏览动线；主色沉稳（深空灰/藏蓝/米白占 70%+），亮色只点行动点。",
+      "palette": {
+        "bg": "#171B22",
+        "ink": "#EDEDEA",
+        "accent": "#FF6A3D"
+      },
+      "fonts": [
+        "Söhne",
+        "Noto Sans SC"
+      ],
+      "cssSnippet": ".f-decon{position:relative}.f-decon .overlap{position:relative;z-index:2;margin-bottom:-.6em;mix-blend-mode:normal}.f-decon .ghost{position:relative;z-index:1;opacity:.18;font-size:3em;font-weight:800}",
+      "applicableTo": [
+        "poster",
+        "editorial"
+      ],
+      "tags": [
+        "deconstruction",
+        "f-pattern",
+        "business"
+      ],
+      "note": "招募海报 / 活动官宣可用；全篇只破一处，装饰透明度 ≤15% 不压正文。",
+      "id": "f-2026"
     }
   ]
 }

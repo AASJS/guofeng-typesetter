@@ -147,6 +147,7 @@ tr:hover td{ background:rgba(168,50,42,.04); }
     <button data-tab="3">③ 标题 · AB</button>
     <button data-tab="4">④ 看板</button>
     <button data-tab="5">⑤ 长文拆卡</button>
+    <button data-tab="6">⑥ AI 排版 · 发布</button>
   </div>
 
   <!-- ============ Tab1 排版 ============ -->
@@ -345,6 +346,36 @@ tr:hover td{ background:rgba(168,50,42,.04); }
           <h3>卡片草案 <span class="hint" id="lfCount"></span></h3>
           <div id="lfList"></div>
           <div class="hint" style="margin-top:8px;line-height:1.8;">拆分规则：要点取每节前 3 条 6~40 字的完整句（在逗号处拆成上下两行）；金句优先含「不是…而是 / 真正的 / 所谓 / 本质上」的短句。最多 12 张，超出部分请分段拆。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Tab6 AI 排版 · 发布 ============ -->
+  <section class="panel" id="p6">
+    <div class="cols">
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <h3>① 复制 AI 提示词</h3>
+          <div class="hint" style="margin-bottom:8px;line-height:1.8;">素材默认取「⑤ 长文拆卡」里粘贴的全文，也可在下面单独粘贴。复制提示词 → 喂给 AI（如 WorkBuddy 对话）→ 拿回 JSON。</div>
+          <textarea id="aiSrc" rows="6" placeholder="（可选）单独粘贴文章素材；⑤ 已粘贴过则留空" style="width:100%;font-family:inherit;font-size:13px;line-height:1.7;padding:10px;border:1px solid #ddd4c4;border-radius:8px;background:#fffdf8;color:inherit;resize:vertical;"></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn pri" id="btnAiPrompt">📋 复制 AI 提示词</button>
+            <button class="btn" id="btnAiLocal">🪄 本地兜底提示词</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>② 导入 AI 结果</h3>
+          <textarea id="aiJson" rows="9" placeholder="把 AI 返回的 JSON 原样粘贴到这里（必须含 cards 数组；有 article 更佳，会生成发布物料）" style="width:100%;font-family:inherit;font-size:12px;line-height:1.6;padding:10px;border:1px solid #ddd4c4;border-radius:8px;background:#fffdf8;color:inherit;resize:vertical;"></textarea>
+          <div style="margin-top:10px;"><button class="btn pri" id="btnAiImport">⬇️ 导入并生成卡片 + 物料</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>③ 发布物料 <span class="hint">一键复制 → 公众号助手</span></h3>
+          <div style="margin-bottom:10px;"><button class="btn sm" id="btnAiCopyAll">📋 复制全部物料</button></div>
+          <div id="aiMeta"></div>
+          <div class="hint" style="margin-top:8px;line-height:1.8;">流程：标题/摘要 → 公众号后台；封面提示词 → 生图（3.35:1）；每张卡的配图提示词 → 生图后用「配图」上传回卡片；卡片组 HTML 在⑤导出。</div>
         </div>
       </div>
     </div>
@@ -1433,6 +1464,141 @@ if (typeof document !== 'undefined') (function () {
   try {
     const savedLf = LS.get(LF_KEY, null);
     if (savedLf && savedLf.text) { $id('lfText').value = savedLf.text; LF.cards = savedLf.cards || []; lfRender(); }
+  } catch (e) {}
+
+  /* ---------- Tab6 AI 排版 · 发布：提示词往返协议 + JSON 导入 + 物料一键复制 ---------- */
+  const AI_KEY = 'gf_ai_publish';
+  const AIP = { article: null, style: null, src: '' };
+
+  function aiCopy(text, label) {
+    const done = () => toast('已复制' + (label || ''));
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => aiCopyFallback(text, done));
+    } else aiCopyFallback(text, done);
+  }
+  function aiCopyFallback(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动选择文本'); }
+    document.body.removeChild(ta);
+  }
+  function aiBuildPrompt() {
+    const src = $id('lfText').value.trim() || $id('aiSrc').value.trim();
+    if (!src) { toast('先在⑤粘贴文章素材（或在本页单独粘贴）'); return ''; }
+    return [
+      '你是「国风高档图文排版」内容策划，服务一个面向 30-50 岁读者、主打反共识认知 / 长期主义 / 反焦虑表达的公众号。',
+      '请把下面的文章素材加工为一组公众号发布物料，严格输出 JSON：不要任何解释文字，不要用 markdown 代码块包裹，直接以 { 开头、} 结尾。',
+      'JSON 结构：',
+      '{',
+      '  "article": {',
+      '    "title": "主标题（≤20 字，反共识 / 长期主义句式优先）",',
+      '    "digest": "公众号摘要（≤120 字，说清给谁解决什么问题）",',
+      '    "coverPrompt": "公众号封面图生成提示词（3.35:1 横版，国风宣纸质感，写清主体画面 / 配色 / 情绪氛围，画面中不要出现文字）"',
+      '  },',
+      '  "cards": [',
+      '    { "no": "01", "title": "小节标题（≤16 字）", "points": ["要点1", "要点2", "要点3"], "golden": "本节金句（8~30 字）", "imgPrompt": "该卡配图生成提示词（9:16 或 1:1，国风宣纸质感 / 水墨留白构图，与要点内容对应、具体可生图，画面中不要出现文字）" }',
+      '  ],',
+      '  "style": { "palette": "朱砂|黛青|赭石|黛绿|黛紫|胭脂 之一", "note": "一句话说明为何选这套配色" }',
+      '}',
+      '要求：拆 3~8 张卡；每条要点 6~40 字完整句；金句优先「不是…而是 / 真正的 / 所谓 / 本质上」句式且不与要点重复；提示词要具体到能直接生图。',
+      '',
+      '【文章素材】',
+      src
+    ].join('\n');
+  }
+  function aiImport() {
+    const raw = $id('aiJson').value.trim();
+    if (!raw) { toast('先粘贴 AI 返回的 JSON'); return; }
+    let obj = null;
+    try { obj = JSON.parse(raw); } catch (e) {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) { try { obj = JSON.parse(m[0]); } catch (e2) {} }
+    }
+    if (!obj || !Array.isArray(obj.cards) || !obj.cards.length) { toast('解析失败：JSON 需含非空 cards 数组'); return; }
+    LF.cards = obj.cards.slice(0, 12).map((c, i) => ({
+      no: String(c.no || i + 1).padStart(2, '0'),
+      title: String(c.title || '').slice(0, 16),
+      points: (c.points || []).slice(0, 3).map(x => String(x)),
+      golden: String(c.golden || ''),
+      imgPrompt: String(c.imgPrompt || '')
+    })).filter(c => c.points.length || c.golden);
+    AIP.article = (obj.article && obj.article.title) ? obj.article : null;
+    AIP.style = obj.style || null;
+    lfRender(); aiRender(); lfPersist(); aiPersist();
+    toast('已导入 ' + LF.cards.length + ' 张卡' + (AIP.article ? ' + 发布物料（⑤ 里可逐卡载入排版）' : '（无 article，物料区留空）'));
+  }
+  function aiLocalPrompts() {
+    if (!LF.cards.length) { toast('先在⑤拆卡，或先导入 AI 结果'); return; }
+    const style = '国风宣纸质感，水墨留白构图，柔和自然光，高级感，画面干净，不要出现任何文字';
+    LF.cards.forEach(c => {
+      c.imgPrompt = '（9:16 竖版）以「' + (c.title || (c.points[0] || '').slice(0, 10)) + '」为意象的画面：' + (c.golden || (c.points[0] || '')) + '。' + style;
+    });
+    if (!AIP.article) {
+      AIP.article = {
+        title: LF.cards[0].title || '',
+        digest: LF.cards.map(c => c.golden || c.points[0]).filter(Boolean).slice(0, 3).join('；').slice(0, 110),
+        coverPrompt: '（3.35:1 横版）国风公众号封面：宣纸底色，水墨山影与大面积留白，呼应「' + (LF.cards[0].title || '') + '」。' + style
+      };
+    }
+    lfRender(); aiRender(); lfPersist(); aiPersist();
+    toast('已生成本地兜底提示词（建议再让 AI 精修）');
+  }
+  function aiPersist() {
+    try { LS.set(AI_KEY, { article: AIP.article, style: AIP.style, src: $id('aiSrc').value }); } catch (e) {}
+  }
+  function aiRows() {
+    const rows = [];
+    if (AIP.article) {
+      rows.push(['文章标题', AIP.article.title || '']);
+      rows.push(['摘要', AIP.article.digest || '']);
+      rows.push(['封面提示词', AIP.article.coverPrompt || '']);
+    }
+    LF.cards.forEach(c => { if (c.imgPrompt) rows.push(['卡' + c.no + ' 配图提示词', c.imgPrompt]); });
+    return rows;
+  }
+  function aiRender() {
+    const box = $id('aiMeta');
+    if (!AIP.article && !LF.cards.some(c => c.imgPrompt)) {
+      box.innerHTML = '<div class="hint">还没有物料。路径一：点「复制 AI 提示词」→ 喂给 AI → JSON 粘到②导入；路径二：⑤拆卡后点「本地兜底提示词」。</div>';
+      return;
+    }
+    const rows = aiRows();
+    box.innerHTML = rows.map((r, i) =>
+      '<div style="border:1px solid #e5dcc9;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fffdf8;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">'
+      + '<b style="font-size:13px;white-space:nowrap;">' + esc(r[0]) + '</b>'
+      + '<button class="btn sm pri" data-aicopy="' + i + '" style="flex-shrink:0;">复制</button></div>'
+      + '<div style="font-size:12px;color:#5a554e;line-height:1.7;word-break:break-all;">' + esc(r[1]) + '</div></div>'
+    ).join('') + (AIP.style && AIP.style.palette
+      ? '<div class="hint">建议配色：' + esc(AIP.style.palette) + (AIP.style.note ? ' —— ' + esc(AIP.style.note) : '') + '（在②配色页手动选）</div>' : '');
+    box.querySelectorAll('[data-aicopy]').forEach(b => b.addEventListener('click', () => {
+      const r = rows[+b.dataset.aicopy]; if (r) aiCopy(r[1], r[0]);
+    }));
+  }
+  $id('btnAiPrompt').addEventListener('click', () => {
+    const p = aiBuildPrompt(); if (!p) return;
+    aiCopy(p, 'AI 提示词');
+    try { $id('aiJson').placeholder = '提示词已复制。去 AI 对话粘贴 → 发送 → 把返回的 JSON 粘到这里。'; } catch (e) {}
+  });
+  $id('btnAiImport').addEventListener('click', aiImport);
+  $id('btnAiLocal').addEventListener('click', aiLocalPrompts);
+  $id('btnAiCopyAll').addEventListener('click', () => {
+    const rows = aiRows();
+    if (!rows.length) { toast('还没有物料可复制'); return; }
+    const md = rows.map(r => '【' + r[0] + '】\n' + r[1]).join('\n\n')
+      + (AIP.style && AIP.style.palette ? '\n\n【建议配色】' + AIP.style.palette + (AIP.style.note ? '（' + AIP.style.note + '）' : '') : '');
+    aiCopy(md, '全部物料');
+  });
+  $id('aiSrc').addEventListener('input', aiPersist);
+  try {
+    const savedAi = LS.get(AI_KEY, null);
+    if (savedAi) {
+      AIP.article = savedAi.article || null;
+      AIP.style = savedAi.style || null;
+      if (savedAi.src) $id('aiSrc').value = savedAi.src;
+      aiRender();
+    }
   } catch (e) {}
 
   /* ---------- 胜出标题桥接（AB 胜出 → 应用到工作台；跨 Tab 同步由外壳派发 StorageEvent） ---------- */
