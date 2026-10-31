@@ -20,25 +20,19 @@
   </div>
 
   <div class="panels">
-    <!-- 排版：嵌入国风排版工作台（默认打开内部 Tab① 排版） -->
-    <section role="tabpanel" class="panel active wb-panel" id="tab-paiban">
-      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="1" title="国风排版工作台 · 排版"></iframe>
-      <div class="wb-loading">加载国风排版工作台…</div>
-    </section>
-    <!-- 配色 / 标题AB / 看板：同一份工作台，分别默认打开对应内部 Tab；内层 Tab 栏已隐藏，避免与顶栏重复 -->
-    <section role="tabpanel" class="panel wb-panel" id="tab-peise">
-      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="2" title="国风排版工作台 · 配色"></iframe>
-      <div class="wb-loading">加载国风排版工作台…</div>
-    </section>
-    <section role="tabpanel" class="panel wb-panel" id="tab-biaoti">
-      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="3" title="国风排版工作台 · 标题AB"></iframe>
-      <div class="wb-loading">加载国风排版工作台…</div>
-    </section>
-    <section role="tabpanel" class="panel wb-panel" id="tab-kanban">
-      <iframe class="wb-frame" sandbox="allow-scripts allow-same-origin allow-downloads" data-tab="4" title="国风排版工作台 · 看板"></iframe>
-      <div class="wb-loading">加载国风排版工作台…</div>
-    </section>
+    <!-- 排版 / 配色 / 标题AB / 看板：单实例工作台的四个落点（内层 Tab 由 postMessage 切换） -->
+    <section role="tabpanel" class="panel active wb-panel" id="tab-paiban"></section>
+    <section role="tabpanel" class="panel wb-panel" id="tab-peise"></section>
+    <section role="tabpanel" class="panel wb-panel" id="tab-biaoti"></section>
+    <section role="tabpanel" class="panel wb-panel" id="tab-kanban"></section>
     <section role="tabpanel" class="panel" id="tab-guofeng"><div class="panel-inner" style="padding:0;height:100%;display:flex;flex-direction:column"><div id="guofeng-mount-2" style="flex:1;min-height:0"></div></div></section>
+
+    <!-- 单实例工作台：iframe 常驻 .panels（absolute 定位，避免移动 DOM 触发重载），
+         四个主 Tab 共用这一份实例，切 Tab 仅切换可见性 + postMessage 内层定位 -->
+    <div class="wb-holder" id="wbHolder">
+      <iframe class="wb-frame" id="wbFrame" sandbox="allow-scripts allow-same-origin allow-downloads" title="国风排版工作台"></iframe>
+      <div class="wb-loading">加载国风排版工作台…</div>
+    </div>
   </div>
   </div>
 

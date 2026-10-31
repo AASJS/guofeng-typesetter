@@ -21,8 +21,8 @@
     panels.forEach(p => p.classList.toggle('active', p.id === 'tab-' + t));
     // 切到新 Tab 后重算卡片预览缩放（引擎监听 window.resize 刷新预览）
     requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
-    const wbf = document.querySelector('#tab-' + t + ' .wb-frame');
-    if (wbf) loadWb(wbf);
+    // 主 Tab（排版/配色/标题AB/看板）→ 显示单实例工作台并定位内层 Tab；国风卡片 → 隐藏
+    if (WB_TABS[t]) showWb(t); else hideWb();
     if (focus) btn.focus();
   }
 
@@ -52,18 +52,24 @@
     console.warn('国风卡片引擎未加载，仅渲染工作站外壳：', e);
   }
 
-  /* ===== 3) 嵌入「国风排版工作台」：懒加载 iframe，默认打开对应内部 Tab ===== */
+  /* ===== 3) 单实例「国风排版工作台」：一份 iframe 服务四个主 Tab =====
+     - iframe 常驻 .panels 容器（absolute 定位），移动 DOM 会导致 iframe 重载，因此永不挪动；
+     - 切主 Tab = 切 holder 可见性 + postMessage 通知内层切 Tab（状态全保留，无闪烁）；
+     - 首次进入加载 workbench.html?tab=1，15s 超时可重试；胜出标题桥接保留（load 后派发）。 */
   function safeGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   const WB_TIMEOUT = 15000; // iframe 加载超时阈值（ms）
+  const WB_TABS = { paiban: '1', peise: '2', biaoti: '3', kanban: '4' };
 
-  function loadWb(frame) {
-    if (!frame || frame.dataset.ready === "1") return;
-    const dt = frame.dataset.tab || "1";
+  function switchInner(frame, n) {
+    try { frame.contentWindow.postMessage({ type: 'wb-switch-tab', tab: n }, '*'); } catch (e) {}
+    try { frame.contentWindow.dispatchEvent(new Event('resize')); } catch (e) {}
+  }
+
+  function loadWb(frame, dt) {
     frame.dataset.ready = "1";
     frame.dataset.loaded = "0";
     frame.src = "workbench.html?tab=" + encodeURIComponent(dt);
-    const panel = frame.closest(".wb-panel");
-    const tip = panel ? panel.querySelector(".wb-loading") : null;
+    const tip = document.querySelector("#wbHolder .wb-loading");
     let timer = null;
     const armTimeout = () => {
       clearTimeout(timer);
@@ -88,8 +94,8 @@
       clearTimeout(timer);
       frame.dataset.loaded = "1";
       try { frame.contentWindow.dispatchEvent(new Event("resize")); } catch (e) {}
-      try { frame.closest(".wb-panel").classList.add("ready"); } catch (e) {}
-      // 胜出标题桥接：把 gf_ab_winner 派发给刚加载好的工作台（跨 Tab 同步）
+      document.getElementById("wbHolder").classList.add("ready");
+      // 胜出标题桥接：把 gf_ab_winner 派发给工作台（多实例时代遗留，现作幂等兜底）
       try {
         var w = safeGet("gf_ab_winner");
         if (w) frame.contentWindow.dispatchEvent(new StorageEvent("storage", { key: "gf_ab_winner", newValue: w }));
@@ -97,6 +103,18 @@
     });
   }
 
-  // 初始激活的 Tab 立即加载
-  loadWb(document.querySelector("#tab-paiban .wb-frame"));
+  function showWb(tabName) {
+    const holder = document.getElementById("wbHolder");
+    const frame = document.getElementById("wbFrame");
+    holder.classList.add("visible");
+    if (frame.dataset.ready === "1") switchInner(frame, WB_TABS[tabName]);
+    else loadWb(frame, WB_TABS[tabName] || "1");
+  }
+
+  function hideWb() {
+    document.getElementById("wbHolder").classList.remove("visible");
+  }
+
+  // 初始激活的 Tab（排版）立即加载单实例工作台
+  showWb('paiban');
 })();

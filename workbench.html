@@ -848,6 +848,13 @@ if (typeof document !== 'undefined') (function () {
     if (b.dataset.tab === '2') syncColorInputs();
     if (b.dataset.tab === '1') preview(); /* 隐藏期间 clientWidth 失效，切回时重算缩放 */
   }));
+  /* 单实例外壳：外壳 Tab 切换时通过 postMessage 通知内层切 Tab（iframe 不重载，状态全保留） */
+  window.addEventListener('message', (e) => {
+    const d = e.data;
+    if (!d || d.type !== 'wb-switch-tab') return;
+    const b = document.querySelector('.tabs button[data-tab="' + d.tab + '"]');
+    if (b && !b.classList.contains('on')) b.click();
+  });
 
   /* ---------- Tab1：版式网格 / 尺寸 / 配色 ---------- */
   function buildTplGrid() {
@@ -922,6 +929,29 @@ if (typeof document !== 'undefined') (function () {
   function save() { LS.set(K.cur, doc); }
 
   /* ---------- 预览 ---------- */
+  /* 增量更新：iframe 首次全量构建（srcdoc），之后纯文本/配色/尺寸变化原位 patch
+     （替换 :root 变量 + .content innerHTML + .seal），不再触发 iframe 导航 → 无闪烁、保滚动、
+     输出与 buildPoster 完全一致；patch 异常时自动回退全量重建。 */
+  let pvReady = false, pvLoading = false;
+  $id('pv').addEventListener('load', () => { pvLoading = false; pvReady = true; });
+  function patchInPlace() {
+    try {
+      const idoc = $id('pv').contentDocument;
+      if (!idoc || !idoc.body) return false;
+      const content = idoc.querySelector('.content'), seal = idoc.querySelector('.seal'), styleEl = idoc.querySelector('style');
+      if (!content || !seal || !styleEl) return false;
+      const s = sizeOf(doc);
+      const rootTxt = ':root{' + GF.rootvars(s.h, colors(doc), s.fs) + '}';
+      if (!/:root\{[^}]*\}/.test(styleEl.textContent)) return false;
+      styleEl.textContent = styleEl.textContent.replace(/:root\{[^}]*\}/, rootTxt.replace(/\$/g, '$$$$'));
+      const band = (doc.showImg && doc.img && doc.size === 'portrait') ? illuHTML(doc) : '';
+      content.innerHTML = band + LAYOUTS[doc.layout].body(doc);
+      seal.textContent = doc.seal || '静心';
+      return true;
+    } catch (e) {
+      return false; /* 任何异常 → 调用方回退全量 srcdoc 重建 */
+    }
+  }
   function preview() {
     const s = sizeOf(doc);
     const box = $id('stage').parentElement;
@@ -935,7 +965,10 @@ if (typeof document !== 'undefined') (function () {
     ifr.style.transform = 'scale(' + k + ')';
     $id('stage').style.width = (s.w * k) + 'px';
     $id('stage').style.height = (s.h * k) + 'px';
-    ifr.srcdoc = buildPoster(doc);
+    if (!(pvReady && !pvLoading && patchInPlace())) {
+      pvLoading = true; pvReady = false;
+      ifr.srcdoc = buildPoster(doc);
+    }
     $id('pvHint').textContent = `实际尺寸 ${s.w}×${s.h}px｜预览缩放 ${Math.round(k * 100)}%｜方版自动 --FS:0.86 防溢出`;
     LS.set(K.cur, doc);
   }
@@ -1269,6 +1302,33 @@ if (typeof document !== 'undefined') (function () {
   $id('btnClearHist').addEventListener('click', () => { if (confirm('确定清空出图历史？文案库与 AB 记录不受影响。')) { LS.set(K.his, []); renderDash(); toast('已清空出图历史'); } });
 
   /* ---------- 配图面板 ---------- */
+  /* ---------- 配图面板 ---------- */
+  /* 上传配图 canvas 降采样压缩：最长边 1600px、JPEG q0.82、白底填充（防透明 PNG 变黑）；
+     小图（<400KB 且无需缩放）原样保留，避免无谓重压。base64 体积大幅下降，保护 localStorage 5MB 配额。 */
+  function compressImage(dataUrl, maxEdge, quality) {
+    maxEdge = maxEdge || 1600; quality = quality || 0.82;
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const k = Math.min(1, maxEdge / Math.max(img.width, img.height));
+          if (k >= 1 && dataUrl.length < 400 * 1024) return resolve(dataUrl);
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * k));
+          c.height = Math.max(1, Math.round(img.height * k));
+          const ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          const out = c.toDataURL('image/jpeg', quality);
+          /* 守卫：极端纹理图 JPEG 可能反而更大，此时保留原图 */
+          resolve(out.length < dataUrl.length ? out : dataUrl);
+        } catch (e) { reject(e); }
+      };
+      img.onerror = () => reject(new Error('图片解码失败'));
+      img.src = dataUrl;
+    });
+  }
+  window.__wbCompress = compressImage; /* 供自动化测试/外部复用 */
   function wireImg() {
     const on = $id('imgOn'), file = $id('imgFile'), url = $id('imgUrl'), cap = $id('imgCap'), clr = $id('imgClear');
     function sync() {
@@ -1283,9 +1343,22 @@ if (typeof document !== 'undefined') (function () {
     file.addEventListener('change', () => {
       const f = file.files && file.files[0];
       if (!f) return;
-      if (f.size > 5 * 1024 * 1024) { alert('图片过大（>5MB），建议压缩后再上传'); return; }
+      if (f.size > 20 * 1024 * 1024) { alert('图片过大（>20MB），请先本地压缩后再上传'); return; }
       const r = new FileReader();
-      r.onload = () => { file.dataset.data = r.result; url.value = ''; sync(); };
+      r.onload = async () => {
+        const before = r.result.length;
+        try {
+          const out = await compressImage(r.result);
+          file.dataset.data = out;
+          url.value = '';
+          const kb = n => Math.round(n / 102.4) / 10;
+          if (out.length < before) toast('已压缩：' + kb(before) + 'KB → ' + kb(out.length) + 'KB（最长边 1600px · JPEG）');
+        } catch (e) {
+          file.dataset.data = r.result; /* 压缩失败回退原图 */
+          url.value = '';
+        }
+        sync();
+      };
       r.readAsDataURL(f);
     });
     clr.addEventListener('click', () => {

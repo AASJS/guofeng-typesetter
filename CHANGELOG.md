@@ -7,6 +7,21 @@
 
 ---
 
+## [3.5.0] - 2026-10-31
+
+### Added
+- **预览增量更新**：预览 iframe 首次全量构建（srcdoc）后，文本/配色/尺寸变化改为**原位 patch**（替换 `:root` 变量 + `.content` innerHTML + `.seal`），不再触发 iframe 导航——无闪烁、无滚动复位；patch 异常自动回退全量重建，输出与 `buildPoster` 完全一致。
+- **配图上传压缩**：上传配图经 canvas 降采样（最长边 1600px · JPEG q0.82 · 白底填充防透明 PNG 变黑），toast 提示压缩前后体积；实测 5.4MB PNG → 32KB；极端纹理图压缩后反而变大时保留原图；上传上限放宽至 20MB（压缩后落盘）。
+- **单实例化**：外壳 4 份工作台 iframe 合并为 1 份常驻实例（absolute 定位避免移动 DOM 触发重载），主 Tab 切换 = 切可见性 + `postMessage(wb-switch-tab)` 内层定位；内存占用约降至 1/4，AB 胜出标题等状态跨主 Tab 天然共享（桥接保留作幂等兜底）。
+
+### Fixed
+- 单实例结构下加载遮罩不消失（`.wb-holder.ready` 选择器缺失导致遮罩盖住工作台）。
+
+### Verified
+- 无头 Chromium 回归（单文件 + 多文件双版本）：单实例切换 iframe 不重载（标记存活）、postMessage 精准定位 ②/①、增量预览原位生效且 srcdoc 不变、压缩 5583KB→32KB、引擎挂载、390px 全 Tab 无横向溢出、localStorage 读写。
+
+---
+
 ## [3.4.0] - 2026-10-30
 
 ### Added
