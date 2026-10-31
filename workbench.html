@@ -378,12 +378,20 @@ tr:hover td{ background:rgba(168,50,42,.04); }
           <div class="hint" style="margin-top:8px;line-height:1.8;">流程：标题/摘要 → 公众号后台；封面提示词 → 生图（3.35:1）；每张卡的配图提示词 → 生图后用「配图」上传回卡片；卡片组 HTML 在⑤导出。</div>
         </div>
         <div class="card" style="margin-top:14px;">
-          <h3>④ 正文排版 <span class="hint">全文 → 公众号内联 HTML，粘贴即用</span></h3>
-          <div class="hint" style="margin-bottom:8px;line-height:1.8;">素材同上（⑤ 全文 / ① 单独粘贴）。风格跟随「②配色」当前配色，按中文排印规范生成：行距 1.75、标题收紧字距 + 强调色竖线、引文底色块、段落两端对齐；全部内联样式，公众号编辑器不掉格式。</div>
+          <h3>④ 正文排版 <span class="hint">全文 → 公众号内联 HTML，粘贴即用（微信兼容）</span></h3>
+          <div class="hint" style="margin-bottom:8px;line-height:1.8;">支持标准 Markdown：## 标题 / **粗体** / *斜体* / ~~删除~~ / [链接](url) / ![图](url) / 表格 / ``` 代码块 / --- 分隔线；直接粘贴 Word、飞书、Notion 富文本会<b>自动净化为 Markdown</b>。复制时自动做微信兼容：字体强制分发、li 内块级降级、中文标点防断行、外链图转 Base64。</div>
+          <div id="wpStyleChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn pri" id="btnWpBuild">⚙️ 生成正文排版</button>
             <button class="btn" id="btnWpCopy">📋 复制正文 HTML</button>
             <button class="btn" id="btnWpPrev">👁 预览</button>
+            <button class="btn" id="btnWpPaste">📥 魔法粘贴</button>
+          </div>
+          <div id="wpPrevBar" style="display:none;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;">
+            <span class="hint">预览宽度：</span>
+            <button class="btn sm" data-wpw="375">📱 手机</button>
+            <button class="btn sm" data-wpw="520">📲 平板</button>
+            <button class="btn sm" data-wpw="0">🖥 全宽</button>
           </div>
           <div id="wpPrev" style="display:none;background:#fff;border:1px solid #ddd4c4;border-radius:10px;padding:20px 18px;max-width:520px;margin-top:12px;overflow:auto;max-height:480px;"></div>
           <div class="hint" id="wpHint" style="margin-top:8px;"></div>
@@ -1614,51 +1622,327 @@ if (typeof document !== 'undefined') (function () {
     lfRender(); aiRender(); lfPersist(); aiPersist();
     toast('已生成「' + domain.label + '」风格提示词（联动配色·' + (PALETTES[doc.palette] || {}).name + '，建议再让 AI 精修）');
   }
-  /* —— ④ 正文排版：全文 → 公众号内联 HTML（风格跟随当前配色 + 中文排印规范） —— */
-  function wpBuild(src) {
-    const pal = PALETTES[doc.palette] || PALETTES[0];
-    const ACC = pal.accent || '#A8322A', BG2 = pal.bg2 || '#F2E9DA', INK = '#3f3f3f';
-    const bo = (s) => esc(s).replace(/\*\*([^*]+)\*\*/g, '<strong style="color:' + ACC + ';">$1</strong>');
-    const H2 = (t) => '<h2 style="margin:34px 0 14px;font-size:19px;line-height:1.4;letter-spacing:-.02em;font-weight:700;color:' + INK + ';border-left:4px solid ' + ACC + ';padding-left:10px;">' + bo(t) + '</h2>';
-    const H3 = (t) => '<h3 style="margin:26px 0 12px;font-size:16px;font-weight:700;color:' + ACC + ';letter-spacing:-.01em;">' + bo(t) + '</h3>';
-    const out = []; let para = [], list = [], quote = [];
-    const flushP = () => { if (para.length) { out.push('<p style="margin:0 0 18px;text-align:justify;">' + bo(para.join('<br>')) + '</p>'); para = []; } };
-    const flushL = () => { if (list.length) { out.push('<ul style="margin:0 0 18px;padding-left:20px;">' + list.map(li => '<li style="margin-bottom:8px;line-height:1.7;">' + bo(li) + '</li>').join('') + '</ul>'); list = []; } };
-    const flushQ = () => { if (quote.length) { out.push('<blockquote style="margin:0 0 18px;padding:12px 14px;background:' + BG2 + ';border-left:3px solid ' + ACC + ';color:#6a6a6a;font-size:14px;line-height:1.7;">' + bo(quote.join('<br>')) + '</blockquote>'); quote = []; } };
-    const flushAll = () => { flushP(); flushL(); flushQ(); };
+  /* —— ④ 正文排版：全文 → 公众号内联 HTML
+        v3.10 强化（参考 raphael-publish）：
+        · 标准 Markdown 行内语法 + 表格 + 图片 + 多图并排 + 代码块 + 分隔线
+        · 6 套正文风格预设（跟随配色 / 纯净白 / 燕麦 / 水墨 / 羊皮纸 / 杂志）
+        · 微信兼容引擎 wpWechatCompat（字体强制分发 / li 降级 / 标点防断行 / 图转 Base64）
+        · 魔法粘贴：富文本 HTML 自动净化为 Markdown —— */
+  let wpStyleId = LS.get('gf_wpstyle', 'follow');
+  const WP_STYLES = [
+    { id: 'follow', name: '跟随配色' },
+    { id: 'plain',  name: '纯净白', ink: '#3f3f3f', sub: '#8a8a8a', accent: '#111111', strong: '#111111', bg2: '#F6F6F6', line: '#E3E3E3', sans: true,  variant: 'bar' },
+    { id: 'oat',    name: '燕麦',   ink: '#4A443B', sub: '#9A8F7E', accent: '#8A6D3B', strong: '#6B4F2A', bg2: '#F5F0E6', line: '#E4DCCB', sans: true,  variant: 'bar' },
+    { id: 'ink',    name: '水墨',   ink: '#333333', sub: '#8C8C8C', accent: '#2E2E2E', strong: '#111111', bg2: '#F4F4F2', line: '#DDDDDD', sans: false, variant: 'center' },
+    { id: 'paper',  name: '羊皮纸', ink: '#5B4A36', sub: '#A08A6A', accent: '#9A5B33', strong: '#7A4526', bg2: '#EFE3C8', line: '#DFCDA8', sans: false, variant: 'center', wrapBg: '#F9F3E3' },
+    { id: 'press',  name: '杂志',   ink: '#262626', sub: '#777777', accent: '#B02418', strong: '#B02418', bg2: '#F7F7F7', line: '#E8E8E8', sans: false, variant: 'bar' }
+  ];
+  function wpParams(id) {
+    if (id === 'follow') {
+      const pal = PALETTES[doc.palette] || PALETTES[0];
+      return { ink: '#3f3f3f', sub: '#8a8a8a', accent: pal.accent, strong: pal.accent, bg2: pal.bg2, line: '#ddd4c4', sans: true, variant: 'bar', wrapBg: '' };
+    }
+    const t = WP_STYLES.find(x => x.id === id) || WP_STYLES[1];
+    return { ink: t.ink, sub: t.sub, accent: t.accent, strong: t.strong, bg2: t.bg2, line: t.line, sans: t.sans, variant: t.variant, wrapBg: t.wrapBg || '' };
+  }
+  /* 行内 Markdown → 内联样式 HTML（先转义再标记，code 段用占位符防二次解析） */
+  function wpInline(s, P) {
+    let t = esc(s);
+    const codes = [];
+    t = t.replace(/`([^`]+)`/g, (_, c) => { codes.push('<code style="background:' + P.bg2 + ';color:' + P.strong + ';padding:1px 5px;border-radius:4px;font-size:13px;font-family:Consolas,Menlo,monospace;">' + c + '</code>'); return '\u0001' + (codes.length - 1) + '\u0001'; });
+    t = t.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:6px;">');
+    t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" style="color:' + P.accent + ';text-decoration:none;border-bottom:1px solid ' + P.accent + ';">$1</a>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:' + P.strong + ';">$1</strong>');
+    t = t.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    t = t.replace(/~~([^~]+)~~/g, '<del style="color:' + P.sub + ';">$1</del>');
+    t = t.replace(/\u0001(\d+)\u0001/g, (_, i) => codes[+i] || '');
+    return t;
+  }
+  function wpBuild(src, styleId) {
+    const P = wpParams(styleId || wpStyleId);
+    const I = s => wpInline(s, P);
+    const HF = P.sans ? "-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" : "'Noto Serif SC','Songti SC',SimSun,serif";
+    const H2 = t => P.variant === 'center'
+      ? '<h2 style="margin:36px 0 16px;font-size:18px;line-height:1.5;letter-spacing:.06em;font-weight:700;color:' + P.accent + ';font-family:' + HF + ';text-align:center;border-bottom:1px solid ' + P.line + ';padding-bottom:10px;">' + I(t) + '</h2>'
+      : '<h2 style="margin:34px 0 14px;font-size:19px;line-height:1.4;letter-spacing:-.02em;font-weight:700;color:' + P.ink + ';font-family:' + HF + ';border-left:4px solid ' + P.accent + ';padding-left:10px;">' + I(t) + '</h2>';
+    const H3 = t => '<h3 style="margin:26px 0 12px;font-size:16px;font-weight:700;color:' + P.accent + ';letter-spacing:-.01em;font-family:' + HF + ';">' + I(t) + '</h3>';
+    const P_ = t => '<p style="margin:0 0 18px;text-align:justify;line-height:1.75;font-family:' + HF + ';">' + I(t) + '</p>';
+    const Q_ = t => '<blockquote style="margin:0 0 18px;padding:12px 14px;background:' + P.bg2 + ';border-left:3px solid ' + P.accent + ';color:' + P.sub + ';font-size:14px;line-height:1.75;font-family:' + HF + ';">' + I(t) + '</blockquote>';
+    const out = []; let para = [], list = [], olist = [], quote = [], code = null, tab = null, imgs = [];
+    const flushP = () => { if (para.length) { out.push(P_(para.join('<br>'))); para = []; } };
+    const flushL = () => { if (list.length) { out.push('<ul style="margin:0 0 18px;padding-left:20px;">' + list.map(li => '<li style="margin-bottom:8px;line-height:1.7;font-family:' + HF + ';">' + I(li) + '</li>').join('') + '</ul>'); list = []; } };
+    const flushO = () => { if (olist.length) { out.push('<ol style="margin:0 0 18px;padding-left:20px;">' + olist.map(li => '<li style="margin-bottom:8px;line-height:1.7;font-family:' + HF + ';">' + I(li) + '</li>').join('') + '</ol>'); olist = []; } };
+    const flushQ = () => { if (quote.length) { out.push(Q_(quote.join('<br>'))); quote = []; } };
+    const flushC = () => { if (code) { out.push('<pre style="margin:0 0 18px;padding:12px 14px;background:' + P.bg2 + ';border-radius:8px;font-family:Consolas,Menlo,monospace;font-size:13px;line-height:1.6;overflow:auto;white-space:pre-wrap;word-break:break-all;">' + esc(code.join('\n')) + '</pre>'); code = null; } };
+    const flushT = () => {
+      if (!tab) return;
+      const th = row => '<tr>' + row.map(c => '<th style="background:' + P.bg2 + ';color:' + P.strong + ';font-weight:700;padding:8px 10px;border:1px solid ' + P.line + ';text-align:left;font-size:14px;">' + I(c) + '</th>').join('') + '</tr>';
+      const td = row => '<tr>' + row.map(c => '<td style="padding:8px 10px;border:1px solid ' + P.line + ';line-height:1.7;font-size:14px;">' + I(c) + '</td>').join('') + '</tr>';
+      out.push('<table style="width:100%;border-collapse:collapse;margin:0 0 18px;">' + (tab.head ? '<thead>' + th(tab.rows[0]) + '</thead><tbody>' + tab.rows.slice(1).map(td).join('') + '</tbody>' : '<tbody>' + tab.rows.map(td).join('') + '</tbody>') + '</table>');
+      tab = null;
+    };
+    const flushI = () => {
+      if (!imgs.length) return;
+      if (imgs.length === 1) {
+        out.push('<p style="margin:0 0 ' + (imgs[0].alt ? '6px' : '18px') + ';text-align:center;"><img src="' + imgs[0].src + '" alt="' + esc(imgs[0].alt) + '" style="max-width:100%;border-radius:6px;display:block;margin:0 auto;"></p>');
+        if (imgs[0].alt) out.push('<p style="margin:0 0 18px;text-align:center;font-size:12px;color:' + P.sub + ';">' + esc(imgs[0].alt) + '</p>');
+      } else {
+        out.push('<table style="width:100%;border-collapse:collapse;margin:0 0 18px;border:none!important;"><tbody><tr>'
+          + imgs.map(m => '<td style="padding:0 4px;vertical-align:top;border:none!important;"><img src="' + m.src + '" alt="' + esc(m.alt) + '" style="width:100%;display:block;border-radius:6px;"></td>').join('')
+          + '</tr></tbody></table>');
+      }
+      imgs = [];
+    };
+    const flushAll = () => { flushP(); flushL(); flushO(); flushQ(); flushC(); flushT(); flushI(); };
+    const cells = ln => ln.replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
     src.replace(/\r/g, '').split('\n').forEach(raw => {
       const ln = raw.trim();
+      if (code !== null) { if (/^```/.test(ln)) { flushI(); flushT(); flushC(); } else code.push(raw); return; }
       if (!ln) { flushAll(); return; }
+      if (/^```/.test(ln)) { flushAll(); code = []; return; }
+      if (/^(-{3,}|\*{3,})$/.test(ln)) { flushAll(); out.push('<section style="border-top:1px dashed ' + P.line + ';margin:26px auto;width:40%;"></section>'); return; }
+      const mi = ln.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+      if (mi) { flushP(); flushL(); flushO(); flushQ(); flushT(); imgs.push({ alt: mi[1], src: esc(mi[2]) }); return; }
+      if (/^\|.+\|$/.test(ln)) {
+        flushP(); flushL(); flushO(); flushQ(); flushC(); flushI();
+        if (!tab) tab = { head: false, rows: [] };
+        if (tab.rows.length === 1 && /^[\s|:\-]+$/.test(ln)) { tab.head = true; return; }
+        if (tab.rows.length && /^[\s|:\-]+$/.test(ln)) return;
+        tab.rows.push(cells(ln)); return;
+      }
+      flushT(); flushI();
       const mh = ln.match(/^(#{1,3})\s+(.*)$/);
       if (mh) { flushAll(); out.push(mh[1].length <= 2 ? H2(mh[2]) : H3(mh[2])); return; }
       if (/^【.+】$/.test(ln)) { flushAll(); out.push(H2(ln.slice(1, -1))); return; }
       if (/^[一二三四五六七八九十]+、\S{1,18}$/.test(ln)) { flushAll(); out.push(H2(ln)); return; }
-      if (/^\d+[.、]\s*\S/.test(ln) && ln.length <= 22) { flushAll(); out.push(H3(ln)); return; }
-      if (/^>\s?/.test(ln)) { flushP(); flushL(); quote.push(ln.replace(/^>\s?/, '')); return; }
-      if (/^「.+」$/.test(ln)) { flushP(); flushL(); quote.push(ln.slice(1, -1)); return; }
-      if (/^[-*•]\s+/.test(ln)) { flushP(); flushQ(); list.push(ln.replace(/^[-*•]\s+/, '')); return; }
-      flushL(); flushQ(); para.push(ln);
+      if (/^\d+、\s*\S/.test(ln) && ln.length <= 22) { flushAll(); out.push(H3(ln)); return; }
+      if (/^\d+[.)]\s+/.test(ln)) { flushP(); flushQ(); flushO(); olist.push(ln.replace(/^\d+[.)]\s+/, '')); return; }
+      if (/^>\s?/.test(ln)) { flushP(); flushL(); flushO(); quote.push(ln.replace(/^>\s?/, '')); return; }
+      if (/^「.+」$/.test(ln)) { flushP(); flushL(); flushO(); quote.push(ln.slice(1, -1)); return; }
+      if (/^[-*•]\s+/.test(ln)) { flushP(); flushQ(); flushO(); list.push(ln.replace(/^[-*•]\s+/, '')); return; }
+      flushL(); flushO(); flushQ(); para.push(ln);
     });
     flushAll();
-    return '<section style="font-size:15px;line-height:1.75;letter-spacing:.5px;color:' + INK + ';">' + out.join('') + '</section>';
+    const wrap = 'font-size:15px;line-height:1.75;letter-spacing:.5px;color:' + P.ink + ';font-family:' + HF + ';' + (P.wrapBg ? 'background:' + P.wrapBg + ';padding:18px 16px;' : '');
+    return '<section style="' + wrap + '">' + out.join('') + '</section>';
   }
+  /* —— 微信兼容引擎（参考 raphael-publish wechatCompat）—— */
+  function wpWechatCompat(html) {
+    try {
+      const dc = new DOMParser().parseFromString(html, 'text/html');
+      const root = dc.body.firstElementChild; if (!root) return html;
+      const cs = root.getAttribute('style') || '';
+      const pick = k => { const m = cs.match(new RegExp('(?:^|;)' + k + ':\\s*([^;]+)')); return m ? m[1].trim() : ''; };
+      const FF = pick('font-family'), FS = pick('font-size'), CL = pick('color'), LH = pick('line-height');
+      /* 1. 字体/行距强制分发：微信编辑器会劫持继承样式 */
+      root.querySelectorAll('p, li, h1, h2, h3, h4, blockquote, span, td, th, a, strong, em').forEach(n => {
+        let st = n.getAttribute('style') || '';
+        if (FF && st.indexOf('font-family') < 0) st += ';font-family:' + FF;
+        if (LH && st.indexOf('line-height') < 0 && n.tagName !== 'SPAN') st += ';line-height:' + LH;
+        if (FS && st.indexOf('font-size') < 0 && n.tagName !== 'SPAN') st += ';font-size:' + FS;
+        if (CL && st.indexOf('color') < 0 && n.tagName !== 'H1' && n.tagName !== 'H2' && n.tagName !== 'H3') st += ';color:' + CL;
+        n.setAttribute('style', st);
+      });
+      /* 2. li 内块级降级为 span：防列表在微信中塌陷 */
+      Array.from(root.querySelectorAll('li')).forEach(li => {
+        Array.from(li.children).forEach(ch => {
+          if (/^(P|DIV|BLOCKQUOTE|SECTION)$/.test(ch.tagName)) {
+            const sp = dc.createElement('span');
+            sp.innerHTML = ch.innerHTML;
+            if (ch.getAttribute('style')) sp.setAttribute('style', ch.getAttribute('style'));
+            ch.parentNode.replaceChild(sp, ch);
+          }
+        });
+      });
+      /* 3. 中文标点吸附：强调标签后的标点挂进标签内 + 零宽连接符防断行 */
+      root.querySelectorAll('strong, em, a, code, del').forEach(n => {
+        const nx = n.nextSibling;
+        if (!nx || nx.nodeType !== 3) return;
+        const m = (nx.textContent || '').match(/^\s*([：；，。！？、])/);
+        if (!m) return;
+        n.appendChild(dc.createTextNode('\u2060' + m[1]));
+        nx.textContent = nx.textContent.replace(/^(\s*)[：；，。！？、]/, '$1');
+      });
+      return root.outerHTML;
+    } catch (e) { return html; }
+  }
+  /* 复制前把外链图片转 Base64（失败保留原 URL，不阻塞） */
+  async function wpImgBase64(html) {
+    const dc = new DOMParser().parseFromString(html, 'text/html');
+    const list = Array.from(dc.querySelectorAll('img[src]')).filter(i => !i.getAttribute('src').startsWith('data:'));
+    await Promise.all(list.map(async i => {
+      try {
+        const r = await fetch(i.getAttribute('src'), { mode: 'cors' });
+        if (!r.ok) return;
+        const d = await new Promise(res => { const fr = new FileReader(); fr.onloadend = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(r.blob()); });
+        if (d) i.setAttribute('src', d);
+      } catch (e) {}
+    }));
+    return dc.body.innerHTML;
+  }
+  /* —— 魔法粘贴：富文本 HTML → Markdown（自研简化版，离线无依赖）—— */
+  function isMdText(t) {
+    if (!t) return false;
+    const ps = [/^#{1,6}\s+/m, /\*\*[^*]+\*\*/, /\[[^\]]+\]\([^)]+\)/, /!\[[^\]]*\]\([^)]+\)/, /^[-*+]\s+/m, /^\d+\.\s+/m, /^>\s+/m, /`[^`]+`/, /^\|.+\|$/m];
+    return ps.filter(p => p.test(t)).length >= 2;
+  }
+  const WP_BLOCK = /^(P|DIV|SECTION|ARTICLE|H[1-6]|UL|OL|LI|BLOCKQUOTE|TABLE|THEAD|TBODY|TR|PRE|HR|FIGURE|FIGCAPTION|ADDRESS|MAIN|HEADER|FOOTER)$/;
+  function wpInlineMd(n) {
+    if (n.nodeType === 3) return n.textContent;
+    if (n.nodeType !== 1) return '';
+    const kids = () => Array.from(n.childNodes).map(wpInlineMd).join('');
+    const tg = n.tagName;
+    if (tg === 'BR') return '\n';
+    if (tg === 'STRONG' || tg === 'B') { const t = kids().trim(); return t ? '**' + t + '**' : ''; }
+    if (tg === 'EM' || tg === 'I') { const t = kids().trim(); return t ? '*' + t + '*' : ''; }
+    if (tg === 'DEL' || tg === 'S' || tg === 'STRIKE') { const t = kids().trim(); return t ? '~~' + t + '~~' : ''; }
+    if (tg === 'CODE') return '`' + n.textContent + '`';
+    if (tg === 'A') { const t = kids().trim(), h = n.getAttribute('href') || ''; if (!t) return ''; return h ? '[' + t + '](' + h + ')' : t; }
+    if (tg === 'IMG') { const s = n.getAttribute('src') || ''; return s ? '![' + (n.getAttribute('alt') || '图片') + '](' + s + ')' : ''; }
+    return kids();
+  }
+  function wpBlockMd(n, out) {
+    if (n.nodeType === 3) { const t = n.textContent.trim(); if (t) out.push(t); return; }
+    if (n.nodeType !== 1) return;
+    const tg = n.tagName;
+    if (tg === 'PRE') { out.push('```\n' + n.textContent.replace(/\n+$/, '') + '\n```'); return; }
+    if (tg === 'H1' || tg === 'H2') { const t = wpInlineMd(n).trim(); if (t) out.push('## ' + t); return; }
+    if (/^H[3-6]$/.test(tg)) { const t = wpInlineMd(n).trim(); if (t) out.push('### ' + t); return; }
+    if (tg === 'BLOCKQUOTE') { const t = wpInlineMd(n).replace(/\n+/g, ' ').trim(); if (t) out.push('> ' + t); return; }
+    if (tg === 'UL' || tg === 'OL') {
+      let i = 1;
+      Array.from(n.children).forEach(li => {
+        if (li.tagName !== 'LI') return;
+        const t = Array.from(li.childNodes).map(x => (x.nodeType === 1 && /^(UL|OL)$/.test(x.tagName)) ? '' : wpInlineMd(x)).join('').replace(/\s+/g, ' ').trim();
+        out.push((tg === 'OL' ? (i++) + '. ' : '- ') + t);
+        Array.from(li.children).forEach(sub => { if (/^(UL|OL)$/.test(sub.tagName)) wpBlockMd(sub, out); });
+      });
+      return;
+    }
+    if (tg === 'TABLE') {
+      Array.from(n.querySelectorAll('tr')).forEach((tr, ri) => {
+        const cs = Array.from(tr.children).map(td => wpInlineMd(td).replace(/\|/g, '\\|').replace(/\s+/g, ' ').trim());
+        if (!cs.length) return;
+        out.push('| ' + cs.join(' | ') + ' |');
+        if (ri === 0) out.push('|' + cs.map(() => ' --- ').join('|') + '|');
+      });
+      return;
+    }
+    if (tg === 'HR') { out.push('---'); return; }
+    if (tg === 'IMG') { const s = n.getAttribute('src') || ''; if (s) out.push('![' + (n.getAttribute('alt') || '图片') + '](' + s + ')'); return; }
+    let buf = '';
+    Array.from(n.childNodes).forEach(c => {
+      if (c.nodeType === 1 && WP_BLOCK.test(c.tagName)) { if (buf.trim()) out.push(buf.trim()); buf = ''; wpBlockMd(c, out); }
+      else buf += wpInlineMd(c);
+    });
+    if (buf.trim()) out.push(buf.trim());
+  }
+  function wpHtmlToMd(html) {
+    const dc = new DOMParser().parseFromString(html, 'text/html');
+    dc.querySelectorAll('script, style, noscript, svg').forEach(n => n.remove());
+    const out = [];
+    Array.from(dc.body.childNodes).forEach(n => wpBlockMd(n, out));
+    return out.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+  function wpInsertAtCursor(ta, txt) {
+    const s = ta.selectionStart || 0, e = ta.selectionEnd || 0;
+    ta.value = ta.value.slice(0, s) + txt + ta.value.slice(e);
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function wpAppendTo(target, md) {
+    if (!md) return;
+    const ta = $id(target);
+    ta.value = (ta.value.trim() ? ta.value.trim() + '\n\n' : '') + md;
+    if (target === 'lfText') { if (typeof lfPersist === 'function') lfPersist(); if (typeof lfRender === 'function') lfRender(); }
+    else aiPersist();
+  }
+  function wpBindPaste(ta) {
+    if (!ta || ta.dataset.wpPaste) return;
+    ta.dataset.wpPaste = '1';
+    ta.addEventListener('paste', e => {
+      const cd = e.clipboardData; if (!cd) return;
+      const imgFile = Array.from(cd.items || []).find(i => i.kind === 'file' && i.type.startsWith('image/'));
+      if (imgFile) {
+        e.preventDefault();
+        const fr = new FileReader();
+        fr.onload = () => { if (fr.result) { wpInsertAtCursor(ta, '![' + '图片' + '](' + fr.result + ')'); toast('剪贴板图片已插入（Base64，注意正文体积）'); } };
+        fr.onerror = () => toast('图片读取失败');
+        fr.readAsDataURL(imgFile.getAsFile());
+        return;
+      }
+      const h = cd.getData('text/html'), t = cd.getData('text/plain');
+      if (!h || !h.trim()) return;
+      if (t && isMdText(t)) return; /* 本身就是 Markdown，原样粘贴 */
+      if ((/<pre[\s>]/i.test(h) || /<code[\s>]/i.test(h)) && !/<(p|div)[\s>]/i.test(h)) return; /* 纯代码片段放行 */
+      e.preventDefault();
+      try {
+        const md = wpHtmlToMd(h);
+        if (md) { wpInsertAtCursor(ta, md); toast('已自动净化为 Markdown（' + md.length + ' 字）'); }
+      } catch (err) { toast('转换失败，已按普通文本粘贴'); }
+    });
+  }
+  $id('btnWpPaste').addEventListener('click', () => {
+    const target = !$id('lfText').value.trim() ? 'lfText' : 'aiSrc';
+    if (!(navigator.clipboard && navigator.clipboard.read)) { toast('当前环境不支持读取剪贴板，请直接在输入框 Ctrl+V 粘贴'); return; }
+    navigator.clipboard.read().then(async items => {
+      for (const it of items) {
+        const itype = (it.types || []).find(t => t.startsWith('image/'));
+        if (itype) {
+          const blob = await it.getType(itype);
+          const d = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(null); fr.readAsDataURL(blob); });
+          if (d) { wpAppendTo(target, '![' + '图片' + '](' + d + ')'); toast('剪贴板图片已插入「' + (target === 'lfText' ? '⑤ 全文' : '素材') + '」'); }
+          return;
+        }
+      }
+      for (const it of items) {
+        let h = null, t = null;
+        if ((it.types || []).includes('text/html')) h = await (await it.getType('text/html')).text();
+        if ((it.types || []).includes('text/plain')) t = await (await it.getType('text/plain')).text();
+        if (t && isMdText(t)) { wpAppendTo(target, t); toast('已粘贴（Markdown 原文）→ ' + (target === 'lfText' ? '⑤ 全文' : '素材框')); return; }
+        if (h && h.trim()) { const md = wpHtmlToMd(h); if (md) { wpAppendTo(target, md); toast('富文本已净化为 Markdown（' + md.length + ' 字）→ ' + (target === 'lfText' ? '⑤ 全文' : '素材框')); return; } }
+        if (t) { wpAppendTo(target, t); toast('已粘贴文本 → ' + (target === 'lfText' ? '⑤ 全文' : '素材框')); return; }
+      }
+      toast('剪贴板为空或内容不可读');
+    }).catch(() => toast('读取剪贴板被拒绝，请直接在输入框 Ctrl+V 粘贴'));
+  });
+  ['lfText', 'aiSrc'].forEach(idm => wpBindPaste($id(idm)));
+  /* —— ④ 交互 —— */
+  function wpStyleChips() {
+    $id('wpStyleChips').innerHTML = WP_STYLES.map(s => '<button class="btn sm' + (s.id === wpStyleId ? ' pri' : '') + '" data-wps="' + s.id + '">' + s.name + '</button>').join('');
+  }
+  wpStyleChips();
+  $id('wpStyleChips').addEventListener('click', e => {
+    const b = e.target.closest('[data-wps]'); if (!b) return;
+    wpStyleId = b.getAttribute('data-wps'); LS.set('gf_wpstyle', wpStyleId); wpStyleChips();
+    if (AIP.wpHtml) { $id('wpHint').textContent = '风格已切换为「' + (WP_STYLES.find(x => x.id === wpStyleId) || {}).name + '」，重新点「⚙️ 生成正文排版」即可刷新'; }
+  });
   $id('btnWpBuild').addEventListener('click', () => {
     const src = $id('lfText').value.trim() || $id('aiSrc').value.trim();
     if (!src) { toast('先在⑤粘贴文章全文（或在本页①单独粘贴）'); return; }
     AIP.wpHtml = wpBuild(src);
     aiPersist(); aiRender();
-    $id('wpHint').textContent = '已生成 ' + (AIP.wpHtml.length / 1024).toFixed(1) + ' KB 内联 HTML（风格跟随「②配色」·' + (PALETTES[doc.palette] || {}).name + '），已加入物料区可一并复制';
+    const st = WP_STYLES.find(x => x.id === wpStyleId) || {};
+    $id('wpHint').textContent = '已生成 ' + (AIP.wpHtml.length / 1024).toFixed(1) + ' KB 内联 HTML（风格「' + (st.name || '跟随配色') + '」' + (wpStyleId === 'follow' ? '·' + (PALETTES[doc.palette] || {}).name : '') + '），已加入物料区可一并复制';
     toast('正文排版已生成，可「👁 预览」或直接复制');
   });
-  $id('btnWpCopy').addEventListener('click', () => {
+  $id('btnWpCopy').addEventListener('click', async () => {
     if (!AIP.wpHtml) { toast('先点「⚙️ 生成正文排版」'); return; }
-    aiCopy(AIP.wpHtml, '正文排版 HTML');
+    toast('正在做微信兼容处理…');
+    let h = wpWechatCompat(AIP.wpHtml);
+    try { h = await wpImgBase64(h); } catch (e) {}
+    aiCopy(h, '正文排版 HTML（微信兼容' + (h.indexOf('data:image') >= 0 ? '·图片已转 Base64' : '') + '）');
   });
   $id('btnWpPrev').addEventListener('click', () => {
-    const p = $id('wpPrev');
+    const p = $id('wpPrev'), bar = $id('wpPrevBar');
     if (!AIP.wpHtml) { toast('先点「⚙️ 生成正文排版」'); return; }
-    if (p.style.display === 'none') { p.innerHTML = AIP.wpHtml; p.style.display = 'block'; }
-    else { p.style.display = 'none'; }
+    if (p.style.display === 'none') { p.innerHTML = AIP.wpHtml; p.style.display = 'block'; bar.style.display = 'flex'; }
+    else { p.style.display = 'none'; bar.style.display = 'none'; }
+  });
+  $id('wpPrevBar').addEventListener('click', e => {
+    const b = e.target.closest('[data-wpw]'); if (!b) return;
+    const w = b.getAttribute('data-wpw');
+    $id('wpPrev').style.maxWidth = w === '0' ? '100%' : w + 'px';
+    toast('预览宽度：' + (w === '0' ? '全宽' : w + 'px（公众号正文约 578px 视区）'));
   });
 
   function aiPersist() {
@@ -1894,6 +2178,8 @@ if (typeof document !== 'undefined') (function () {
   /* ---------- 初始化 ---------- */
   syncSizeSeg(); buildTplGrid(); buildPalGrid(); buildForm(); buildPalCards(); syncColorInputs(); wireImg();
   buildSlots(); buildAbTpl(); renderAbLog(); preview();
+  /* ④ 正文排版调试/回归钩子（只读工具函数，不影响生产逻辑） */
+  window.WPTEST = { wpBuild, wpWechatCompat, wpHtmlToMd, isMdText };
 })();
 </script>
 

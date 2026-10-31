@@ -7,6 +7,28 @@
 
 ---
 
+## [3.10.0] - 2026-10-31
+
+### Added
+- **④ 正文排版强化（参考 [raphael-publish](https://github.com/liuxiaopai-ai/raphael-publish)）**
+  - **标准 Markdown 全支持**：行内 `**粗**` / `*斜*` / `~~删~~` / `[链接](url)` / `` `code` ``（code 段占位符防二次解析）；块级无序/有序列表（`1.` 进有序列表，`1、`/`一、` 仍识别为小标题）、`|` 表格（thead/tbody 全内联样式）、``` 代码块（pre 白名单转义）、`---`/`***` 分隔线
+  - **配图进正文**：`![说明](url)` 独立行单图居中 + 图注；连续多图自动并排 table 网格（微信 flex 不支持 → table 兼容方案）
+  - **6 套风格预设**：跟随配色（联动②）/ 纯净白 / 燕麦 / 水墨（衬线+居中标题）/ 羊皮纸（衬线+米黄底）/ 杂志（衬线+深红强调）；chips 切换 + localStorage 持久化
+  - **微信兼容引擎 `wpWechatCompat`**（复制时自动执行）：容器字体/字号/颜色/行距强制分发到 p/li/h*/blockquote/td（防微信编辑器劫持继承）；`li` 内 P/DIV/BLOCKQUOTE 降级为 span（防列表塌陷）；strong/em/a/code 后的中文标点挂入标签内 + `U+2060` 零宽连接符（防强调后标点被断行）；外链图片 fetch → Base64（失败保留 URL 不阻塞）
+  - **魔法粘贴**：`lfText` / `aiSrc` 粘贴事件拦截——富文本 HTML 自动净化为 Markdown（自研 wpHtmlToMd，h1-h6/p/strong/em/del/a/img/ul/ol/嵌套列表/table/blockquote/pre 全规则，离线无依赖）；剪贴板图片文件直接转 Base64 插入；「📥 魔法粘贴」按钮主动读取剪贴板（自动落 ⑤ 全文或素材框）
+  - **多端预览**：预览区 375 / 520 / 全宽三档宽度切换
+- 调试/回归钩子 `window.WPTEST`（wpBuild / wpWechatCompat / wpHtmlToMd / isMdText 只读工具函数）
+
+### Fixed
+- 表格行缓冲被 `flushAll` 误清空（表头分隔行无法识别 → 表格永远无 thead）
+- `1. xxx` 短行被「数字小标题」规则吞掉导致有序列表永不触发（现 `1.` 进列表、`1、` 才是小标题）
+
+### Verified
+- 无头回归 49 项全绿：wpBuild 全要素（h2/h3/strong/em/del/a/code/pre/quote/ul/ol/table/hr/图注/多图网格/转义/6 风格）✓、微信兼容（字体分发/li 降级/标点吸附 U+2060/section 保持）✓、HTML→MD（标题/行内/列表/表格/引文/图/代码）✓、UI 交互流（生成/预览/风格切换/宽度切换）✓、6 Tab + 390px 无横向溢出 ✓
+- 单文件版（455KB）冒烟 6/6：WPTEST 挂载、wpBuild paper 风格、wpWechatCompat、wpHtmlToMd、6 Tab ✓
+
+---
+
 ## [3.9.0] - 2026-10-31
 
 ### Added
